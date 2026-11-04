@@ -28,7 +28,6 @@ class CsNavigationTest {
     @Test
     fun `home keys map to the home section`() {
         assertEquals(CsSection.HOME, csSectionOf(NormalNavKey.LauncherMain))
-        assertEquals(CsSection.HOME, csSectionOf(NormalNavKey.ClassicHome))
         assertEquals(CsSection.HOME, csSectionOf(null))
     }
 
@@ -54,6 +53,11 @@ class CsNavigationTest {
     }
 
     @Test
+    fun `downloads key maps to downloads section`() {
+        assertEquals(CsSection.DOWNLOADS, csSectionOf(NormalNavKey.Downloads))
+    }
+
+    @Test
     fun `unknown screens belong to no section`() {
         assertNull(csSectionOf(NormalNavKey.Multiplayer))
     }
@@ -63,10 +67,12 @@ class CsNavigationTest {
         assertTrue(isCsSectionRoot(NormalNavKey.Instances))
         assertTrue(isCsSectionRoot(NormalNavKey.Discover))
         assertTrue(isCsSectionRoot(NormalNavKey.LauncherMain))
+        assertTrue(isCsSectionRoot(NormalNavKey.Discover))
+        assertTrue(isCsSectionRoot(NormalNavKey.Instances))
+        assertTrue(isCsSectionRoot(NormalNavKey.Downloads))
         assertTrue(isCsSectionRoot(NestedNavKey.Settings()))
 
         assertFalse(isCsSectionRoot(NormalNavKey.VersionsManager))
-        assertFalse(isCsSectionRoot(NormalNavKey.ClassicHome))
         assertFalse(isCsSectionRoot(NormalNavKey.Multiplayer))
     }
 }

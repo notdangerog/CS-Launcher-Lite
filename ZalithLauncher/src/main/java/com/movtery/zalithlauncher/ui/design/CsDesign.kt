@@ -6,13 +6,6 @@
  * redistribute it and/or modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
 
 package com.movtery.zalithlauncher.ui.design
@@ -29,63 +22,80 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * CS Launcher Lite design tokens.
+ * CS Launcher Lite design tokens — EXACT spec implementation.
  *
- * The whole launcher derives its look from MaterialTheme (colorScheme, shapes,
- * typography, motion), so keeping the tokens in one place reskins every screen
- * consistently without touching each of them.
+ * Color Palette & Theme per FINAL UI/UX Design Specification:
+ * - Background: Deep charcoal/matte black #121212
+ * - Cards: Rounded dark grey #1E1E1E
+ * - Accent: Vibrant electric green #1DB954 (neon green)
+ * - Typography: Clean modern sans-serif, white primary, muted grey secondary
  */
 object CsColor {
-    /** Brand accent - the single signature green of CS Launcher Lite */
-    val Accent = Color(0xFF3DDC84)
-    val AccentDark = Color(0xFF1B9A57)
-    val AccentMuted = Color(0xFF2BA968)
+    /** Brand accent — vibrant electric green #1DB954 — sole signature color */
+    val Accent = Color(0xFF1DB954)
+    val AccentDark = Color(0xFF179443)
+    val AccentMuted = Color(0xFF14833B)
+    val AccentGlow = Color(0xFF1ED760)
 
-    /** Neutral charcoal ramp, darkest to lightest */
-    val Neutral0 = Color(0xFF08090C)
-    val Neutral1 = Color(0xFF0D0F13)
-    val Neutral2 = Color(0xFF12151A)
-    val Neutral3 = Color(0xFF171B21)
-    val Neutral4 = Color(0xFF1D222A)
-    val Neutral5 = Color(0xFF242A33)
-    val Neutral6 = Color(0xFF2E353F)
+    /** Spec background #121212 — deep charcoal/matte black */
+    val Background = Color(0xFF121212)
+    /** Spec card #1E1E1E — rounded dark grey */
+    val Card = Color(0xFF1E1E1E)
+    val CardHover = Color(0xFF252525)
+    val CardPressed = Color(0xFF2A2A2A)
 
-    val TextPrimary = Color(0xFFECF0F6)
-    val TextSecondary = Color(0xFFA6AFBD)
-    val TextDisabled = Color(0xFF6C7686)
+    /** Neutral ramp aligned to spec — darkest to lightest */
+    val Neutral0 = Color(0xFF0A0A0A)
+    val Neutral1 = Color(0xFF121212) // <- spec background
+    val Neutral2 = Color(0xFF1A1A1A)
+    val Neutral3 = Color(0xFF1E1E1E) // <- spec card
+    val Neutral4 = Color(0xFF252525)
+    val Neutral5 = Color(0xFF2A2A2A)
+    val Neutral6 = Color(0xFF2E2E2E)
+    val Neutral7 = Color(0xFF363636)
 
-    val Divider = Color(0xFF262C35)
-    /** Divider between the three main sections of the shell */
-    val DividerStrong = Color(0xFF323A47)
-    /** Background of the navigation rail and the account panel */
-    val Panel = Color(0xFF0A0C10)
+    /** Typography: white primary, muted grey secondary */
+    val TextPrimary = Color(0xFFFFFFFF)
+    val TextSecondary = Color(0xFF9AA0A6)
+    val TextTertiary = Color(0xFF6B7280)
+    val TextDisabled = Color(0xFF4B5563)
+
+    /** Dividers — thin vertical lines */
+    val Divider = Color(0xFF2A2A2A)
+    /** Slightly thicker divider in front of right panel */
+    val DividerStrong = Color(0xFF333333)
+    /** Panel background — same as app background for seamless look */
+    val Panel = Color(0xFF121212)
+    val PanelCard = Color(0xFF1A1A1A)
+
     val Warning = Color(0xFFF0B429)
     val Danger = Color(0xFFEF4B5A)
     val Info = Color(0xFF58A6FF)
 
-    // Light theme ramp (secondary, the launcher ships dark-first)
+    // Light theme (secondary, ships dark-first)
     val LightBg = Color(0xFFF6F8FA)
     val LightSurface = Color(0xFFFFFFFF)
     val LightSurfaceHigh = Color(0xFFEFF2F6)
     val LightOutline = Color(0xFFD7DDE5)
     val LightTextPrimary = Color(0xFF11151A)
     val LightTextSecondary = Color(0xFF5A6472)
-    val LightAccent = Color(0xFF12874F)
+    val LightAccent = Color(0xFF1DB954)
 }
 
 /**
- * Dark scheme - the primary CS Launcher Lite theme.
+ * Dark scheme — THE primary CS Launcher Lite theme per spec.
+ * Background #121212, cards #1E1E1E, accent #1DB954.
  */
 val csLiteDark = darkColorScheme(
     primary = CsColor.Accent,
-    onPrimary = Color(0xFF04180D),
-    primaryContainer = Color(0xFF14402A),
-    onPrimaryContainer = Color(0xFFB6F5D2),
+    onPrimary = Color(0xFF05210F),
+    primaryContainer = Color(0xFF0F3D1E),
+    onPrimaryContainer = Color(0xFFB7F5CC),
     inversePrimary = CsColor.AccentDark,
 
-    secondary = Color(0xFF8FB7A2),
-    onSecondary = Color(0xFF0B1A12),
-    secondaryContainer = CsColor.Neutral5,
+    secondary = Color(0xFF9AA0A6),
+    onSecondary = Color(0xFF121212),
+    secondaryContainer = CsColor.Neutral4,
     onSecondaryContainer = CsColor.TextPrimary,
 
     tertiary = CsColor.Info,
@@ -93,17 +103,17 @@ val csLiteDark = darkColorScheme(
     tertiaryContainer = Color(0xFF17303F),
     onTertiaryContainer = Color(0xFFCDE6FF),
 
-    background = CsColor.Neutral1,
+    background = CsColor.Background,
     onBackground = CsColor.TextPrimary,
 
-    surface = CsColor.Neutral1,
+    surface = CsColor.Background,
     onSurface = CsColor.TextPrimary,
-    surfaceVariant = CsColor.Neutral4,
+    surfaceVariant = CsColor.Card,
     onSurfaceVariant = CsColor.TextSecondary,
 
     surfaceTint = CsColor.Accent,
     inverseSurface = CsColor.TextPrimary,
-    inverseOnSurface = CsColor.Neutral1,
+    inverseOnSurface = CsColor.Background,
 
     error = CsColor.Danger,
     onError = Color(0xFF2B0308),
@@ -114,17 +124,17 @@ val csLiteDark = darkColorScheme(
     outlineVariant = CsColor.Divider,
     scrim = Color(0xFF000000),
 
-    surfaceBright = CsColor.Neutral3,
-    surfaceDim = CsColor.Neutral1,
+    surfaceBright = CsColor.Card,
+    surfaceDim = CsColor.Background,
     surfaceContainerLowest = CsColor.Neutral0,
-    surfaceContainerLow = CsColor.Neutral2,
+    surfaceContainerLow = CsColor.Background,
     surfaceContainer = CsColor.Neutral2,
-    surfaceContainerHigh = CsColor.Neutral3,
+    surfaceContainerHigh = CsColor.Card,
     surfaceContainerHighest = CsColor.Neutral4
 )
 
 /**
- * Light scheme - kept complete so the existing theme switch keeps working.
+ * Light scheme — kept complete so theme switch keeps working.
  */
 val csLiteLight = lightColorScheme(
     primary = CsColor.LightAccent,
@@ -174,14 +184,14 @@ val csLiteLight = lightColorScheme(
 )
 
 /**
- * Rounded, consistent corner radii for every surface in the launcher.
+ * Rounded, consistent corner radii — per spec, modern dark cards.
  */
 val CsShapes = Shapes(
     extraSmall = RoundedCornerShape(6.dp),
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(14.dp),
-    large = RoundedCornerShape(18.dp),
-    extraLarge = RoundedCornerShape(24.dp)
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(20.dp)
 )
 
 /**
@@ -199,31 +209,37 @@ object CsSpace {
 }
 
 /**
- * Fixed component sizing so cards feel like one system.
+ * Fixed component sizing — ultra-slim rail, compact right panel, large banner cards.
  */
 object CsSize {
+    // Legacy name kept for compat
     val sidebarWidth = 196.dp
-    val sidebarCollapsedWidth = 76.dp
-    /** Icon-only navigation rail (the CS Launcher Lite layout) */
-    val railWidth = 72.dp
-    /** Right hand account panel */
-    val accountPanelWidth = 288.dp
+    val sidebarCollapsedWidth = 64.dp
+    /** Ultra-slim icon-only rail per spec */
+    val railWidth = 60.dp
+    /** Compact right widget panel */
+    val accountPanelWidth = 272.dp
     /** Hairline between rail and content */
     val dividerThin = 1.dp
-    /** Slightly thicker divider in front of the account panel */
+    /** Slightly thicker divider in front of right panel */
     val dividerStrong = 2.dp
-    /** Rail / panel icon hit target */
-    val railItem = 44.dp
-    /** Catalog card height, tuned so a 2x2 block fits a landscape phone */
-    val catalogCardHeight = 152.dp
-    val catalogCardHeightLarge = 196.dp
+    /** Rail icon hit target — pill capsule */
+    val railItem = 42.dp
+    val railIconSize = 22.dp
+    val railCapsuleWidth = 48.dp
+    val railCapsuleHeight = 32.dp
+    /** Large preview banner card — prominent modpack display */
+    val catalogCardHeight = 268.dp
+    val catalogCardHeightLarge = 300.dp
+    val bannerHeight = 140.dp
+    val bannerHeightLarge = 160.dp
     val topBarHeight = 56.dp
-    val cardIcon = 56.dp
+    val cardIcon = 48.dp
     val cardIconSmall = 40.dp
     val cardIconLarge = 72.dp
-    val buttonHeight = 40.dp
-    val buttonHeightLarge = 48.dp
-    val tileMinWidth = 240.dp
+    val buttonHeight = 36.dp
+    val buttonHeightLarge = 44.dp
+    val tileMinWidth = 280.dp
 }
 
 private fun TextStyle.tighter(tracking: Int = 0): TextStyle = copy(
@@ -232,15 +248,16 @@ private fun TextStyle.tighter(tracking: Int = 0): TextStyle = copy(
 )
 
 /**
- * Modern, slightly tighter typography than the Material defaults.
+ * Typography — clean, modern sans-serif, high readability.
+ * White primary, muted grey secondary per spec.
  */
 val CsTypography = Typography(
     displaySmall = Typography().displaySmall.copy(
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         letterSpacing = (-0.5).sp
     ),
     headlineLarge = Typography().headlineLarge.copy(
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         letterSpacing = (-0.4).sp
     ),
     headlineMedium = Typography().headlineMedium.copy(
@@ -252,12 +269,14 @@ val CsTypography = Typography(
         letterSpacing = (-0.2).sp
     ),
     titleLarge = Typography().titleLarge.copy(
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         letterSpacing = (-0.1).sp
     ),
     titleMedium = Typography().titleMedium.copy(fontWeight = FontWeight.SemiBold),
     titleSmall = Typography().titleSmall.copy(fontWeight = FontWeight.Medium),
     labelLarge = Typography().labelLarge.copy(fontWeight = FontWeight.SemiBold),
     labelMedium = Typography().labelMedium.copy(fontWeight = FontWeight.Medium),
-    bodyMedium = Typography().bodyMedium.copy(letterSpacing = 0.1.sp)
+    bodyLarge = Typography().bodyLarge.copy(fontWeight = FontWeight.Normal, letterSpacing = 0.15.sp),
+    bodyMedium = Typography().bodyMedium.copy(letterSpacing = 0.15.sp),
+    bodySmall = Typography().bodySmall.copy(letterSpacing = 0.1.sp)
 )

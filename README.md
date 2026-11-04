@@ -10,7 +10,8 @@
 
 | Build | Architecture | Download |
 | --- | --- | --- |
-| v1.1.0 debug (three-section redesign) | arm64-v8a | **[CS-Launcher-Lite-1.1.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.1.0/CS-Launcher-Lite-1.1.0-arm64-debug.apk)** |
+| v1.2.0 debug (unified UI) | arm64-v8a | **[CS-Launcher-Lite-1.2.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.2.0/CS-Launcher-Lite-1.2.0-arm64-debug.apk)** |
+| v1.1.0 debug (three-section redesign) | arm64-v8a | [CS-Launcher-Lite-1.1.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.1.0/CS-Launcher-Lite-1.1.0-arm64-debug.apk) |
 | v1.0.0 debug | arm64-v8a | [CS-Launcher-Lite-1.0.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.0.0/CS-Launcher-Lite-1.0.0-arm64-debug.apk) |
 
 All releases: <https://github.com/notdangerog/CS-Launcher-Lite/releases>

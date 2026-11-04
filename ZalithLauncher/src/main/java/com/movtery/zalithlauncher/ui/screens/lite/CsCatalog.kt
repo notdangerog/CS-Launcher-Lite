@@ -17,6 +17,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,6 +76,8 @@ import com.movtery.zalithlauncher.ui.design.CsCard
 import com.movtery.zalithlauncher.ui.design.CsEmptyState
 import com.movtery.zalithlauncher.ui.design.CsIconButton
 import com.movtery.zalithlauncher.ui.design.CsPrimaryButton
+import com.movtery.zalithlauncher.ui.design.CsColor
+import com.movtery.zalithlauncher.ui.design.CsSize
 import com.movtery.zalithlauncher.ui.design.CsSpace
 import com.movtery.zalithlauncher.ui.screens.content.download.assets.elements.SearchAssetsState
 import com.movtery.zalithlauncher.utils.logging.Logger
@@ -323,50 +326,65 @@ fun CsCatalogCard(
     onInstall: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Spec: large preview banner cards — game screenshots, titles, descriptions,
+    // download stats, neon green Install button. Single unified dark theme.
     CsCard(
         modifier = modifier
             .fillMaxWidth()
             .height(height),
         onClick = onOpen,
         contentPadding = PaddingValues(0.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(14.dp)
+        color = CsColor.Card,
+        shape = RoundedCornerShape(16.dp)
     ) {
-        // ---- cover artwork -------------------------------------------------
+        // ---- Banner artwork — game screenshot simulation ----
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .height(CsSize.bannerHeight)
+                .background(CsColor.Neutral2)
+                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
         ) {
             if (entry.iconUrl != null) {
                 AsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(0.55f),
+                    modifier = Modifier.fillMaxSize(),
                     model = entry.iconUrl,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.92f
+                )
+                // Darken slightly for text readability — spec dark theme
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                0.6f to Color.Black.copy(alpha = 0.18f),
+                                1f to Color.Black.copy(alpha = 0.55f)
+                            )
+                        )
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(CsColor.Neutral3, CsColor.Neutral4)
+                            )
+                        )
                 )
             }
-            // Scrim so the artwork fades into the card body and the icon stays readable
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            0.35f to Color.Black.copy(alpha = 0.15f),
-                            1f to MaterialTheme.colorScheme.surfaceContainerLow
-                        )
-                    )
-            )
+            // Small project icon overlapping banner bottom-left — rounded, bordered
             if (entry.iconUrl != null) {
                 AsyncImage(
                     modifier = Modifier
-                        .padding(CsSpace.s)
-                        .size(40.dp)
+                        .align(Alignment.BottomStart)
+                        .padding(start = CsSpace.m, bottom = 10.dp)
+                        .size(44.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .align(Alignment.BottomStart),
+                        .background(CsColor.Card),
                     model = entry.iconUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop
@@ -374,56 +392,57 @@ fun CsCatalogCard(
             }
         }
 
-        // ---- text + metadata -----------------------------------------------
+        // ---- Text + metadata — white title, muted grey description ----
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(1f)
                 .padding(horizontal = CsSpace.m, vertical = CsSpace.s)
         ) {
             Text(
                 text = entry.title,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                color = CsColor.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = entry.description,
+                modifier = Modifier.padding(top = 2.dp),
+                text = entry.description.ifBlank { stringResource(R.string.cs_catalog_empty_message) },
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = CsColor.TextSecondary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(CsSpace.xs))
+            Spacer(modifier = Modifier.weight(1f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(CsSpace.s)
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
-                    modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(CsSpace.xs)
                 ) {
                     Icon(
-                        modifier = Modifier.size(13.dp),
+                        modifier = Modifier.size(14.dp),
                         painter = painterResource(R.drawable.ic_download),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = CsColor.TextSecondary
                     )
                     Text(
                         text = formatDownloadCount(entry.downloads),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = CsColor.TextSecondary,
                         maxLines = 1
                     )
                     CatalogMetaDivider()
                     Text(
                         text = catalogVersionLabel(entry),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = CsColor.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -432,21 +451,27 @@ fun CsCatalogCard(
                         Text(
                             text = entry.loaders.first(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = CsColor.Accent,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
-
-                CsIconButton(
-                    iconRes = R.drawable.ic_download,
-                    contentDescription = stringResource(R.string.cs_catalog_install),
-                    size = 30,
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
-                    contentColor = MaterialTheme.colorScheme.primary,
-                    onClick = onInstall
-                )
+                // Neon green Install button — vibrant electric green #1DB954
+                androidx.compose.foundation.layout.Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(CsColor.Accent)
+                        .clickable(onClick = onInstall)
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.cs_catalog_install),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        color = Color.White,
+                        maxLines = 1
+                    )
+                }
             }
         }
     }

@@ -3065,6 +3065,7 @@
     <string name="cs_nav_home">Home</string>
     <string name="cs_nav_instances">Instances</string>
     <string name="cs_nav_discover">Discover</string>
+    <string name="cs_nav_downloads">Downloads</string>
     <string name="cs_nav_settings">Settings</string>
     <string name="cs_topbar_files">File manager</string>
     <string name="cs_account_sign_in">Sign in</string>
@@ -3155,4 +3156,13 @@
     <string name="cs_account_manage">Manage accounts</string>
     <string name="cs_account_switch">Switch account</string>
     <string name="cs_classic_home">Card grid home</string>
+    <string name="cs_downloads_title">Downloads</string>
+    <string name="cs_downloads_subtitle">Tasks and installation history</string>
+    <string name="cs_downloads_active">Active tasks</string>
+    <string name="cs_downloads_history">Installation history</string>
+    <string name="cs_downloads_empty">No active downloads</string>
+    <string name="cs_downloads_no_history">No recent installations</string>
+    <string name="cs_news_title">News &amp; Updates</string>
+    <string name="cs_news_subtitle">Latest from Minecraft &amp; CS Launcher</string>
+    <string name="cs_account_offline">Local Account / Offline</string>
 </resources>

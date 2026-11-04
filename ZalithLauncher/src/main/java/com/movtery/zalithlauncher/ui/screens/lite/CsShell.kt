@@ -11,9 +11,6 @@
 package com.movtery.zalithlauncher.ui.screens.lite
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,14 +30,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ripple
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -59,24 +57,23 @@ import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.TitledNavKey
 
 /**
- * Top level destinations of the CS Launcher Lite shell.
- *
- * The navigation rail only ever shows these; everything else is a detail screen
- * pushed on top of one of them.
+ * Top-level destinations — EXACTLY five, NO text labels, icon-only.
+ * Spec: Home, Instances, Discover, Downloads, Settings
  */
 enum class CsSection {
     HOME,
-    DISCOVER,
     INSTANCES,
+    DISCOVER,
+    DOWNLOADS,
     SETTINGS
 }
 
 /**
- * Icon-only navigation rail.
- *
- * The logo sits at the top, Home / Discover / Instances directly below it and the
- * settings gear is pinned to the bottom. Labels are intentionally omitted: the rail
- * stays narrow so the catalog keeps the width it needs on a landscape phone.
+ * Ultra-slim vertical navigation bar — spec exact:
+ * - ONLY minimalist thin-line icons, NO text names
+ * - Active tab highlighted with sleek rounded green capsule shape
+ * - Logo at top (same CS moon logo as app icon), Settings at bottom
+ * - Thin vertical line divider after rail (handled by CsSectionDivider)
  */
 @Composable
 fun CsRail(
@@ -88,59 +85,68 @@ fun CsRail(
         modifier = modifier
             .fillMaxHeight()
             .width(CsSize.railWidth)
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-            .padding(vertical = CsSpace.m),
+            .background(CsColor.Background)
+            .padding(vertical = CsSpace.s),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(CsSpace.xs)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         CsRailLogo()
 
         Spacer(modifier = Modifier.height(CsSpace.l))
 
         CsRailItem(
-            iconRes = R.drawable.ic_home_filled,
+            iconRes = R.drawable.ic_nav_home,
             contentDescription = stringResource(R.string.cs_nav_home),
             selected = selected == CsSection.HOME,
             onClick = { onNavigate(CsSection.HOME) }
         )
         CsRailItem(
-            iconRes = R.drawable.ic_search,
+            iconRes = R.drawable.ic_nav_instances,
+            contentDescription = stringResource(R.string.cs_nav_instances),
+            selected = selected == CsSection.INSTANCES,
+            onClick = { onNavigate(CsSection.INSTANCES) }
+        )
+        CsRailItem(
+            iconRes = R.drawable.ic_nav_discover,
             contentDescription = stringResource(R.string.cs_nav_discover),
             selected = selected == CsSection.DISCOVER,
             onClick = { onNavigate(CsSection.DISCOVER) }
         )
         CsRailItem(
-            iconRes = R.drawable.ic_box,
-            contentDescription = stringResource(R.string.cs_nav_instances),
-            selected = selected == CsSection.INSTANCES,
-            onClick = { onNavigate(CsSection.INSTANCES) }
+            iconRes = R.drawable.ic_nav_downloads,
+            contentDescription = stringResource(R.string.cs_nav_downloads),
+            selected = selected == CsSection.DOWNLOADS,
+            onClick = { onNavigate(CsSection.DOWNLOADS) }
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
         CsRailItem(
-            iconRes = R.drawable.ic_settings_filled,
+            iconRes = R.drawable.ic_nav_settings,
             contentDescription = stringResource(R.string.cs_nav_settings),
             selected = selected == CsSection.SETTINGS,
             onClick = { onNavigate(CsSection.SETTINGS) }
         )
+
+        Spacer(modifier = Modifier.height(CsSpace.xs))
     }
 }
 
 /**
- * Launcher mark shown at the very top of the rail.
+ * Launcher mark at top of rail — exact same logo as app icon (crescent + CS + stars)
+ * No text, no extra chrome, just the moon logo on charcoal.
  */
 @Composable
 private fun CsRailLogo() {
     Box(
         modifier = Modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+            .size(42.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(CsColor.Background),
         contentAlignment = Alignment.Center
     ) {
         Image(
-            modifier = Modifier.size(26.dp),
+            modifier = Modifier.size(34.dp),
             painter = painterResource(R.drawable.ic_cs_logo),
             contentDescription = stringResource(R.string.cs_brand_name)
         )
@@ -148,7 +154,8 @@ private fun CsRailLogo() {
 }
 
 /**
- * One icon button of the rail with the animated selection indicator.
+ * One icon button with the sleek rounded green capsule for active state.
+ * Spec: active tab highlighted with a rounded green capsule shape (pill).
  */
 @Composable
 private fun CsRailItem(
@@ -158,54 +165,33 @@ private fun CsRailItem(
     onClick: () -> Unit
 ) {
     val container by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
-        else MaterialTheme.colorScheme.surfaceContainerLowest,
-        animationSpec = tween(durationMillis = 160),
+        targetValue = if (selected) CsColor.Accent else CsColor.Background,
+        animationSpec = tween(180),
         label = "CsRailContainer"
     )
     val content by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(durationMillis = 160),
+        targetValue = if (selected) Color.White else CsColor.TextSecondary,
+        animationSpec = tween(180),
         label = "CsRailContent"
     )
     val interactionSource = remember { MutableInteractionSource() }
-    val indicatorHeight by animateDpAsState(
-        targetValue = if (selected) 20.dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "CsRailIndicator"
-    )
 
     Box(
         modifier = Modifier
-            .size(CsSize.railItem)
-            .clip(RoundedCornerShape(12.dp))
+            .width(CsSize.railCapsuleWidth)
+            .height(CsSize.railCapsuleHeight)
+            .clip(RoundedCornerShape(16.dp))
             .background(container)
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(),
+                indication = ripple(bounded = true),
                 role = Role.Tab,
                 onClick = onClick
             ),
         contentAlignment = Alignment.Center
     ) {
-        // selection indicator on the left edge of the item
-        if (indicatorHeight > 0.dp) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 2.dp)
-                    .width(3.dp)
-                    .height(indicatorHeight)
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-        }
         Icon(
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(CsSize.railIconSize),
             painter = painterResource(iconRes),
             contentDescription = contentDescription,
             tint = content
@@ -214,8 +200,8 @@ private fun CsRailItem(
 }
 
 /**
- * Divider drawn between the three sections of the shell. The one in front of the
- * account panel is slightly thicker, the one after the rail is a hairline.
+ * Divider between sections — thin vertical line, right divider slightly thicker.
+ * Spec: thin vertical line separating rail from center, right divider slightly thicker.
  */
 @Composable
 fun CsSectionDivider(thick: Boolean = false, modifier: Modifier = Modifier) {
@@ -223,14 +209,13 @@ fun CsSectionDivider(thick: Boolean = false, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxHeight()
             .width(if (thick) CsSize.dividerStrong else CsSize.dividerThin)
-            .background(if (thick) CsColor.DividerStrong else MaterialTheme.colorScheme.outlineVariant)
+            .background(if (thick) CsColor.DividerStrong else CsColor.Divider)
     )
 }
 
 /**
- * Header of the center column: section title, optional back affordance and the
- * launcher wide actions (tasks, multiplayer, files, and the account chip when the
- * account panel is collapsed).
+ * Header of center column: section title + actions.
+ * Clean, minimal — white primary, muted grey secondary.
  */
 @Composable
 fun CsTopBar(
@@ -244,13 +229,13 @@ fun CsTopBar(
     onMultiplayer: () -> Unit = {},
     onFileManager: () -> Unit = {},
     showAccountChip: Boolean = false,
-    onAccount: () -> Unit = {},
-    onClassicHome: (() -> Unit)? = null
+    onAccount: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(CsSize.topBarHeight)
+            .background(CsColor.Background)
             .padding(start = CsSpace.l, end = CsSpace.m),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -258,7 +243,8 @@ fun CsTopBar(
             CsIconButton(
                 iconRes = R.drawable.ic_arrow_back,
                 contentDescription = stringResource(R.string.generic_back),
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                containerColor = CsColor.Card,
+                contentColor = CsColor.TextPrimary,
                 onClick = onBack
             )
             Spacer(modifier = Modifier.width(CsSpace.m))
@@ -267,7 +253,7 @@ fun CsTopBar(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = CsColor.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -277,7 +263,7 @@ fun CsTopBar(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = CsColor.TextSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -288,30 +274,27 @@ fun CsTopBar(
             horizontalArrangement = Arrangement.spacedBy(CsSpace.s),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (onClassicHome != null) {
-                CsIconButton(
-                    iconRes = R.drawable.ic_dashboard_outlined,
-                    contentDescription = stringResource(R.string.cs_classic_home),
-                    onClick = onClassicHome
-                )
-            }
             if (taskRunning) {
                 CsIconButton(
                     iconRes = R.drawable.ic_assignment_filled,
                     contentDescription = stringResource(R.string.main_task_menu),
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = CsColor.Accent.copy(alpha = 0.15f),
+                    contentColor = CsColor.Accent,
                     onClick = onTaskClick
                 )
             }
             CsIconButton(
                 iconRes = R.drawable.ic_group_filled,
                 contentDescription = stringResource(R.string.terracotta),
+                containerColor = CsColor.Card,
+                contentColor = CsColor.TextSecondary,
                 onClick = onMultiplayer
             )
             CsIconButton(
                 iconRes = R.drawable.ic_folder_filled,
                 contentDescription = stringResource(R.string.cs_topbar_files),
+                containerColor = CsColor.Card,
+                contentColor = CsColor.TextSecondary,
                 onClick = onFileManager
             )
             if (showAccountChip) {
@@ -322,13 +305,11 @@ fun CsTopBar(
 }
 
 /**
- * Maps the current navigation key onto the rail entry that owns it, so nested
- * screens keep the right icon highlighted.
+ * Maps current navigation key to its rail section.
  */
 fun csSectionOf(key: TitledNavKey?): CsSection? = when (key) {
     null,
-    NormalNavKey.LauncherMain,
-    NormalNavKey.ClassicHome -> CsSection.HOME
+    NormalNavKey.LauncherMain -> CsSection.HOME
 
     NormalNavKey.Discover,
     NormalNavKey.SearchMod,
@@ -346,6 +327,8 @@ fun csSectionOf(key: TitledNavKey?): CsSection? = when (key) {
     is NestedNavKey.VersionSettings,
     is NestedNavKey.VersionExport -> CsSection.INSTANCES
 
+    NormalNavKey.Downloads -> CsSection.DOWNLOADS
+
     is NormalNavKey.Settings,
     is NestedNavKey.Settings -> CsSection.SETTINGS
 
@@ -353,34 +336,28 @@ fun csSectionOf(key: TitledNavKey?): CsSection? = when (key) {
 }
 
 /**
- * Returns true when the given key is one of the section roots, i.e. a screen the rail
- * navigates to directly. Detail screens show a back affordance instead.
+ * True when given key is a section root (rail destination).
  */
 fun isCsSectionRoot(key: TitledNavKey?): Boolean = when (key) {
     null,
     NormalNavKey.LauncherMain,
     NormalNavKey.Instances,
-    NormalNavKey.Discover -> true
+    NormalNavKey.Discover,
+    NormalNavKey.Downloads -> true
     is NestedNavKey.Settings -> true
     else -> false
 }
 
-/**
- * Small helper used by the top bar to render the title of a detail screen.
- */
 @Composable
 fun CsDetailTitle(text: AndroidStringText, modifier: Modifier = Modifier) {
     AndroidStringText(
         modifier = modifier,
         text = text,
-        style = MaterialTheme.typography.labelSmall,
+        style = MaterialTheme.typography.labelSmall.copy(color = CsColor.TextSecondary),
         maxLines = 1
     )
 }
 
-/**
- * Container used by screens that need a plain, padded column.
- */
 @Composable
 fun CsContentContainer(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(modifier = modifier.fillMaxWidth()) {
@@ -388,17 +365,11 @@ fun CsContentContainer(modifier: Modifier = Modifier, content: @Composable () ->
     }
 }
 
-/**
- * Width of the rail as a Dp value, exposed for tests and layout helpers.
- */
 val csRailWidth: Dp = CsSize.railWidth
 
-/**
- * Card used for the CS brand block on wide layouts.
- */
 @Composable
 fun CsBrandCard(modifier: Modifier = Modifier) {
-    CsCard(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainerLow) {
+    CsCard(modifier = modifier, color = CsColor.Card) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(CsSpace.s)
@@ -411,7 +382,7 @@ fun CsBrandCard(modifier: Modifier = Modifier) {
             Text(
                 text = stringResource(R.string.cs_brand_name),
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = CsColor.TextPrimary,
                 maxLines = 1
             )
         }

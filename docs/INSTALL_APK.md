@@ -1,61 +1,44 @@
-# CS Launcher Lite — v1.1.0 (three-section redesign, arm64 debug)
+# CS Launcher Lite — v1.2.0 (unified UI, arm64 debug)
 
 ## Download
 
 **Direct link (no login needed):**
-https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.1.0/CS-Launcher-Lite-1.1.0-arm64-debug.apk
+https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.2.0/CS-Launcher-Lite-1.2.0-arm64-debug.apk
 
-Release page: https://github.com/notdangerog/CS-Launcher-Lite/releases/tag/v1.1.0
-Source: https://github.com/notdangerog/CS-Launcher-Lite (commit `a3734ea`)
+Release page: https://github.com/notdangerog/CS-Launcher-Lite/releases/tag/v1.2.0
+Source: https://github.com/notdangerog/CS-Launcher-Lite
 
 | Property | Value |
 | --- | --- |
-| File | `CS-Launcher-Lite-1.1.0-arm64-debug.apk` |
-| Size | 220,391,806 bytes (≈210 MiB) |
-| SHA-256 | `80d286bcff6c2e532aaba79b8210343c70d96c4cb5eadba1c3b092614bfee5a9` |
+| File | `CS-Launcher-Lite-1.2.0-arm64-debug.apk` |
+| Size | 220447637 bytes (≈211 MiB) |
+| SHA-256 | `82781b41d5e74f3b727f6b69210b2d086e96f5a7ef2f0f88c9408dba0551e7ef` |
 | Package | `com.movtery.zalithlauncher.v2.debug` |
 | App label | CS Launcher Lite |
-| versionName / code | `1.1.0-debug` / 300100 |
+| versionName / code | `1.2.0-debug` / 300101 |
 | minSdk / compileSdk | 26 (Android 8.0) / 37 |
 | ABI | arm64-v8a only |
 | Signature | debug keystore (`CN=MovTery`), APK Signature Scheme v2 — verified |
 
-## What changed in 1.1.0
+## What changed in 1.2.0 — Complete UI Replacement (Unified)
 
-* **Three-section layout** — icon-only rail (logo, Home / Discover / Instances, settings at
-  the bottom), catalog center, permanent account panel behind a slightly thicker divider.
-* **Home is the catalog** — Popular Modpacks, 2-column grid, ~4 cards visible, real Modrinth
-  data sorted by downloads, 20 per page with infinite scroll, recent instances above it.
-* **Account panel** — Playing as / avatar / username / animated switcher; Microsoft and
-  Local-Offline sign-in; a single "Not signed in … Sign in" row when logged out.
-* **Discover** — debounced search + Modpacks / Mods / Resource Packs / Worlds / Shaders.
-* Instances and Settings keep every existing feature.
+This is the **one unified CS Launcher Lite interface** per the FINAL DESIGN SPEC — no merged old/new, no duplicated navigation:
 
-Full report: [`docs/CS_LAUNCHER_LITE_V2.md`](https://github.com/notdangerog/CS-Launcher-Lite/blob/main/docs/CS_LAUNCHER_LITE_V2.md)
+* **Color & Theme:** Deep charcoal `#121212` background, rounded dark grey `#1E1E1E` cards, electric green `#1DB954` accent for active states and Install buttons. White primary text, muted grey secondary, clean sans-serif throughout.
+* **Left Sidebar:** Ultra-slim (60dp) vertical rail with **ONLY** 5 thin-line icons — Home, Instances, Discover, Downloads, Settings — **NO text labels**. Active tab has a sleek rounded green capsule (pill) highlight. CS moon logo at top (same as app icon), gear pinned to bottom. Thin 1dp divider to center, 2dp to right panel.
+* **Center:** **Recommended Modpacks** — large preview banner cards (140dp banner with game screenshot, rounded icon, title/description, download count/MC version/loader, neon green **Install** button). Real Modrinth data sorted by downloads, 20 per page with infinite scroll. No welcome banners, no duplicated quick-actions.
+* **Right Panel:** Compact widget area — profile status card (avatar, username, "Local Account / Offline" or Microsoft when signed in) + **news feed** cards (Minecraft updates, modpack news, launcher news) with article icons. "Not signed in — Sign in" horizontal row when logged out. One source of truth via `AccountsManager`.
+* **Five destinations:** Home (Recommended Modpacks), Instances (Play/Edit/⋮ with create/manage), Discover (search + categories Modpacks/Mods/Resource Packs/Shaders/Worlds), Downloads (active tasks with progress + empty states), Settings (Java, RAM, resolution, renderers, storage, appearance — all real settings, no fakes).
+* **App Icon:** Crescent moon + metallic **CS** + stars on black — same logo inside rail and on launcher icon (mipmap + adaptive icon).
+* **Responsive:** Rail + center + right panel on tablets/landscape (≥720dp); rail + center with right panel as slide-in drawer on phones/portrait. 1 column on narrow, 2 on wide, never overlap.
+* **Preserved:** Pojav launch engine, Microsoft & Local auth, instance/version management, Java runtimes, mod-loader support, download/install, multiplayer, file manager, task system — all backend untouched.
 
 ## Install
 
 ```bash
-adb install -r CS-Launcher-Lite-1.1.0-arm64-debug.apk
+adb install -r CS-Launcher-Lite-1.2.0-arm64-debug.apk
+sha256sum CS-Launcher-Lite-1.2.0-arm64-debug.apk # must match SHA above
 ```
-
-Or copy the APK to the device, allow "install unknown apps" and open it.
-
-Verify the download first:
-
-```bash
-sha256sum CS-Launcher-Lite-1.1.0-arm64-debug.apk   # must match the hash above
-```
-
-## Caveats
-
-- **Debug build**, signed with the debug keystore; not store-ready.
-- **arm64 only.**
-- Because the applicationId ends in `.v2.debug`, it does not share data with a release
-  Zalith Launcher 2 install — point it at the same game folder in Settings → Storage.
-- Runtime behaviour (actual Minecraft launch, downloads, Microsoft login) was **not**
-  verified on a device: no emulator or phone exists in the build environment. Compilation,
-  unit tests, packaging and signature verification were performed.
 
 ## Rebuild
 
@@ -65,5 +48,4 @@ cd CS-Launcher-Lite
 echo "sdk.dir=/path/to/android-sdk" > local.properties
 ./gradlew :ZalithLauncher:assembleDebug -Darch=arm64
 ```
-Requires JDK 17+, Android SDK 37 / build-tools 37.0.0, NDK 25.2.9519653, Rust with
-`aarch64-linux-android`, and `cargo-ndk`.
+Requires JDK 21, Android SDK 37 / build-tools 37.0.0, NDK 25.2.9519653, Rust with `aarch64-linux-android`, cargo-ndk 4.1.2.

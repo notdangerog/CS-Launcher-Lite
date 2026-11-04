@@ -45,9 +45,9 @@ sealed interface NormalNavKey : TitledNavKey {
     @Serializable data object Discover : NormalNavKey {
         @Contextual override val title: AndroidStringText = androidText(R.string.cs_nav_discover)
     }
-    /** 经典卡片网格主页（保留原有功能入口） */
-    @Serializable data object ClassicHome : NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.cs_home_classic)
+    /** CS 下载管理屏幕 — tasks + history */
+    @Serializable data object Downloads : NormalNavKey {
+        @Contextual override val title: AndroidStringText = androidText(R.string.cs_nav_downloads)
     }
     /** 账号管理屏幕 */
     @Serializable data class AccountManager(
