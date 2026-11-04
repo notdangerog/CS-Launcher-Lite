@@ -1,67 +1,75 @@
-# CS Launcher Lite — APK
+# CS Launcher Lite — v1.0.0 (arm64 debug)
 
-| Field | Value |
+## Download
+
+**Direct link (no login needed):**
+https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.0.0/CS-Launcher-Lite-1.0.0-arm64-debug.apk
+
+Release page: https://github.com/notdangerog/CS-Launcher-Lite/releases/tag/v1.0.0
+Source repository: https://github.com/notdangerog/CS-Launcher-Lite
+
+| Property | Value |
 | --- | --- |
 | File | `CS-Launcher-Lite-1.0.0-arm64-debug.apk` |
-| Size | 220,346,618 bytes (≈ 210 MiB) |
+| Size | 220,346,666 bytes (≈210 MiB) |
+| SHA-256 | `ebd4546c3e787e55eba5599ffa39994ae64b96f546bb64d65c2dc5bb78ab6027` |
 | Package | `com.movtery.zalithlauncher.v2.debug` |
-| App label | **CS Launcher Lite** |
-| Version | 1.0.0 (versionCode 300000, `-debug` suffix) |
-| ABI | **arm64-v8a only** (all modern phones; no x86/32-bit) |
-| minSdk / targetSdk | 26 / 34 (built against SDK 37.2) |
-| Build type | debug (not minified) |
-| Signature | v2, debug keystore bundled with the project (`CN=MovTery`) |
-| SHA-256 | `b4390a903f619a64da2b7d24eb24e65a0b0fe189c9ebe895652db85a44d6479c` |
+| App label | CS Launcher Lite |
+| versionName / code | `1.0.0-debug` / 300000 |
+| minSdk / compileSdk | 26 (Android 8.0) / 37 |
+| ABI | arm64-v8a only |
+| Signature | debug keystore (`CN=MovTery`), APK Signature Scheme v2 — **verified** |
+
+Verified with `aapt2 dump badging` (label, version, native-code) and `apksigner verify --print-certs`.
 
 ## Install
 
-1. Copy the `.apk` to the device (USB, `adb push`, or download link).
-2. Allow installation from unknown sources for the file manager/browser you use.
-3. Install and launch. First start unpacks the bundled Java runtimes, so expect a
-   longer first launch than subsequent ones.
-
-With adb:
+1. Copy the APK to the device (or use `adb`).
+2. Enable *Install unknown apps* for your file manager / browser.
+3. Open the file and install.
 
 ```bash
 adb install -r CS-Launcher-Lite-1.0.0-arm64-debug.apk
 ```
 
-## Important notes
-
-* **Debug build.** It is signed with the project's *debug* keystore, not a release
-  key. It can be installed side-by-side with a Zalith Launcher 2 install because
-  the applicationId keeps the `.v2.debug` suffix — but because the package name is
-  `…zalithlauncher.v2.debug`, Android treats it as a **different app**: it will not
-  see data of a release Zalith install. To try it against existing instances, point
-  CS Launcher Lite at the same game folder from *Instances → Game folders*.
-* **Why 210 MiB:** the APK bundles four Java runtimes (JRE 8/17/21/25, ~70 MiB of
-  xz-compressed runtime archives), the OSMesa/GL translation libraries (~48 MiB),
-  LWJGL natives and the whole Compose/Kotlin dependency graph in dex form. This is
-  the same footprint as upstream Zalith Launcher 2 — a release build with R8 and
-  per-ABI splits is noticeably smaller.
-* **arm64 only.** Building all four ABIs needs
-  `./gradlew :ZalithLauncher:assembleDebug` without `-Darch=arm64`.
-
-## Verified on this build
-
-```
-aapt2 dump badging   → application-label:'CS Launcher Lite', versionName 1.0.0-debug
-apksigner verify     → Verifies (v2 scheme)
-gradle assembleDebug → BUILD SUCCESSFUL
-unit tests           → CsNavigationTest 6/6 pass
-```
-
-**Not verified:** runtime behaviour on a device (no emulator/device in this
-sandbox). The checklist for a device pass is in `CS_LAUNCHER_LITE.md` §7.
-
-## Rebuild it yourself
+Verify the download first:
 
 ```bash
-./gradlew :ZalithLauncher:assembleDebug -Darch=arm64
-# output: ZalithLauncher/build/outputs/apk/debug/
+sha256sum CS-Launcher-Lite-1.0.0-arm64-debug.apk   # must match the hash above
 ```
 
-or use the repository's GitHub Actions workflow **“Build APK”**
-(`.github/workflows/build.yml`) with `variant: Debug` — it produces per-ABI
-artifacts. The full change set is also available as `CS-Launcher-Lite.patch`
-(applies onto upstream commit `9546e84`).
+## Why is it ~220 MB?
+
+The APK bundles everything a Java-Edition launch needs offline, same as upstream:
+
+- four Java runtimes (JRE 8 / 17 / 21 / 25 archives) — ~80 MB compressed
+- OSMesa / OpenGL compatibility libraries for several renderers — ~48 MB
+- application code + Compose resources (`classes*.dex` ≈ 19 MB)
+- native libs (Pojav core, LWJGL, Rust-built components) for arm64-v8a
+
+A release build with R8 + per-ABI splits and runtime-JRE downloading would be far smaller;
+this is a debug build for testing.
+
+## Caveats
+
+- **Debug build** — signed with the debug keystore; do not ship to a store.
+- **arm64 only** — no armeabi-v7a / x86_64 build in this release.
+- Because the applicationId is `…v2.debug`, it does **not** share data with a release
+  Zalith Launcher 2 install. Point CS Launcher Lite at the same `.minecraft` folder in
+  Settings → Storage if you want to reuse existing instances.
+- Runtime behaviour (launching a real game, downloads, logins) was **not** verified on a
+  device in this environment — no emulator or phone was available. The device checklist is
+  in `docs/CS_LAUNCHER_LITE.md` §7.
+
+## Rebuild from source
+
+```bash
+git clone https://github.com/notdangerog/CS-Launcher-Lite.git
+cd CS-Launcher-Lite
+echo "sdk.dir=/path/to/android-sdk" > local.properties
+./gradlew :ZalithLauncher:assembleDebug -Darch=arm64
+```
+
+Requires JDK 17+, Android SDK 37 / build-tools 37.0.0, NDK 25.2.9519653, Rust targets
+`aarch64-linux-android` + `x86_64-linux-android`, and `cargo-ndk`.
+Measured on 2 vCPU / 2 GB RAM with warm caches: **BUILD SUCCESSFUL in 18m 13s**.

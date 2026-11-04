@@ -8,9 +8,11 @@
 
 ## Download
 
-| Build | Architecture | Link |
+| Build | Architecture | Download |
 | --- | --- | --- |
-| v1.0.0 debug | arm64-v8a | see the [**Releases**](https://github.com/notdangerog/CS-Launcher-Lite/releases) page |
+| v1.0.0 debug | arm64-v8a | **[CS-Launcher-Lite-1.0.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.0.0/CS-Launcher-Lite-1.0.0-arm64-debug.apk)** |
+
+All releases: <https://github.com/notdangerog/CS-Launcher-Lite/releases>
 
 Debug-signed (installable, not Play-ready), ~220 MB because it bundles the Java runtimes and
 graphics libraries needed to launch Minecraft on-device.
