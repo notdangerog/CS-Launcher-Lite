@@ -10,7 +10,8 @@
 
 | Build | Architecture | Download |
 | --- | --- | --- |
-| v1.0.0 debug | arm64-v8a | **[CS-Launcher-Lite-1.0.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.0.0/CS-Launcher-Lite-1.0.0-arm64-debug.apk)** |
+| v1.1.0 debug (three-section redesign) | arm64-v8a | **[CS-Launcher-Lite-1.1.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.1.0/CS-Launcher-Lite-1.1.0-arm64-debug.apk)** |
+| v1.0.0 debug | arm64-v8a | [CS-Launcher-Lite-1.0.0-arm64-debug.apk](https://github.com/notdangerog/CS-Launcher-Lite/releases/download/v1.0.0/CS-Launcher-Lite-1.0.0-arm64-debug.apk) |
 
 All releases: <https://github.com/notdangerog/CS-Launcher-Lite/releases>
 
@@ -49,7 +50,8 @@ echo "sdk.dir=/path/to/android-sdk" > local.properties
 
 ## Docs
 
-- [`docs/CS_LAUNCHER_LITE.md`](docs/CS_LAUNCHER_LITE.md) — implementation & verification report
+- [`docs/CS_LAUNCHER_LITE_V2.md`](docs/CS_LAUNCHER_LITE_V2.md) — three-section redesign report (v1.1.0)
+- [`docs/CS_LAUNCHER_LITE.md`](docs/CS_LAUNCHER_LITE.md) — first-pass implementation & verification report
 - [`docs/INSTALL_APK.md`](docs/INSTALL_APK.md) — install instructions, package/signature details
 
 ## Licence
