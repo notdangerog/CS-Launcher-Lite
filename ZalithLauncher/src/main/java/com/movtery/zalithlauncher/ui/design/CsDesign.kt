@@ -55,6 +55,10 @@ object CsColor {
     val TextDisabled = Color(0xFF6C7686)
 
     val Divider = Color(0xFF262C35)
+    /** Divider between the three main sections of the shell */
+    val DividerStrong = Color(0xFF323A47)
+    /** Background of the navigation rail and the account panel */
+    val Panel = Color(0xFF0A0C10)
     val Warning = Color(0xFFF0B429)
     val Danger = Color(0xFFEF4B5A)
     val Info = Color(0xFF58A6FF)
@@ -200,6 +204,19 @@ object CsSpace {
 object CsSize {
     val sidebarWidth = 196.dp
     val sidebarCollapsedWidth = 76.dp
+    /** Icon-only navigation rail (the CS Launcher Lite layout) */
+    val railWidth = 72.dp
+    /** Right hand account panel */
+    val accountPanelWidth = 288.dp
+    /** Hairline between rail and content */
+    val dividerThin = 1.dp
+    /** Slightly thicker divider in front of the account panel */
+    val dividerStrong = 2.dp
+    /** Rail / panel icon hit target */
+    val railItem = 44.dp
+    /** Catalog card height, tuned so a 2x2 block fits a landscape phone */
+    val catalogCardHeight = 152.dp
+    val catalogCardHeightLarge = 196.dp
     val topBarHeight = 56.dp
     val cardIcon = 56.dp
     val cardIconSmall = 40.dp

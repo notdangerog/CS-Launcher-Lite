@@ -217,6 +217,9 @@ class ModrinthSearchResult(
 
         override fun platformDownloadCount(): Long = downloads
 
+        override fun platformVersions(): List<String>? =
+            versions.toList().takeIf { it.isNotEmpty() }
+
         override fun platformFollows(): Long = follows
 
         override fun platformModLoaders(): List<PlatformDisplayLabel>? {

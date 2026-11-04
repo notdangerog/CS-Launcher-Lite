@@ -49,7 +49,6 @@ class CsNavigationTest {
 
     @Test
     fun `library and settings map to their own sections`() {
-        assertEquals(CsSection.LIBRARY, csSectionOf(NormalNavKey.Library))
         assertEquals(CsSection.SETTINGS, csSectionOf(NestedNavKey.Settings()))
         assertEquals(CsSection.SETTINGS, csSectionOf(NormalNavKey.Settings.Renderer))
     }
@@ -63,7 +62,6 @@ class CsNavigationTest {
     fun `only section roots hide the back affordance`() {
         assertTrue(isCsSectionRoot(NormalNavKey.Instances))
         assertTrue(isCsSectionRoot(NormalNavKey.Discover))
-        assertTrue(isCsSectionRoot(NormalNavKey.Library))
         assertTrue(isCsSectionRoot(NormalNavKey.LauncherMain))
         assertTrue(isCsSectionRoot(NestedNavKey.Settings()))
 

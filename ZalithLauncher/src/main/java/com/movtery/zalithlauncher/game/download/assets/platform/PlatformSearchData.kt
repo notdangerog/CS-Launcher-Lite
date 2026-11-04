@@ -76,4 +76,10 @@ interface PlatformSearchData {
      * 在平台上标注的类别信息
      */
     fun platformCategories(classes: PlatformClasses): List<PlatformFilterCode>?
+
+    /**
+     * 在平台上标注的受支持 Minecraft 版本列表
+     * 并非所有平台都会在搜索结果中提供该信息，未提供时返回 null
+     */
+    fun platformVersions(): List<String>? = null
 }

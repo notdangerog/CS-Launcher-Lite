@@ -20,6 +20,7 @@ package com.movtery.zalithlauncher.ui.screens.main
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +30,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -99,15 +103,20 @@ import com.movtery.zalithlauncher.ui.screens.content.DownloadScreen
 import com.movtery.zalithlauncher.ui.screens.content.FileSelectorScreen
 import com.movtery.zalithlauncher.ui.screens.content.FirstLoginMenu
 import com.movtery.zalithlauncher.ui.screens.content.LauncherScreen
+import com.movtery.zalithlauncher.ui.screens.lite.CsAccountPanel
+import com.movtery.zalithlauncher.ui.screens.lite.CsCatalogType
+import com.movtery.zalithlauncher.ui.screens.lite.CsCatalogViewModel
+import com.movtery.zalithlauncher.ui.screens.lite.CsDetailTitle
 import com.movtery.zalithlauncher.ui.screens.lite.CsDiscoverScreen
 import com.movtery.zalithlauncher.ui.screens.lite.CsHomeScreen
 import com.movtery.zalithlauncher.ui.screens.lite.CsInstancesScreen
-import com.movtery.zalithlauncher.ui.screens.lite.CsLibraryScreen
+import com.movtery.zalithlauncher.ui.screens.lite.CsRail
 import com.movtery.zalithlauncher.ui.screens.lite.CsSection
-import com.movtery.zalithlauncher.ui.screens.lite.CsSidebar
+import com.movtery.zalithlauncher.ui.screens.lite.CsSectionDivider
 import com.movtery.zalithlauncher.ui.screens.lite.CsTopBar
 import com.movtery.zalithlauncher.ui.screens.lite.csSectionOf
 import com.movtery.zalithlauncher.ui.screens.lite.isCsSectionRoot
+import com.movtery.zalithlauncher.ui.screens.lite.rememberCsCatalogViewModel
 import com.movtery.zalithlauncher.ui.screens.content.LicenseScreen
 import com.movtery.zalithlauncher.ui.screens.content.LogViewScreen
 import com.movtery.zalithlauncher.ui.screens.content.MultiplayerScreen
@@ -118,6 +127,7 @@ import com.movtery.zalithlauncher.ui.screens.content.VersionsManageScreen
 import com.movtery.zalithlauncher.ui.screens.content.WebViewScreen
 import com.movtery.zalithlauncher.ui.screens.content.assetinfo.AssetInfoScreen
 import com.movtery.zalithlauncher.ui.screens.content.navigateToDownload
+import com.movtery.zalithlauncher.ui.screens.content.swapToCategoryAssets
 import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
@@ -183,7 +193,6 @@ fun MainScreen(
         CsSection.HOME -> stringResource(R.string.cs_nav_home)
         CsSection.INSTANCES -> stringResource(R.string.cs_nav_instances)
         CsSection.DISCOVER -> stringResource(R.string.cs_nav_discover)
-        CsSection.LIBRARY -> stringResource(R.string.cs_nav_library)
         CsSection.SETTINGS -> stringResource(R.string.cs_nav_settings)
         null -> BuildKeys.LAUNCHER_NAME
     }
@@ -198,7 +207,6 @@ fun MainScreen(
             CsSection.HOME -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.LauncherMain)
             CsSection.INSTANCES -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.Instances)
             CsSection.DISCOVER -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.Discover)
-            CsSection.LIBRARY -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.Library)
             CsSection.SETTINGS -> stack.removeAndNavigateTo(
                 removes = removes,
                 screenKey = screenBackStackModel.settingsScreen
@@ -206,91 +214,165 @@ fun MainScreen(
         }
     }
 
+    // Popular mod packs shown by the home catalog. One view model for the whole
+    // session, so scrolling away and back never refetches the list.
+    val homeCatalog = rememberCsCatalogViewModel(key = "home", type = CsCatalogType.MODPACK)
+
+    val openAccountScreen: (FirstLoginMenu) -> Unit = { menu ->
+        screenBackStackModel.mainScreen.navigateTo(
+            screenKey = NormalNavKey.AccountManager(menu)
+        )
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = backgroundColor,
         contentColor = onBackgroundColor()
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            CsSidebar(
-                selected = section,
-                onNavigate = navigateToSection
-            )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // Three columns on landscape / tablet widths; on narrow phones the account
+            // panel becomes a slide in panel so the catalog keeps its two columns.
+            val wideLayout = maxWidth >= 720.dp
+            var accountPanelOpen by remember { mutableStateOf(false) }
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                CsTopBar(
-                    title = sectionTitle,
-                    detailTitle = if (!isCsSectionRoot(mainScreenKey)) {
-                        {
-                            val detail = mainScreenKey?.title
-                            if (detail != null) {
-                                AndroidStringText(
-                                    text = detail,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1
+            Row(modifier = Modifier.fillMaxSize()) {
+                // ---- left: icon only navigation rail ----
+                CsRail(
+                    selected = section,
+                    onNavigate = navigateToSection
+                )
+                CsSectionDivider()
+
+                // ---- center: catalog / screens ----
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    CsTopBar(
+                        title = sectionTitle,
+                        detailTitle = if (!isCsSectionRoot(mainScreenKey)) {
+                            {
+                                val detail = mainScreenKey?.title
+                                if (detail != null) {
+                                    CsDetailTitle(text = detail)
+                                }
+                            }
+                        } else null,
+                        taskRunning = taskRunning,
+                        onBack = if (!isCsSectionRoot(mainScreenKey)) {
+                            {
+                                backDispatcher?.onBackPressed()
+                                    ?: screenBackStackModel.mainScreen.backStack.removeLastOrNull()
+                            }
+                        } else null,
+                        onTaskClick = { changeTasksExpandedState() },
+                        onMultiplayer = {
+                            screenBackStackModel.mainScreen.removeAndNavigateTo(
+                                removes = screenBackStackModel.clearBeforeNavKeys,
+                                screenKey = NormalNavKey.Multiplayer
+                            )
+                        },
+                        onFileManager = {
+                            eventViewModel.sendEvent(
+                                EventViewModel.Event.OpenFileManager(
+                                    rootPath = PathManager.DIR_FILES_EXTERNAL.absolutePath
+                                )
+                            )
+                        },
+                        showAccountChip = !wideLayout,
+                        onAccount = { accountPanelOpen = true },
+                        onClassicHome = if (section == CsSection.HOME) {
+                            {
+                                screenBackStackModel.mainScreen.navigateTo(
+                                    screenKey = NormalNavKey.ClassicHome
                                 )
                             }
-                        }
-                    } else null,
-                    taskRunning = taskRunning,
-                    onBack = if (!isCsSectionRoot(mainScreenKey)) {
-                        {
-                            backDispatcher?.onBackPressed()
-                                ?: screenBackStackModel.mainScreen.backStack.removeLastOrNull()
-                        }
-                    } else null,
-                    onTaskClick = { changeTasksExpandedState() },
-                    onMultiplayer = {
-                        screenBackStackModel.mainScreen.removeAndNavigateTo(
-                            removes = screenBackStackModel.clearBeforeNavKeys,
-                            screenKey = NormalNavKey.Multiplayer
-                        )
-                    },
-                    onFileManager = {
-                        eventViewModel.sendEvent(
-                            EventViewModel.Event.OpenFileManager(
-                                rootPath = PathManager.DIR_FILES_EXTERNAL.absolutePath
-                            )
-                        )
-                    },
-                    onAccount = {
-                        screenBackStackModel.mainScreen.navigateTo(
-                            screenKey = NormalNavKey.AccountManager(FirstLoginMenu.NONE)
-                        )
-                    }
-                )
+                        } else null
+                    )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    NavStateHost(rootKey = screenBackStackModel.mainScreen) {
-                        NavigationUI(
-                            modifier = Modifier.fillMaxSize(),
-                            screenBackStackModel = screenBackStackModel,
-                            toMainScreen = toMainScreen,
-                            eventViewModel = eventViewModel,
-                            modpackImportViewModel = modpackImportViewModel,
-                            modifyVersionViewModel = modifyVersionViewModel,
-                            submitError = submitError
-                        )
-                    }
-
-                    TaskMenu(
-                        isExpanded = isTaskMenuExpanded,
+                    Box(
                         modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(0.3f)
-                            .align(Alignment.CenterStart)
-                            .padding(all = 6.dp)
+                            .fillMaxWidth()
+                            .weight(1f)
                     ) {
-                        changeTasksExpandedState()
+                        NavStateHost(rootKey = screenBackStackModel.mainScreen) {
+                            NavigationUI(
+                                modifier = Modifier.fillMaxSize(),
+                                screenBackStackModel = screenBackStackModel,
+                                toMainScreen = toMainScreen,
+                                eventViewModel = eventViewModel,
+                                modpackImportViewModel = modpackImportViewModel,
+                                modifyVersionViewModel = modifyVersionViewModel,
+                                submitError = submitError,
+                                homeCatalog = homeCatalog
+                            )
+                        }
+
+                        TaskMenu(
+                            isExpanded = isTaskMenuExpanded,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(0.3f)
+                                .align(Alignment.CenterStart)
+                                .padding(all = 6.dp)
+                        ) {
+                            changeTasksExpandedState()
+                        }
                     }
+                }
+
+                // ---- right: account panel (wide layouts) ----
+                if (wideLayout) {
+                    CsSectionDivider(thick = true)
+                    CsAccountPanel(
+                        onSignIn = { openAccountScreen(FirstLoginMenu.NORMAL) },
+                        onMicrosoftLogin = { openAccountScreen(FirstLoginMenu.MICROSOFT) },
+                        onLocalLogin = { openAccountScreen(FirstLoginMenu.NORMAL) },
+                        onManageAccounts = { openAccountScreen(FirstLoginMenu.NONE) }
+                    )
+                }
+            }
+
+            // ---- account panel as an overlay on narrow screens ----
+            if (!wideLayout) {
+                AnimatedVisibility(
+                    visible = accountPanelOpen,
+                    enter = fadeIn(animationSpec = tween(120)),
+                    exit = fadeOut(animationSpec = tween(120))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.45f))
+                            .clickable { accountPanelOpen = false }
+                    )
+                }
+                AnimatedVisibility(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    visible = accountPanelOpen,
+                    enter = slideInHorizontally(animationSpec = tween(180)) { it },
+                    exit = slideOutHorizontally(animationSpec = tween(160)) { it }
+                ) {
+                    CsAccountPanel(
+                        compact = true,
+                        onSignIn = {
+                            accountPanelOpen = false
+                            openAccountScreen(FirstLoginMenu.NORMAL)
+                        },
+                        onMicrosoftLogin = {
+                            accountPanelOpen = false
+                            openAccountScreen(FirstLoginMenu.MICROSOFT)
+                        },
+                        onLocalLogin = {
+                            accountPanelOpen = false
+                            openAccountScreen(FirstLoginMenu.NORMAL)
+                        },
+                        onManageAccounts = {
+                            accountPanelOpen = false
+                            openAccountScreen(FirstLoginMenu.NONE)
+                        }
+                    )
                 }
             }
         }
@@ -305,7 +387,8 @@ private fun NavigationUI(
     eventViewModel: EventViewModel,
     modpackImportViewModel: ModpackImportViewModel,
     modifyVersionViewModel: ModifyVersionViewModel,
-    submitError: (ErrorViewModel.ThrowableMessage) -> Unit
+    submitError: (ErrorViewModel.ThrowableMessage) -> Unit,
+    homeCatalog: CsCatalogViewModel
 ) {
     val backStack = screenBackStackModel.mainScreen.backStack
     val currentKey = backStack.lastOrNull()
@@ -350,9 +433,9 @@ private fun NavigationUI(
             entryProvider = entryProvider {
                 entry<NormalNavKey.LauncherMain> {
                     CsHomeScreen(
-                        currentVersion = currentVersion,
                         versions = versions,
-                        runningTasks = tasks.size,
+                        currentVersion = currentVersion,
+                        catalog = homeCatalog,
                         onPlay = { version ->
                             eventViewModel.sendEvent(
                                 EventViewModel.Event.Launch.Game(version)
@@ -362,37 +445,20 @@ private fun NavigationUI(
                         onOpenInstances = {
                             backStack.navigateTo(NormalNavKey.Instances)
                         },
-                        onOpenDiscover = {
-                            backStack.navigateTo(NormalNavKey.Discover)
-                        },
-                        onOpenClassicHome = {
-                            backStack.navigateTo(NormalNavKey.ClassicHome)
-                        },
-                        onOpenAccounts = {
-                            backStack.navigateTo(
-                                NormalNavKey.AccountManager(FirstLoginMenu.NONE)
+                        onOpenModpack = { entry ->
+                            screenBackStackModel.swapToCategoryAssets(
+                                platform = entry.platform,
+                                classes = entry.classes,
+                                projectId = entry.projectId,
+                                iconUrl = entry.iconUrl
                             )
                         },
-                        onOpenSettings = {
-                            screenBackStackModel.mainScreen.removeAndNavigateTo(
-                                removes = screenBackStackModel.clearBeforeNavKeys,
-                                screenKey = screenBackStackModel.settingsScreen
-                            )
-                        },
-                        onOpenMultiplayer = {
-                            backStack.navigateTo(NormalNavKey.Multiplayer)
-                        },
-                        onOpenFiles = {
-                            eventViewModel.sendEvent(
-                                EventViewModel.Event.OpenFileManager(
-                                    rootPath = PathManager.DIR_FILES_EXTERNAL.absolutePath
-                                )
-                            )
-                        },
-                        onImportModpack = { uri ->
-                            modpackImportViewModel.import(
-                                context = context,
-                                uri = uri
+                        onInstallModpack = { entry ->
+                            screenBackStackModel.swapToCategoryAssets(
+                                platform = entry.platform,
+                                classes = entry.classes,
+                                projectId = entry.projectId,
+                                iconUrl = entry.iconUrl
                             )
                         }
                     )
@@ -424,49 +490,29 @@ private fun NavigationUI(
                 }
                 entry<NormalNavKey.Discover> {
                     CsDiscoverScreen(
-                        onDownloadGame = {
-                            screenBackStackModel.navigateToDownload(screenBackStackModel.downloadGameScreen)
+                        onOpenEntry = { entry ->
+                            screenBackStackModel.swapToCategoryAssets(
+                                platform = entry.platform,
+                                classes = entry.classes,
+                                projectId = entry.projectId,
+                                iconUrl = entry.iconUrl
+                            )
                         },
-                        onDownloadModPacks = {
-                            screenBackStackModel.navigateToDownload(screenBackStackModel.downloadModPackScreen)
+                        onInstallEntry = { entry ->
+                            screenBackStackModel.swapToCategoryAssets(
+                                platform = entry.platform,
+                                classes = entry.classes,
+                                projectId = entry.projectId,
+                                iconUrl = entry.iconUrl
+                            )
                         },
-                        onDownloadMods = {
-                            screenBackStackModel.navigateToDownload(screenBackStackModel.downloadModScreen)
-                        },
-                        onDownloadResourcePacks = {
-                            screenBackStackModel.navigateToDownload(screenBackStackModel.downloadResourcePackScreen)
-                        },
-                        onDownloadShaders = {
-                            screenBackStackModel.navigateToDownload(screenBackStackModel.downloadShadersScreen)
-                        },
-                        onDownloadSaves = {
-                            screenBackStackModel.navigateToDownload(screenBackStackModel.downloadSavesScreen)
+                        onFavorites = {
+                            screenBackStackModel.navigateToDownload(
+                                screenBackStackModel.downloadFavoritesScreen
+                            )
                         },
                         onSearchById = {
                             screenBackStackModel.navigateToDownload(NormalNavKey.SearchId)
-                        },
-                        onFavorites = {
-                            screenBackStackModel.navigateToDownload(screenBackStackModel.downloadFavoritesScreen)
-                        }
-                    )
-                }
-                entry<NormalNavKey.Library> {
-                    CsLibraryScreen(
-                        versions = versions,
-                        currentVersion = currentVersion,
-                        onManageInstance = navigateToVersions,
-                        onOpenManager = { version, managerKey ->
-                            val opened = backStack.lastOrNull() as? NestedNavKey.VersionSettings
-                            if (opened != null && opened.version == version) {
-                                opened.backStack.navigateTo(managerKey, useClassEquality = true)
-                            } else {
-                                val key = NestedNavKey.VersionSettings(version)
-                                key.backStack.navigateTo(managerKey, useClassEquality = true)
-                                backStack.navigateTo(key)
-                            }
-                        },
-                        onOpenInstances = {
-                            backStack.navigateTo(NormalNavKey.Instances)
                         }
                     )
                 }

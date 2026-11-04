@@ -339,6 +339,9 @@ class CurseForgeData(
 
     override fun platformDownloadCount(): Long = downloadCount
 
+    override fun platformVersions(): List<String>? =
+        latestFilesIndexes.map { it.gameVersion }.distinct().takeIf { it.isNotEmpty() }
+
     override fun platformFollows(): Long? = null
 
     override fun platformModLoaders(): List<PlatformDisplayLabel>? {

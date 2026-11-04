@@ -93,7 +93,7 @@ fun ScreenBackStackViewModel.navigateToDownload(targetScreen: TitledNavKey? = nu
 /**
  * 跳转到资源类型对应的下载分类屏幕，并进入项目详情页
  */
-private fun ScreenBackStackViewModel.swapToCategoryAssets(
+fun ScreenBackStackViewModel.swapToCategoryAssets(
     platform: Platform,
     classes: PlatformClasses,
     projectId: String,

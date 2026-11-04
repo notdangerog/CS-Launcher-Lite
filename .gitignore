@@ -35,3 +35,6 @@ LWJGL/*/build/
 
 # module build outputs
 build/
+
+# module build outputs
+build/
