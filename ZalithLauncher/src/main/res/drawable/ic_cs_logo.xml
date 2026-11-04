@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ CS Launcher Lite - launcher artwork
+  ~ Copyright (C) 2025-2026 MovTery <movtery228@qq.com> and contributors
+  ~ Based on Zalith Launcher 2, licensed under GPL-3.0.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#171B21"
+        android:pathData="M14,2 L34,2 A12,12 0 0,1 46,14 L46,34 A12,12 0 0,1 34,46 L14,46 A12,12 0 0,1 2,34 L2,14 A12,12 0 0,1 14,2 Z" />
+    <path
+        android:fillColor="#1F242C"
+        android:pathData="M14,2 L34,2 A12,12 0 0,1 46,14 L46,20 L2,20 L2,14 A12,12 0 0,1 14,2 Z" />
+    <path
+        android:fillColor="#5BF0A0"
+        android:pathData="M24,10 L38,17.5 L24,25 L10,17.5 Z" />
+    <path
+        android:fillColor="#2BB56B"
+        android:pathData="M10,17.5 L24,25 L24,40 L10,32.5 Z" />
+    <path
+        android:fillColor="#1B8A50"
+        android:pathData="M38,17.5 L24,25 L24,40 L38,32.5 Z" />
+</vector>
