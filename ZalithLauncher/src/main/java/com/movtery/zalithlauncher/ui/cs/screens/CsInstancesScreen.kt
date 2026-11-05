@@ -7,14 +7,6 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
 
 package com.movtery.zalithlauncher.ui.cs.screens
@@ -52,12 +44,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionType
@@ -69,18 +64,18 @@ import com.movtery.zalithlauncher.ui.cs.components.CsTabs
 import com.movtery.zalithlauncher.ui.cs.components.CsTag
 import com.movtery.zalithlauncher.ui.cs.theme.CsColors
 
-/** 库的筛选标签：按版本类型过滤，与本地实例数据模型一致 */
-private enum class LibraryFilter(val labelRes: Int) {
+/** Instance filter, mapped to the launcher's real [VersionType] data. */
+private enum class InstanceFilter(val labelRes: Int) {
     ALL(R.string.cs_library_tab_all),
     MODDED(R.string.cs_library_tab_modded),
     VANILLA(R.string.cs_library_tab_vanilla)
 }
 
 /**
- * 库屏幕：所有本地实例；没有实例时居中显示说明与"创建新实例"按钮
+ * Instances — every locally installed Minecraft version, with working launch / settings / pin actions.
  */
 @Composable
-fun CsLibraryScreen(
+fun CsInstancesScreen(
     onLaunch: (Version) -> Unit,
     onOpenSettings: (Version) -> Unit,
     onCreateInstance: () -> Unit,
@@ -88,13 +83,13 @@ fun CsLibraryScreen(
 ) {
     val versions by VersionsManager.versions.collectAsStateWithLifecycle()
     var filterIndex by remember { mutableIntStateOf(0) }
-    val filter = LibraryFilter.entries[filterIndex]
+    val filter = InstanceFilter.entries[filterIndex]
 
     val filtered = remember(versions, filter) {
         when (filter) {
-            LibraryFilter.ALL -> versions
-            LibraryFilter.MODDED -> versions.filter { it.versionType == VersionType.MODLOADERS }
-            LibraryFilter.VANILLA -> versions.filter { it.versionType != VersionType.MODLOADERS }
+            InstanceFilter.ALL -> versions
+            InstanceFilter.MODDED -> versions.filter { it.versionType == VersionType.MODLOADERS }
+            InstanceFilter.VANILLA -> versions.filter { it.versionType != VersionType.MODLOADERS }
         }
     }
 
@@ -102,22 +97,27 @@ fun CsLibraryScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CsColors.Background)
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(horizontal = 22.dp, vertical = 16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                modifier = Modifier.weight(1f, fill = false),
-                text = stringResource(R.string.cs_nav_library),
-                style = MaterialTheme.typography.headlineMedium,
-                color = CsColors.TextPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            if (versions.isNotEmpty()) {
-                CsTag(text = stringResource(R.string.cs_library_instances_count, versions.size))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.cs_nav_instances),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = CsColors.TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
+                    text = stringResource(R.string.cs_instances_subtitle, versions.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = CsColors.TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(12.dp))
             CsPrimaryButton(
                 text = stringResource(R.string.cs_library_create_instance),
                 onClick = onCreateInstance,
@@ -129,7 +129,7 @@ fun CsLibraryScreen(
         Spacer(modifier = Modifier.height(14.dp))
 
         CsTabs(
-            labels = LibraryFilter.entries.map { stringResource(it.labelRes) },
+            labels = InstanceFilter.entries.map { stringResource(it.labelRes) },
             selectedIndex = filterIndex,
             onSelected = { filterIndex = it }
         )
@@ -140,10 +140,10 @@ fun CsLibraryScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 24.dp),
+                    .padding(bottom = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
-                LibraryEmptyState(
+                EmptyInstances(
                     isFirstRun = versions.isEmpty(),
                     onCreateInstance = onCreateInstance
                 )
@@ -151,7 +151,7 @@ fun CsLibraryScreen(
         } else {
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
-                columns = GridCells.Adaptive(minSize = 240.dp),
+                columns = GridCells.Adaptive(minSize = 250.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = 20.dp)
@@ -169,7 +169,7 @@ fun CsLibraryScreen(
 }
 
 @Composable
-private fun LibraryEmptyState(
+private fun EmptyInstances(
     isFirstRun: Boolean,
     onCreateInstance: () -> Unit
 ) {
@@ -177,34 +177,27 @@ private fun LibraryEmptyState(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 空状态插画：柔和的祖母绿光晕 + 层叠图形，完全由 Compose 绘制
-        Box(
-            modifier = Modifier.size(148.dp),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(modifier = Modifier.size(140.dp), contentAlignment = Alignment.Center) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(40.dp))
+                    .clip(RoundedCornerShape(38.dp))
                     .background(
                         Brush.radialGradient(
-                            listOf(
-                                CsColors.AccentSoft,
-                                CsColors.Background
-                            )
+                            listOf(CsColors.AccentSoft, CsColors.Background)
                         )
                     )
             )
             Box(
                 modifier = Modifier
-                    .size(94.dp)
-                    .clip(RoundedCornerShape(26.dp))
+                    .size(88.dp)
+                    .clip(RoundedCornerShape(24.dp))
                     .background(CsColors.Card)
-                    .border(1.dp, CsColors.Border, RoundedCornerShape(26.dp)),
+                    .border(1.dp, CsColors.Border, RoundedCornerShape(24.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    modifier = Modifier.size(42.dp),
+                    modifier = Modifier.size(38.dp),
                     painter = painterResource(R.drawable.ic_cs_layers),
                     contentDescription = null,
                     tint = CsColors.Accent
@@ -212,7 +205,7 @@ private fun LibraryEmptyState(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         Text(
             text = stringResource(R.string.cs_library_empty_title),
@@ -222,10 +215,10 @@ private fun LibraryEmptyState(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(7.dp))
 
         Text(
-            modifier = Modifier.fillMaxWidth(0.9f),
+            modifier = Modifier.fillMaxWidth(0.92f),
             text = if (isFirstRun) {
                 stringResource(R.string.cs_library_empty_desc)
             } else {
@@ -238,7 +231,7 @@ private fun LibraryEmptyState(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(22.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         CsPrimaryButton(
             text = stringResource(R.string.cs_library_create_instance),
@@ -259,10 +252,7 @@ private fun InstanceCard(
     val loaderName = info?.primaryLoader?.loader?.displayName?.takeIf { it.isNotBlank() }
     val mcVersion = info?.minecraftVersion
 
-    CsCard(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onOpenSettings
-    ) {
+    CsCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 InstanceIcon(version = version, size = 44.dp)
@@ -294,7 +284,7 @@ private fun InstanceCard(
                 Box {
                     CsIconButton(
                         iconRes = R.drawable.ic_more_vert,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.cs_library_settings),
                         onClick = { menuExpanded = true },
                         size = 28.dp,
                         iconSize = 15.dp
@@ -310,11 +300,7 @@ private fun InstanceCard(
                             text = {
                                 Text(
                                     text = stringResource(
-                                        if (version.pinnedState) {
-                                            R.string.cs_library_unpin
-                                        } else {
-                                            R.string.cs_library_pin
-                                        }
+                                        if (version.pinnedState) R.string.cs_library_unpin else R.string.cs_library_pin
                                     ),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = CsColors.TextPrimary,
@@ -353,9 +339,7 @@ private fun InstanceCard(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (mcVersion != null) {
-                    CsTag(text = mcVersion)
-                }
+                if (mcVersion != null) CsTag(text = mcVersion)
                 if (loaderName != null) {
                     CsTag(text = loaderName, accent = true)
                 } else {
@@ -370,6 +354,42 @@ private fun InstanceCard(
                 text = stringResource(R.string.cs_library_launch),
                 onClick = onLaunch,
                 iconRes = R.drawable.ic_play_arrow_filled
+            )
+        }
+    }
+}
+
+/** Instance icon: the version's own icon file when present, otherwise the default glyph. */
+@Composable
+fun InstanceIcon(
+    version: Version,
+    size: Dp,
+    modifier: Modifier = Modifier
+) {
+    val iconFile = remember(version) {
+        version.getVersionIconFile().takeIf { it.exists() }
+    }
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(size / 4))
+            .background(CsColors.CardElevated)
+            .border(1.dp, CsColors.Border, RoundedCornerShape(size / 4)),
+        contentAlignment = Alignment.Center
+    ) {
+        if (iconFile != null) {
+            AsyncImage(
+                modifier = Modifier.fillMaxSize(),
+                model = iconFile,
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Icon(
+                modifier = Modifier.size(size * 0.5f),
+                painter = painterResource(R.drawable.ic_sports_esports_filled),
+                contentDescription = null,
+                tint = CsColors.TextSecondary
             )
         }
     }

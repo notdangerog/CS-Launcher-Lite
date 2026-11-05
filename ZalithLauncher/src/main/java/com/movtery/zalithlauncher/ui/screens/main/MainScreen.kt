@@ -95,7 +95,6 @@ import com.movtery.zalithlauncher.ui.screens.TitledNavKey
 import com.movtery.zalithlauncher.ui.screens.content.AccountManageScreen
 import com.movtery.zalithlauncher.ui.screens.content.DownloadScreen
 import com.movtery.zalithlauncher.ui.screens.content.FileSelectorScreen
-import com.movtery.zalithlauncher.ui.screens.content.LauncherScreen
 import com.movtery.zalithlauncher.ui.screens.content.LicenseScreen
 import com.movtery.zalithlauncher.ui.screens.content.LogViewScreen
 import com.movtery.zalithlauncher.ui.screens.content.MultiplayerScreen
@@ -113,9 +112,12 @@ import com.movtery.zalithlauncher.ui.theme.backgroundColor
 import androidx.compose.runtime.mutableIntStateOf
 import com.movtery.zalithlauncher.ui.resolveAndroidString
 import com.movtery.zalithlauncher.ui.cs.data.CsAddonItem
+import com.movtery.zalithlauncher.ui.cs.data.CsDiscoverRequest
 import com.movtery.zalithlauncher.ui.cs.screens.CsDiscoverScreen
 import com.movtery.zalithlauncher.ui.cs.screens.CsHomeScreen
-import com.movtery.zalithlauncher.ui.cs.screens.CsLibraryScreen
+import com.movtery.zalithlauncher.ui.cs.screens.CsDownloadsScreen
+import com.movtery.zalithlauncher.ui.cs.screens.CsInstancesScreen
+import com.movtery.zalithlauncher.ui.cs.screens.CsSettingsScreen
 import com.movtery.zalithlauncher.ui.cs.shell.CsDestination
 import com.movtery.zalithlauncher.ui.cs.shell.CsMenuItem
 import com.movtery.zalithlauncher.ui.cs.shell.CsShell
@@ -178,22 +180,26 @@ fun MainScreen(
     /** 侧边栏当前选中项 */
     val selectedDestination = when (mainScreenKey) {
         null, is NormalNavKey.LauncherMain -> CsDestination.HOME
+        is NormalNavKey.Instances -> CsDestination.INSTANCES
         is NormalNavKey.Discover -> CsDestination.DISCOVER
-        is NormalNavKey.Library -> CsDestination.LIBRARY
+        is NormalNavKey.Downloads -> CsDestination.DOWNLOADS
+        is NormalNavKey.SettingsHome -> CsDestination.SETTINGS
         else -> null
     }
 
-    /** 侧边栏跳转：清理掉设置/下载/联机等临时页面，避免返回栈重叠 */
+    /**
+     * 侧边栏跳转：主目的地始终独占返回栈（clearWith），
+     * 这样五个页面之间切换永远不会产生叠加的返回栈。
+     */
     val navigateTopLevel: (CsDestination) -> Unit = { destination ->
         val target: TitledNavKey = when (destination) {
             CsDestination.HOME -> NormalNavKey.LauncherMain
+            CsDestination.INSTANCES -> NormalNavKey.Instances
             CsDestination.DISCOVER -> NormalNavKey.Discover
-            CsDestination.LIBRARY -> NormalNavKey.Library
+            CsDestination.DOWNLOADS -> NormalNavKey.Downloads
+            CsDestination.SETTINGS -> NormalNavKey.SettingsHome
         }
-        screenBackStackModel.mainScreen.removeAndNavigateTo(
-            removes = screenBackStackModel.clearBeforeNavKeys,
-            screenKey = target
-        )
+        screenBackStackModel.mainScreen.clearWith(target)
     }
 
     /** 顶栏标题 */
@@ -252,11 +258,10 @@ fun MainScreen(
             onClick = openFileManager
         ),
         CsMenuItem(
-            label = stringResource(R.string.generic_setting),
+            label = stringResource(R.string.cs_settings_advanced),
             iconRes = R.drawable.ic_settings_filled,
             onClick = {
-                screenBackStackModel.mainScreen.removeAndNavigateTo(
-                    removes = screenBackStackModel.clearBeforeNavKeys,
+                screenBackStackModel.mainScreen.navigateTo(
                     screenKey = screenBackStackModel.settingsScreen
                 )
             }
@@ -272,53 +277,27 @@ fun MainScreen(
             CsShell(
                 selected = selectedDestination,
                 onNavigate = navigateTopLevel,
-                onSettings = {
-                    screenBackStackModel.mainScreen.removeAndNavigateTo(
-                        removes = screenBackStackModel.clearBeforeNavKeys,
-                        screenKey = screenBackStackModel.settingsScreen
-                    )
-                },
-                onAccounts = {
-                    screenBackStackModel.mainScreen.navigateTo(
-                        screenKey = NormalNavKey.AccountManager(FirstLoginMenu.NONE)
-                    )
-                },
                 title = titleText,
-                canGoBack = !inLauncherScreen,
+                canGoBack = selectedDestination == null,
                 onBack = {
                     screenBackStackModel.mainScreen.backStack.removeFirstOrNull()
                 },
                 runningTaskCount = runningTaskCount,
-                onOpenTasks = changeTasksExpandedState,
+                onOpenTasks = {
+                    screenBackStackModel.mainScreen.clearWith(NormalNavKey.Downloads)
+                },
                 menuItems = menuItems
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                ) {
-                    NavStateHost(rootKey = screenBackStackModel.mainScreen) {
-                        NavigationUI(
-                            modifier = Modifier.fillMaxSize(),
-                            screenBackStackModel = screenBackStackModel,
-                            toMainScreen = toMainScreen,
-                            eventViewModel = eventViewModel,
-                            modpackImportViewModel = modpackImportViewModel,
-                            modifyVersionViewModel = modifyVersionViewModel,
-                            submitError = submitError
-                        )
-                    }
-
-                    TaskMenu(
-                        isExpanded = isTaskMenuExpanded,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(0.34f)
-                            .align(Alignment.CenterStart)
-                            .padding(all = 6.dp)
-                    ) {
-                        changeTasksExpandedState()
-                    }
+                NavStateHost(rootKey = screenBackStackModel.mainScreen) {
+                    NavigationUI(
+                        modifier = Modifier.fillMaxSize(),
+                        screenBackStackModel = screenBackStackModel,
+                        toMainScreen = toMainScreen,
+                        eventViewModel = eventViewModel,
+                        modpackImportViewModel = modpackImportViewModel,
+                        modifyVersionViewModel = modifyVersionViewModel,
+                        submitError = submitError
+                    )
                 }
             }
         }
@@ -348,6 +327,14 @@ private fun NavigationUI(
             screenBackStackModel.mainScreen.navigateTo(
                 screenKey = NestedNavKey.VersionSettings(version),
                 useClassEquality = true
+            )
+        }
+        /** 打开文件管理器 */
+        val openFileManager: () -> Unit = {
+            eventViewModel.sendEvent(
+                EventViewModel.Event.OpenFileManager(
+                    rootPath = PathManager.DIR_FILES_EXTERNAL.absolutePath
+                )
             )
         }
         /** 导航至整合包导出屏幕 */
@@ -380,19 +367,15 @@ private fun NavigationUI(
                         )
                     }
                     CsHomeScreen(
+                        onInstall = openProject,
                         onOpenDiscover = {
-                            screenBackStackModel.mainScreen.removeAndNavigateTo(
-                                removes = screenBackStackModel.clearBeforeNavKeys,
-                                screenKey = NormalNavKey.Discover
-                            )
+                            screenBackStackModel.mainScreen.clearWith(NormalNavKey.Discover)
                         },
-                        onOpenProject = openProject,
                         onManageAccounts = {
                             screenBackStackModel.mainScreen.navigateTo(
                                 screenKey = NormalNavKey.AccountManager(FirstLoginMenu.NONE)
                             )
-                        },
-                        onOpenInstance = { version -> navigateToVersions(version) }
+                        }
                     )
                 }
                 entry<NormalNavKey.Discover> {
@@ -408,8 +391,8 @@ private fun NavigationUI(
                         }
                     )
                 }
-                entry<NormalNavKey.Library> {
-                    CsLibraryScreen(
+                entry<NormalNavKey.Instances> {
+                    CsInstancesScreen(
                         onLaunch = { version ->
                             eventViewModel.sendEvent(
                                 EventViewModel.Event.Launch.Game(version)
@@ -418,6 +401,44 @@ private fun NavigationUI(
                         onOpenSettings = { version -> navigateToVersions(version) },
                         onCreateInstance = {
                             screenBackStackModel.navigateToDownload()
+                        }
+                    )
+                }
+                entry<NormalNavKey.Downloads> {
+                    CsDownloadsScreen(
+                        onBrowseCategory = { category ->
+                            CsDiscoverRequest.request(category)
+                            screenBackStackModel.mainScreen.clearWith(NormalNavKey.Discover)
+                        }
+                    )
+                }
+                entry<NormalNavKey.SettingsHome> {
+                    CsSettingsScreen(
+                        onOpenAccounts = {
+                            screenBackStackModel.mainScreen.navigateTo(
+                                screenKey = NormalNavKey.AccountManager(FirstLoginMenu.NONE)
+                            )
+                        },
+                        onOpenVersionsManager = {
+                            screenBackStackModel.mainScreen.navigateTo(
+                                screenKey = NormalNavKey.VersionsManager
+                            )
+                        },
+                        onOpenEngineSettings = {
+                            screenBackStackModel.mainScreen.navigateTo(
+                                screenKey = screenBackStackModel.settingsScreen
+                            )
+                        },
+                        onOpenFileManager = openFileManager,
+                        onOpenMultiplayer = {
+                            screenBackStackModel.mainScreen.navigateTo(
+                                screenKey = NormalNavKey.Multiplayer
+                            )
+                        },
+                        onOpenAbout = {
+                            screenBackStackModel.mainScreen.navigateTo(
+                                screenKey = screenBackStackModel.settingsScreen
+                            )
                         }
                     )
                 }

@@ -88,6 +88,7 @@ import com.movtery.zalithlauncher.ui.cs.components.CsTag
 import com.movtery.zalithlauncher.ui.cs.components.formatCount
 import com.movtery.zalithlauncher.ui.cs.data.CsAddonItem
 import com.movtery.zalithlauncher.ui.cs.data.CsBrowseCategory
+import com.movtery.zalithlauncher.ui.cs.data.CsDiscoverRequest
 import com.movtery.zalithlauncher.ui.cs.data.CsDiscoverState
 import com.movtery.zalithlauncher.ui.cs.data.CsDiscoverViewModel
 import com.movtery.zalithlauncher.ui.cs.data.CsEnvironmentFacet
@@ -108,6 +109,11 @@ fun CsDiscoverScreen(
     viewModel: CsDiscoverViewModel = viewModel(key = "cs_discover")
 ) {
     var filterDrawerOpen by remember { mutableStateOf(false) }
+
+    // 其它页面（例如 Downloads）请求打开指定分类
+    LaunchedEffect(Unit) {
+        CsDiscoverRequest.consume()?.let { viewModel.selectCategory(it) }
+    }
 
     // 搜索文本输入后自动搜索（550ms 防抖）
     var lastSubmittedQuery by remember { mutableStateOf(viewModel.query) }

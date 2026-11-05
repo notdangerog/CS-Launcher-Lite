@@ -3139,4 +3139,49 @@
     <string name="cs_discover_error">Couldn\'t load results. Check your connection and try again.</string>
     <string name="cs_home_featured_loading">Loading featured modpacks…</string>
     <string name="cs_home_no_features">No featured modpacks available yet.</string>
+    <!-- Unified CS Launcher Lite UI (Phase 2) -->
+    <string name="cs_nav_instances">Instances</string>
+    <string name="cs_nav_downloads">Downloads</string>
+    <string name="cs_home_title">Home</string>
+    <string name="cs_home_subtitle">Recommended modpacks, curated for your device.</string>
+    <string name="cs_home_recommended">Recommended Modpacks</string>
+    <string name="cs_home_view_all">View all</string>
+    <string name="cs_home_news_release">Latest release</string>
+    <string name="cs_home_news_release_tag">Release</string>
+    <string name="cs_profile_title">Profile</string>
+    <string name="cs_profile_offline">Offline · Local account</string>
+
+    <string name="cs_instances_subtitle">%1$d instance(s) installed</string>
+
+    <string name="cs_downloads_subtitle">Every install and update task, in one place.</string>
+    <string name="cs_downloads_active">Running tasks</string>
+    <string name="cs_downloads_empty_title">No downloads right now</string>
+    <string name="cs_downloads_empty_desc">Installs you start from Home or Discover will show up here with live progress.</string>
+    <string name="cs_downloads_browse">Browse content</string>
+    <string name="cs_downloads_browse_desc">Pick a category to find something new to play with.</string>
+    <string name="cs_downloads_cancel">Cancel</string>
+    <string name="cs_downloads_preparing">Preparing…</string>
+    <string name="cs_downloads_task_fallback">Preparing download…</string>
+
+    <string name="cs_settings_subtitle">Launcher preferences and engine tools.</string>
+    <string name="cs_settings_accounts">Account</string>
+    <string name="cs_settings_appearance">Appearance</string>
+    <string name="cs_settings_anim_speed">Animation speed</string>
+    <string name="cs_settings_anim_speed_desc">Interface transition speed level (1–30).</string>
+    <string name="cs_settings_bg_opacity">Background opacity</string>
+    <string name="cs_settings_bg_opacity_desc">How strongly your custom background shows through.</string>
+    <string name="cs_settings_task_panel">Task panel</string>
+    <string name="cs_settings_task_panel_desc">Show the Downloads panel while tasks are running.</string>
+    <string name="cs_settings_engine">Engine settings</string>
+    <string name="cs_settings_engine_desc">Renderers, game, controls and Java — the launcher engine behind every instance.</string>
+    <string name="cs_settings_versions">Versions manager</string>
+    <string name="cs_settings_versions_desc">Install, modify, export or delete game versions.</string>
+    <string name="cs_settings_advanced">All settings</string>
+    <string name="cs_settings_advanced_desc">Renderer, game, control, gamepad, Java and about.</string>
+    <string name="cs_settings_files_desc">Browse the launcher file directories.</string>
+    <string name="cs_settings_multiplayer_desc">Host or join a shared world over Terracotta.</string>
+    <string name="cs_settings_about">About</string>
+    <string name="cs_settings_version">Version %1$s</string>
+    <string name="cs_settings_unified_ui">Unified UI</string>
+    <string name="cs_settings_about_open">Open about &amp; licences</string>
 </resources>

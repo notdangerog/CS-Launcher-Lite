@@ -7,14 +7,6 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
 
 package com.movtery.zalithlauncher.ui.cs.shell
@@ -70,14 +62,19 @@ import com.movtery.zalithlauncher.ui.cs.components.csPressScale
 import com.movtery.zalithlauncher.ui.cs.theme.CsColors
 import com.movtery.zalithlauncher.ui.cs.theme.CsSpacing
 
-/** 主导航的三个目的地 */
+/**
+ * The five — and only five — destinations of CS Launcher Lite.
+ * Order matches the sidebar, top to bottom: Home, Instances, Discover, Downloads, Settings.
+ */
 enum class CsDestination(val labelRes: Int, val iconRes: Int) {
     HOME(R.string.cs_nav_home, R.drawable.ic_home_filled),
+    INSTANCES(R.string.cs_nav_instances, R.drawable.ic_cs_layers),
     DISCOVER(R.string.cs_nav_discover, R.drawable.ic_cs_explore),
-    LIBRARY(R.string.cs_nav_library, R.drawable.ic_cs_layers)
+    DOWNLOADS(R.string.cs_nav_downloads, R.drawable.ic_download_2_outlined),
+    SETTINGS(R.string.cs_nav_settings, R.drawable.ic_settings_filled)
 }
 
-/** 顶栏溢出菜单项 */
+/** Extra tools that are not primary destinations (engine features, kept out of the rail). */
 data class CsMenuItem(
     val label: String,
     val iconRes: Int,
@@ -85,17 +82,17 @@ data class CsMenuItem(
 )
 
 /**
- * CS Launcher Lite 主框架：最左侧的细长导航栏 + 顶栏 + 内容区域
+ * The single application shell: ultra-slim icon-only rail + slim top bar + content area.
+ *
+ * This is the only navigation surface in the app — no second rail, no tab bar, no duplicated buttons.
  */
 @Composable
 fun CsShell(
     selected: CsDestination?,
     onNavigate: (CsDestination) -> Unit,
-    onSettings: () -> Unit,
-    onAccounts: () -> Unit,
+    onBack: () -> Unit,
     title: String,
     canGoBack: Boolean,
-    onBack: () -> Unit,
     runningTaskCount: Int,
     onOpenTasks: () -> Unit,
     menuItems: List<CsMenuItem>,
@@ -107,11 +104,9 @@ fun CsShell(
             .fillMaxSize()
             .background(CsColors.Background)
     ) {
-        CsSidebar(
+        CsNavRail(
             selected = selected,
-            onNavigate = onNavigate,
-            onSettings = onSettings,
-            onAccounts = onAccounts
+            onNavigate = onNavigate
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -136,14 +131,13 @@ fun CsShell(
 }
 
 /**
- * 最左侧细长导航栏：仅图标，无文字标签
+ * Ultra-slim rail: thin-line icons only, no text labels.
+ * The active destination is highlighted with a rounded green capsule behind the icon.
  */
 @Composable
-private fun CsSidebar(
+private fun CsNavRail(
     selected: CsDestination?,
-    onNavigate: (CsDestination) -> Unit,
-    onSettings: () -> Unit,
-    onAccounts: () -> Unit
+    onNavigate: (CsDestination) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -154,105 +148,92 @@ private fun CsSidebar(
     ) {
         Spacer(modifier = Modifier.height(10.dp))
 
-        // 品牌标记
+        // Brand mark (identity, not navigation)
         Box(
             modifier = Modifier
-                .size(38.dp)
+                .size(36.dp)
                 .clip(RoundedCornerShape(11.dp))
                 .background(CsColors.AccentSoft)
                 .border(1.dp, CsColors.AccentDark, RoundedCornerShape(11.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                modifier = Modifier.size(21.dp),
+                modifier = Modifier.size(20.dp),
                 painter = painterResource(R.drawable.ic_cs_logo),
                 contentDescription = stringResource(R.string.cs_app_name),
                 tint = CsColors.Accent
             )
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         CsDestination.entries.forEach { destination ->
-            CsSidebarItem(
+            CsRailItem(
                 destination = destination,
                 selected = destination == selected,
                 onClick = { onNavigate(destination) }
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
         }
 
         Spacer(modifier = Modifier.weight(1f))
-
-        CsSidebarIcon(
-            iconRes = R.drawable.ic_settings_filled,
-            contentDescription = stringResource(R.string.cs_nav_settings),
-            selected = false,
-            onClick = onSettings
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        CsSidebarIcon(
-            iconRes = R.drawable.ic_person_filled,
-            contentDescription = stringResource(R.string.cs_nav_account),
-            selected = false,
-            onClick = onAccounts
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
 @Composable
-private fun CsSidebarItem(
+private fun CsRailItem(
     destination: CsDestination,
     selected: Boolean,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val background by animateColorAsState(
+
+    // "Sleek rounded green capsule" for the active tab
+    val capsuleColor by animateColorAsState(
         targetValue = if (selected) CsColors.AccentSoft else Color.Transparent,
-        label = "csSidebarItemBackground"
+        label = "csRailCapsule"
+    )
+    val capsuleWidth by animateDpAsState(
+        targetValue = if (selected) 30.dp else 22.dp,
+        label = "csRailCapsuleWidth"
+    )
+    val capsuleHeight by animateDpAsState(
+        targetValue = if (selected) 44.dp else 32.dp,
+        label = "csRailCapsuleHeight"
     )
     val tint by animateColorAsState(
         targetValue = if (selected) CsColors.Accent else CsColors.TextSecondary,
-        label = "csSidebarItemTint"
+        label = "csRailTint"
     )
 
     Box(
         modifier = Modifier
             .width(CsSpacing.sidebarWidth)
-            .height(46.dp),
+            .height(50.dp),
         contentAlignment = Alignment.Center
     ) {
-        // 左侧选中指示条
-        val indicatorWidth by animateDpAsState(
-            targetValue = if (selected) 3.dp else 0.dp,
-            label = "csSidebarIndicator"
-        )
         Box(
             modifier = Modifier
-                .align(Alignment.CenterStart)
-                .width(indicatorWidth)
-                .height(22.dp)
-                .clip(RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp))
-                .background(CsColors.Accent)
-        )
-
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(background)
+                .width(capsuleWidth)
+                .height(capsuleHeight)
+                .clip(CircleShape)
+                .background(capsuleColor)
+                .then(
+                    if (selected) {
+                        Modifier.border(1.dp, CsColors.AccentDark, CircleShape)
+                    } else Modifier
+                )
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,
                     onClick = onClick
                 )
-                .csPressScale(interactionSource, pressedScale = 0.92f),
+                .csPressScale(interactionSource, pressedScale = 0.9f),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(19.dp),
                 painter = painterResource(destination.iconRes),
                 contentDescription = stringResource(destination.labelRes),
                 tint = tint
@@ -261,48 +242,6 @@ private fun CsSidebarItem(
     }
 }
 
-@Composable
-private fun CsSidebarIcon(
-    iconRes: Int,
-    contentDescription: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val background by animateColorAsState(
-        targetValue = if (selected) CsColors.AccentSoft else Color.Transparent,
-        label = "csSidebarFooterBackground"
-    )
-    val tint by animateColorAsState(
-        targetValue = if (selected) CsColors.Accent else CsColors.TextSecondary,
-        label = "csSidebarFooterTint"
-    )
-
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(background)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .csPressScale(interactionSource, pressedScale = 0.92f),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            modifier = Modifier.size(19.dp),
-            painter = painterResource(iconRes),
-            contentDescription = contentDescription,
-            tint = tint
-        )
-    }
-}
-
-/**
- * 顶栏：返回按钮、页面标题、运行状态、任务入口、溢出菜单
- */
 @Composable
 private fun CsTopBar(
     title: String,
@@ -354,7 +293,6 @@ private fun CsTopBar(
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            // 运行状态
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
@@ -384,51 +322,87 @@ private fun CsTopBar(
                 )
             }
 
-            Spacer(modifier = Modifier.width(6.dp))
-
-            Box {
-                CsIconButton(
-                    iconRes = R.drawable.ic_more_vert,
-                    contentDescription = stringResource(R.string.cs_more_menu),
-                    onClick = { menuExpanded = true },
-                    size = 30.dp,
-                    iconSize = 16.dp
-                )
-
-                DropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false },
-                    modifier = Modifier
-                        .background(CsColors.CardElevated)
-                        .widthIn(min = 190.dp, max = 260.dp)
-                ) {
-                    menuItems.forEach { item ->
-                        DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        modifier = Modifier.size(15.dp),
-                                        painter = painterResource(item.iconRes),
-                                        contentDescription = null,
-                                        tint = CsColors.TextSecondary
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = item.label,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = CsColors.TextPrimary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+            if (menuItems.isNotEmpty()) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Box {
+                    CsIconButton(
+                        iconRes = R.drawable.ic_more_vert,
+                        contentDescription = stringResource(R.string.cs_more_menu),
+                        onClick = { menuExpanded = true },
+                        size = 30.dp,
+                        iconSize = 16.dp
+                    )
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier
+                            .background(CsColors.CardElevated)
+                            .widthIn(min = 190.dp, max = 260.dp)
+                    ) {
+                        menuItems.forEach { item ->
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            modifier = Modifier.size(15.dp),
+                                            painter = painterResource(item.iconRes),
+                                            contentDescription = null,
+                                            tint = CsColors.TextSecondary
+                                        )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Text(
+                                            text = item.label,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = CsColors.TextPrimary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    menuExpanded = false
+                                    item.onClick()
                                 }
-                            },
-                            onClick = {
-                                menuExpanded = false
-                                item.onClick()
-                            }
-                        )
+                            )
+                        }
                     }
                 }
+            }
+        }
+    }
+}
+
+/** Two-column helper: wide screens get the right widget panel, narrow screens stack it below. */
+@Composable
+fun CsDashboardLayout(
+    modifier: Modifier = Modifier,
+    sidePanelWidth: androidx.compose.ui.unit.Dp = 300.dp,
+    wideBreakpoint: androidx.compose.ui.unit.Dp = 860.dp,
+    main: @Composable () -> Unit,
+    side: @Composable () -> Unit
+) {
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val isWide = maxWidth >= wideBreakpoint
+        val sideWidth = (maxWidth * 0.30f).coerceIn(268.dp, sidePanelWidth)
+
+        if (isWide) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.weight(1f)) { main() }
+                Box(
+                    modifier = Modifier
+                        .width(sideWidth)
+                        .fillMaxHeight()
+                        .background(CsColors.BackgroundSecondary)
+                ) { side() }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.weight(1f)) { main() }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(CsColors.BackgroundSecondary)
+                ) { side() }
             }
         }
     }

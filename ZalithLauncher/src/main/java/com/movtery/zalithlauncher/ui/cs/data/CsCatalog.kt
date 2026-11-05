@@ -177,3 +177,18 @@ enum class CsLicenseFacet(private val facetValueValue: String) : ModrinthFacet, 
     override fun facetValue(): String = facetValueValue
     override fun index(): Int = 0
 }
+
+/**
+ * 轻量的一次性跳转请求：让「下载 → 浏览内容」等入口能把用户带到 Discover 的指定分类。
+ * Discover 屏幕在组合时消费该请求，消费后立即清空，避免重复触发。
+ */
+object CsDiscoverRequest {
+    var pendingCategory by androidx.compose.runtime.mutableStateOf<CsBrowseCategory?>(null)
+        private set
+
+    fun request(category: CsBrowseCategory) {
+        pendingCategory = category
+    }
+
+    fun consume(): CsBrowseCategory? = pendingCategory.also { pendingCategory = null }
+}

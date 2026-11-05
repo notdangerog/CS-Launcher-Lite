@@ -7,28 +7,16 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
 
 package com.movtery.zalithlauncher.ui.cs.screens
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -47,7 +35,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,16 +62,13 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.getAccountTypeName
-import com.movtery.zalithlauncher.game.version.installed.Version
-import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersion
 import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersions
 import com.movtery.zalithlauncher.ui.cs.components.CsCard
 import com.movtery.zalithlauncher.ui.cs.components.CsDivider
 import com.movtery.zalithlauncher.ui.cs.components.CsEmptyState
-import com.movtery.zalithlauncher.ui.cs.components.CsLoadingBlock
+import com.movtery.zalithlauncher.ui.cs.components.CsPrimaryButton
 import com.movtery.zalithlauncher.ui.cs.components.CsProjectIcon
-import com.movtery.zalithlauncher.ui.cs.components.CsRemoteImage
 import com.movtery.zalithlauncher.ui.cs.components.CsSecondaryButton
 import com.movtery.zalithlauncher.ui.cs.components.CsSectionHeader
 import com.movtery.zalithlauncher.ui.cs.components.CsSkeletonBlock
@@ -94,158 +78,99 @@ import com.movtery.zalithlauncher.ui.cs.components.formatCount
 import com.movtery.zalithlauncher.ui.cs.data.CsAddonItem
 import com.movtery.zalithlauncher.ui.cs.data.CsFeaturedState
 import com.movtery.zalithlauncher.ui.cs.data.CsHomeViewModel
+import com.movtery.zalithlauncher.ui.cs.shell.CsDashboardLayout
 import com.movtery.zalithlauncher.ui.cs.theme.CsColors
 import com.movtery.zalithlauncher.ui.screens.content.elements.PlayerFace
 
 /**
- * 首页：左侧主内容（欢迎语 + 2 × 2 精选整合包网格），右侧账号/好友/新闻信息栏
+ * Home — the dashboard.
  *
- * 宽屏（≥ 880dp）为左右两栏；窄屏时信息栏内容移动到主内容下方同一滚动容器里，
- * 保证任何屏幕尺寸下都不会出现重叠或被裁切的元素。
+ * Centre: large "Recommended Modpacks" banner cards with real Modrinth data and working Install actions.
+ * Right: compact widget panel with the player's account status and a news feed.
  */
 @Composable
 fun CsHomeScreen(
+    onInstall: (CsAddonItem) -> Unit,
     onOpenDiscover: () -> Unit,
-    onOpenProject: (CsAddonItem) -> Unit,
     onManageAccounts: () -> Unit,
-    onOpenInstance: (Version) -> Unit,
     modifier: Modifier = Modifier,
-    homeViewModel: CsHomeViewModel = viewModel(key = "cs_home")
+    viewModel: CsHomeViewModel = viewModel(key = "cs_home")
 ) {
-    BoxWithConstraints(
-        modifier = modifier
-            .fillMaxSize()
-            .background(CsColors.Background)
-    ) {
-        val isWide = maxWidth >= 880.dp
-        // 右侧信息栏宽度：可用宽度的 29%，并限制在合理区间内
-        val sideWidth = (maxWidth * 0.29f).coerceIn(280.dp, 360.dp)
-
-        if (isWide) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp, vertical = 18.dp)
-                ) {
-                    HomeMainContent(
-                        homeViewModel = homeViewModel,
-                        onOpenDiscover = onOpenDiscover,
-                        onOpenProject = onOpenProject,
-                        onOpenInstance = onOpenInstance
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .width(sideWidth)
-                        .fillMaxHeight()
-                        .background(CsColors.BackgroundSecondary)
-                ) {
-                    HomeSidePanel(
-                        onManageAccounts = onManageAccounts,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp, vertical = 18.dp)
-                    )
-                }
-            }
-        } else {
+    CsDashboardLayout(
+        modifier = modifier.background(CsColors.Background),
+        main = {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 22.dp, vertical = 16.dp)
             ) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
-                    HomeMainContent(
-                        homeViewModel = homeViewModel,
-                        onOpenDiscover = onOpenDiscover,
-                        onOpenProject = onOpenProject,
-                        onOpenInstance = onOpenInstance
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.cs_home_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = CsColors.TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.cs_home_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = CsColors.TextSecondary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(CsColors.BackgroundSecondary)
-                ) {
-                    HomeSidePanel(
-                        onManageAccounts = onManageAccounts,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 16.dp)
-                    )
-                }
+                Spacer(modifier = Modifier.height(18.dp))
+
+                CsSectionHeader(
+                    title = stringResource(R.string.cs_home_recommended),
+                    actionText = stringResource(R.string.cs_home_view_all),
+                    onAction = onOpenDiscover
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                RecommendedGrid(
+                    state = viewModel.featured,
+                    onInstall = onInstall,
+                    onRetry = { viewModel.loadFeatured() }
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+        },
+        side = {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+            ) {
+                ProfileWidget(onManageAccounts = onManageAccounts)
+                Spacer(modifier = Modifier.height(18.dp))
+                NewsWidget()
             }
         }
-    }
+    )
 }
 
 /* ------------------------------------------------------------------ */
-/* 主内容                                                              */
+/* Recommended modpacks                                                */
 /* ------------------------------------------------------------------ */
 
 @Composable
-private fun ColumnScope.HomeMainContent(
-    homeViewModel: CsHomeViewModel,
-    onOpenDiscover: () -> Unit,
-    onOpenProject: (CsAddonItem) -> Unit,
-    onOpenInstance: (Version) -> Unit
-) {
-    Text(
-        text = stringResource(R.string.cs_home_welcome_back),
-        style = MaterialTheme.typography.headlineMedium,
-        color = CsColors.TextPrimary,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
-
-    Spacer(modifier = Modifier.height(18.dp))
-
-    CsSectionHeader(
-        title = stringResource(R.string.cs_home_featured_modpacks),
-        actionText = stringResource(R.string.cs_nav_discover),
-        onAction = onOpenDiscover
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    FeaturedGrid(
-        state = homeViewModel.featured,
-        onOpenProject = onOpenProject,
-        onRetry = { homeViewModel.loadFeatured() }
-    )
-
-    Spacer(modifier = Modifier.height(26.dp))
-
-    InstancesStrip(onOpenInstance = onOpenInstance)
-}
-
-/**
- * 严格的 2 列 × 2 行网格。
- *
- * 卡片高度完全由固定尺寸构成（封面高度 = 卡片宽度 × 0.5，文字区域固定行数），
- * 因此同一行的两张卡片尺寸必然一致，也不会出现文字把卡片撑开的情况。
- */
-@Composable
-private fun FeaturedGrid(
+private fun RecommendedGrid(
     state: CsFeaturedState,
-    onOpenProject: (CsAddonItem) -> Unit,
+    onInstall: (CsAddonItem) -> Unit,
     onRetry: () -> Unit
 ) {
     when (state) {
-        is CsFeaturedState.Loading -> FeaturedSkeleton()
-        is CsFeaturedState.Error -> Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 180.dp),
-            contentAlignment = Alignment.Center
-        ) {
+        is CsFeaturedState.Loading -> RecommendedSkeleton()
+
+        is CsFeaturedState.Error -> CsCard(modifier = Modifier.fillMaxWidth()) {
             CsEmptyState(
+                modifier = Modifier.padding(vertical = 26.dp),
                 title = stringResource(R.string.cs_home_modpacks_error),
                 description = stringResource(R.string.cs_discover_source_note),
                 action = {
@@ -259,39 +184,35 @@ private fun FeaturedGrid(
             )
         }
 
-        is CsFeaturedState.Empty -> Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 180.dp),
-            contentAlignment = Alignment.Center
-        ) {
+        is CsFeaturedState.Empty -> CsCard(modifier = Modifier.fillMaxWidth()) {
             CsEmptyState(
+                modifier = Modifier.padding(vertical = 26.dp),
                 title = stringResource(R.string.cs_home_no_features),
                 description = stringResource(R.string.cs_discover_source_note)
             )
         }
 
         is CsFeaturedState.Loaded -> BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val spacing = 14.dp
-            val cardWidth = (maxWidth - spacing) / 2
-            // 封面高度跟随卡片宽度，保证不同屏幕尺寸下比例一致
-            val coverHeight = (cardWidth * 0.5f).coerceIn(96.dp, 168.dp)
-            val rows = state.items.chunked(2)
+            // Capture layout values before entering Row/Column scopes
+            val columns = if (maxWidth >= 760.dp) 2 else 1
+            val spacing = 12.dp
+            val cellWidth = if (columns == 2) (maxWidth - spacing) / 2 else maxWidth
+            val coverHeight = if (columns == 2) 132.dp else 158.dp
 
             Column(verticalArrangement = Arrangement.spacedBy(spacing)) {
-                rows.forEach { rowItems ->
+                state.items.chunked(columns).forEach { rowItems ->
                     Row(horizontalArrangement = Arrangement.spacedBy(spacing)) {
                         rowItems.forEach { item ->
-                            FeaturedModpackCard(
-                                modifier = Modifier.width(cardWidth),
+                            ModpackBannerCard(
+                                modifier = Modifier.width(cellWidth),
                                 item = item,
                                 coverHeight = coverHeight,
-                                onClick = { onOpenProject(item) }
+                                compact = columns == 2,
+                                onInstall = { onInstall(item) }
                             )
                         }
-                        // 不足两个时补齐空位，保证左对齐
-                        if (rowItems.size == 1) {
-                            Spacer(modifier = Modifier.width(cardWidth))
+                        if (rowItems.size < columns) {
+                            Spacer(modifier = Modifier.width(cellWidth))
                         }
                     }
                 }
@@ -301,16 +222,18 @@ private fun FeaturedGrid(
 }
 
 @Composable
-private fun FeaturedSkeleton() {
+private fun RecommendedSkeleton() {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val spacing = 14.dp
-        val cardWidth = (maxWidth - spacing) / 2
-        val coverHeight = (cardWidth * 0.5f).coerceIn(96.dp, 168.dp)
+        val columns = if (maxWidth >= 760.dp) 2 else 1
+        val spacing = 12.dp
+        val cellWidth = if (columns == 2) (maxWidth - spacing) / 2 else maxWidth
+        val coverHeight = if (columns == 2) 132.dp else 158.dp
+
         Column(verticalArrangement = Arrangement.spacedBy(spacing)) {
             repeat(2) {
                 Row(horizontalArrangement = Arrangement.spacedBy(spacing)) {
-                    repeat(2) {
-                        CsCard(modifier = Modifier.width(cardWidth)) {
+                    repeat(columns) {
+                        CsCard(modifier = Modifier.width(cellWidth)) {
                             CsSkeletonBlock(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -318,29 +241,22 @@ private fun FeaturedSkeleton() {
                                 cornerRadius = 0.dp
                             )
                             Column(modifier = Modifier.padding(12.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    CsSkeletonBlock(
-                                        modifier = Modifier.size(38.dp),
-                                        cornerRadius = 10.dp
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    CsSkeletonBlock(
-                                        modifier = Modifier
-                                            .fillMaxWidth(0.6f)
-                                            .height(14.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(12.dp))
+                                CsSkeletonBlock(
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.55f)
+                                        .height(14.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
                                 CsSkeletonBlock(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(10.dp)
                                 )
-                                Spacer(modifier = Modifier.height(6.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
                                 CsSkeletonBlock(
                                     modifier = Modifier
-                                        .fillMaxWidth(0.8f)
-                                        .height(10.dp)
+                                        .fillMaxWidth()
+                                        .height(32.dp)
                                 )
                             }
                         }
@@ -351,15 +267,22 @@ private fun FeaturedSkeleton() {
     }
 }
 
+/**
+ * Large preview banner card: screenshot-style cover, title, description, stats, green Install button.
+ *
+ * All text is line-clamped and the card height is derived from fixed pieces, so two cards in a row
+ * always have identical dimensions and nothing can overflow.
+ */
 @Composable
-private fun FeaturedModpackCard(
+private fun ModpackBannerCard(
     item: CsAddonItem,
     coverHeight: Dp,
-    onClick: () -> Unit,
+    compact: Boolean,
+    onInstall: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    CsCard(modifier = modifier, onClick = onClick) {
-        // 封面：渐变底 + 图标虚化放大 + 居中清晰图标，任何素材都不会被拉伸
+    CsCard(modifier = modifier) {
+        // Cover: gradient base + blurred icon as the "screenshot" backdrop + vignette into the card colour
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -375,23 +298,13 @@ private fun FeaturedModpackCard(
                 AsyncImage(
                     modifier = Modifier
                         .fillMaxSize()
-                        .alpha(0.32f)
-                        .blur(12.dp),
+                        .alpha(0.38f)
+                        .blur(16.dp),
                     model = item.iconUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
-                AsyncImage(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(52.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    model = item.iconUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit
-                )
             }
-            // 底部渐变过渡到卡片色
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -399,39 +312,60 @@ private fun FeaturedModpackCard(
                         Brush.verticalGradient(
                             listOf(
                                 Color.Transparent,
-                                CsColors.Card.copy(alpha = 0.55f),
+                                CsColors.Card.copy(alpha = 0.45f),
                                 CsColors.Card
                             )
                         )
                     )
             )
+            // Loader / category chip on the cover
+            val badge = item.loaders.firstOrNull()
+                ?: item.categories.firstOrNull()?.let { stringResource(it.getDisplayName()) }
+            if (badge != null) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(10.dp)
+                        .clip(RoundedCornerShape(7.dp))
+                        .background(CsColors.Background.copy(alpha = 0.72f))
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = badge,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = CsColors.Accent,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            // Project icon bottom-left, overlapping the cover/content boundary
+            CsProjectIcon(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 12.dp, bottom = 10.dp)
+                    .size(if (compact) 40.dp else 44.dp),
+                iconUrl = item.iconUrl,
+                name = item.title,
+                cornerRadius = 11.dp
+            )
         }
 
         Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CsProjectIcon(
-                    iconUrl = item.iconUrl,
-                    name = item.title,
-                    modifier = Modifier.size(38.dp),
-                    cornerRadius = 10.dp
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = item.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = CsColors.TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Spacer(modifier = Modifier.height(9.dp))
-
             Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(32.dp),
+                    .padding(start = if (compact) 0.dp else 56.dp),
+                text = item.title,
+                style = MaterialTheme.typography.titleMedium,
+                color = CsColors.TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Text(
+                modifier = Modifier.heightIn(min = 32.dp),
                 text = item.description,
                 style = MaterialTheme.typography.bodySmall,
                 color = CsColors.TextSecondary,
@@ -451,141 +385,39 @@ private fun FeaturedModpackCard(
                 )
                 val follows = item.follows ?: 0L
                 if (follows > 0) {
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(9.dp))
                     CsStatItem(
                         iconRes = R.drawable.ic_favorite_outlined,
                         text = formatCount(follows)
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                val tag = item.loaders.firstOrNull() ?: item.categories.firstOrNull()?.let { code ->
-                    stringResource(code.getDisplayName())
-                }
-                if (tag != null) {
-                    CsTag(text = tag, accent = true)
-                }
+                CsPrimaryButton(
+                    text = stringResource(R.string.cs_discover_install),
+                    onClick = onInstall,
+                    iconRes = R.drawable.ic_download,
+                    compact = true
+                )
             }
         }
     }
 }
 
-/**
- * 已有实例的快速入口（真实数据，点击进入实例设置）
- */
-@Composable
-private fun InstancesStrip(onOpenInstance: (Version) -> Unit) {
-    val versions by VersionsManager.versions.collectAsStateWithLifecycle()
-    if (versions.isEmpty()) return
-
-    CsSectionHeader(title = stringResource(R.string.cs_home_instances_heading))
-    Spacer(modifier = Modifier.height(10.dp))
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        versions.take(8).forEach { version ->
-            CsCard(
-                modifier = Modifier.width(180.dp),
-                onClick = { onOpenInstance(version) }
-            ) {
-                Row(
-                    modifier = Modifier.padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    InstanceIcon(version = version, size = 32.dp)
-                    Spacer(modifier = Modifier.width(9.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = version.getVersionName(),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = CsColors.TextPrimary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = version.getVersionInfo()?.getInfoString() ?: "",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = CsColors.TextTertiary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * 实例图标（使用版本自带的图标文件，没有则显示默认图标）
- */
-@Composable
-fun InstanceIcon(
-    version: Version,
-    size: Dp,
-    modifier: Modifier = Modifier
-) {
-    val iconFile = remember(version) {
-        version.getVersionIconFile().takeIf { it.exists() }
-    }
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(RoundedCornerShape(size / 4))
-            .background(CsColors.CardElevated)
-            .border(1.dp, CsColors.Border, RoundedCornerShape(size / 4)),
-        contentAlignment = Alignment.Center
-    ) {
-        if (iconFile != null) {
-            AsyncImage(
-                modifier = Modifier.fillMaxSize(),
-                model = iconFile,
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Icon(
-                modifier = Modifier.size(size * 0.5f),
-                painter = painterResource(R.drawable.ic_sports_esports_filled),
-                contentDescription = null,
-                tint = CsColors.TextSecondary
-            )
-        }
-    }
-}
-
 /* ------------------------------------------------------------------ */
-/* 右侧信息栏                                                          */
+/* Right panel widgets                                                 */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Account widget — shows the real signed-in account or the offline/local state.
+ */
 @Composable
-private fun HomeSidePanel(
-    onManageAccounts: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        AccountPanel(onManageAccounts = onManageAccounts)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        FriendsPanel(onManageAccounts = onManageAccounts)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        NewsPanel()
-    }
-}
-
-@Composable
-private fun AccountPanel(onManageAccounts: () -> Unit) {
+private fun ProfileWidget(onManageAccounts: () -> Unit) {
     val accounts by AccountsManager.accountsFlow.collectAsStateWithLifecycle()
     val currentAccount by AccountsManager.currentAccountFlow.collectAsStateWithLifecycle()
     var expanded by remember { mutableStateOf(false) }
 
     Text(
-        text = stringResource(R.string.cs_home_playing_as),
+        text = stringResource(R.string.cs_profile_title),
         style = MaterialTheme.typography.titleMedium,
         color = CsColors.TextPrimary,
         maxLines = 1,
@@ -602,7 +434,7 @@ private fun AccountPanel(onManageAccounts: () -> Unit) {
                 modifier = Modifier.padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AccountAvatar(account = currentAccount, size = 34.dp)
+                AccountAvatar(account = currentAccount, size = 38.dp)
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -612,14 +444,28 @@ private fun AccountPanel(onManageAccounts: () -> Unit) {
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = currentAccount?.let { getAccountTypeName(it) }
-                            ?: stringResource(R.string.cs_home_no_account),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = CsColors.TextTertiary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    // Status row: account type + online/offline marker
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(if (currentAccount != null) CsColors.Accent else CsColors.TextTertiary)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = if (currentAccount != null) {
+                                getAccountTypeName(currentAccount!!)
+                            } else {
+                                stringResource(R.string.cs_profile_offline)
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (currentAccount != null) CsColors.Accent else CsColors.TextTertiary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
                 Icon(
                     modifier = Modifier.size(18.dp),
@@ -635,7 +481,7 @@ private fun AccountPanel(onManageAccounts: () -> Unit) {
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .background(CsColors.CardElevated)
-                .width(260.dp)
+                .width(250.dp)
         ) {
             accounts.forEach { account ->
                 DropdownMenuItem(
@@ -671,41 +517,15 @@ private fun AccountPanel(onManageAccounts: () -> Unit) {
                     }
                 )
             }
-            if (accounts.isEmpty()) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = stringResource(R.string.cs_home_no_account),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = CsColors.TextTertiary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        onManageAccounts()
-                    }
-                )
-            }
             DropdownMenuItem(
                 text = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            modifier = Modifier.size(15.dp),
-                            painter = painterResource(R.drawable.ic_person_outlined),
-                            contentDescription = null,
-                            tint = CsColors.Accent
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.cs_home_manage_accounts),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = CsColors.Accent,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.cs_home_manage_accounts),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = CsColors.Accent,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 },
                 onClick = {
                     expanded = false
@@ -714,6 +534,16 @@ private fun AccountPanel(onManageAccounts: () -> Unit) {
             )
         }
     }
+
+    Spacer(modifier = Modifier.height(10.dp))
+
+    CsSecondaryButton(
+        modifier = Modifier.fillMaxWidth(),
+        text = stringResource(R.string.cs_home_manage_accounts),
+        onClick = onManageAccounts,
+        iconRes = R.drawable.ic_person_outlined,
+        compact = true
+    )
 }
 
 @Composable
@@ -722,7 +552,8 @@ private fun AccountAvatar(account: Account?, size: Dp) {
         modifier = Modifier
             .size(size)
             .clip(RoundedCornerShape(size / 4))
-            .background(CsColors.CardElevated),
+            .background(CsColors.CardElevated)
+            .border(1.dp, CsColors.Border, RoundedCornerShape(size / 4)),
         contentAlignment = Alignment.Center
     ) {
         if (account != null) {
@@ -742,38 +573,11 @@ private fun AccountAvatar(account: Account?, size: Dp) {
     }
 }
 
-@Composable
-private fun FriendsPanel(onManageAccounts: () -> Unit) {
-    Text(
-        text = stringResource(R.string.cs_home_friends),
-        style = MaterialTheme.typography.titleMedium,
-        color = CsColors.TextPrimary,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        text = stringResource(R.string.cs_home_friends_empty),
-        style = MaterialTheme.typography.bodySmall,
-        color = CsColors.TextSecondary,
-        maxLines = 4,
-        overflow = TextOverflow.Ellipsis
-    )
-    Spacer(modifier = Modifier.height(10.dp))
-    CsSecondaryButton(
-        text = stringResource(R.string.cs_home_manage_accounts),
-        onClick = onManageAccounts,
-        iconRes = R.drawable.ic_person_outlined,
-        compact = true
-    )
-}
-
 /**
- * 新闻卡片：使用 Minecraft 官方版本清单中的真实发布数据
+ * News widget — real Minecraft release entries from the launcher's version manifest.
  */
 @Composable
-private fun NewsPanel() {
+private fun NewsWidget() {
     val versions by MinecraftVersions.allVersions.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -790,38 +594,36 @@ private fun NewsPanel() {
     Spacer(modifier = Modifier.height(10.dp))
 
     if (versions.isEmpty()) {
-        CsLoadingBlock(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(72.dp)
-        )
+        CsCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(10.dp)) {
+                CsSkeletonBlock(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp)
+                )
+            }
+        }
         return
     }
 
     val releases = remember(versions) {
-        versions
-            .filter { it.type == MinecraftVersion.Type.Release }
-            .take(4)
+        versions.filter { it.type == MinecraftVersion.Type.Release }.take(4)
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
         releases.forEach { release ->
             CsCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier.padding(10.dp),
+                    modifier = Modifier.padding(9.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 缩略图：渐变底 + 版本号，无需额外网络资源
                     Box(
                         modifier = Modifier
-                            .size(width = 56.dp, height = 46.dp)
+                            .size(width = 54.dp, height = 44.dp)
                             .clip(RoundedCornerShape(9.dp))
                             .background(
                                 Brush.linearGradient(
-                                    listOf(
-                                        CsColors.AccentDark,
-                                        CsColors.Background
-                                    )
+                                    listOf(CsColors.AccentDark, CsColors.Background)
                                 )
                             ),
                         contentAlignment = Alignment.Center
@@ -834,19 +636,12 @@ private fun NewsPanel() {
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(9.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Minecraft ${release.version.id}",
+                            text = stringResource(R.string.cs_home_news_release, release.version.id),
                             style = MaterialTheme.typography.titleSmall,
                             color = CsColors.TextPrimary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = release.type.name,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = CsColors.Accent,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -858,12 +653,13 @@ private fun NewsPanel() {
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                    CsTag(text = stringResource(R.string.cs_home_news_release_tag), accent = true)
                 }
             }
         }
     }
 
-    Spacer(modifier = Modifier.height(14.dp))
+    Spacer(modifier = Modifier.height(12.dp))
     CsDivider()
     Spacer(modifier = Modifier.height(10.dp))
     Text(
