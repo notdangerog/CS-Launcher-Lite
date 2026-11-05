@@ -142,7 +142,6 @@
     <string name="theme_color_urban_ash">Urban Ash</string>
     <!-- Option of the theme color setting in launcher settings -->
     <string name="theme_color_verdant_dawn">Silent Forest Dawn</string>
-    <string name="theme_color_cs_lite">CS Lite Green</string>
     <!-- Title of the color picker dialog -->
     <string name="theme_color_picker_title">Color Picker</string>
     <!-- Button in the color picker dialog to edit the color as a hex code -->
@@ -404,29 +403,27 @@
     <!-- Warning dialog text before downloading over mobile data, used for game, mod, and modpack downloads -->
     <string name="download_install_warning_mobile_data">You are using mobile data. Continuing the download will consume data.</string>
     <!-- Label of the name search field in the download filter panel; also used on the favorites screen -->
-    <string name="download_assets_filter_search_name">Search Name</string>
+    <string name="download_addon_filter_search_name">Search Name</string>
     <!-- Title of the download platform filter section (Modrinth or CurseForge); also used on the favorites screen -->
-    <string name="download_assets_filter_search_platform">Target Platform</string>
+    <string name="download_addon_filter_search_platform">Target Platform</string>
     <!-- Label of the game version field in the download filter panel; also used on the home server list -->
-    <string name="download_assets_filter_game_version">Game Version</string>
+    <string name="download_addon_filter_game_version">Game Version</string>
     <!-- Title of the category filter section in the download search filter panel -->
-    <string name="download_assets_filter_category">Category</string>
+    <string name="download_addon_filter_category">Category</string>
     <!-- Title of the mod loader filter section in the download filter panel; also used on the favorites screen -->
-    <string name="download_assets_filter_modloader">Mod Loader</string>
+    <string name="download_addon_filter_modloader">Mod Loader</string>
     <!-- Chip shown next to a filter section title when nothing is selected yet -->
-    <string name="download_assets_filter_none">None Selected</string>
+    <string name="download_addon_filter_none">None Selected</string>
     <!-- Sort option in the download search filter panel -->
-    <string name="download_assets_filter_sort_by_relevant">Relevance</string>
+    <string name="download_addon_filter_sort_by_relevant">Relevance</string>
     <!-- Sort option in the download search filter panel -->
-    <string name="download_assets_filter_sort_by_total_downloads">Total Downloads</string>
+    <string name="download_addon_filter_sort_by_total_downloads">Total Downloads</string>
     <!-- Sort option in the download search filter panel -->
-    <string name="download_assets_filter_sort_by_popularity">Popularity</string>
+    <string name="download_addon_filter_sort_by_popularity">Popularity</string>
     <!-- Sort option in the download search filter panel -->
-    <string name="download_assets_filter_sort_by_recently_created">Recently Created</string>
+    <string name="download_addon_filter_sort_by_recently_created">Recently Created</string>
     <!-- Sort option in the download search filter panel -->
-    <string name="download_assets_filter_sort_by_recently_updated">Recently Updated</string>
-    <!-- Author caption on a search result card; %s is the author name -->
-    <string name="download_assets_result_authors">By %s</string>
+    <string name="download_addon_filter_sort_by_recently_updated">Recently Updated</string>
     <!-- Label of the favorite toggle on project cards and detail pages -->
     <string name="favorite_add">Favorite</string>
     <!-- Label of the favorite toggle when the project is already favorited -->
@@ -442,67 +439,67 @@
     <!-- Sort option on the favorites screen, sorting by project name -->
     <string name="favorites_sort_title">Project Name</string>
     <!-- Accessibility label of the previous page button in the download search results -->
-    <string name="download_assets_result_previous_page">Previous Page</string>
+    <string name="download_addon_result_previous_page">Previous Page</string>
     <!-- Accessibility label of the next page button in the download search results -->
-    <string name="download_assets_result_next_page">Next Page</string>
+    <string name="download_addon_result_next_page">Next Page</string>
     <!-- Error text in the search results, tappable to retry; %s is the error detail -->
-    <string name="download_assets_failed_to_get_result">Failed to get search results: %s. Tap to retry.</string>
+    <string name="download_addon_failed_to_get_result">Failed to get search results: %s. Tap to retry.</string>
     <!-- Error text on the project detail page, tappable to retry; %s is the error detail -->
-    <string name="download_assets_failed_to_get_project">Failed to retrieve project information: %s. Tap to retry.</string>
+    <string name="download_addon_failed_to_get_project">Failed to retrieve project information: %s. Tap to retry.</string>
     <!-- Error text above the project version list, tappable to retry; %s is the error detail -->
-    <string name="download_assets_failed_to_get_versions">Failed to retrieve version list: %s. Tap to retry.</string>
+    <string name="download_addon_failed_to_get_versions">Failed to retrieve version list: %s. Tap to retry.</string>
     <!-- Filter chip on the project version list that shows only stable Minecraft releases -->
-    <string name="download_assets_show_only_mc_release">Show Only MC Releases</string>
+    <string name="download_addon_show_only_mc_release">Show Only MC Releases</string>
     <!-- Hint of the version search field on the project version list -->
-    <string name="download_assets_search_mc_versions">Search MC Versions</string>
-    <!-- Section title for required dependencies in the asset install dialog -->
-    <string name="download_assets_dependency_projects">Dependencies</string>
-    <!-- Section title for optional dependencies in the asset install dialog -->
-    <string name="download_assets_optional_projects">Optional Projects</string>
+    <string name="download_addon_search_mc_versions">Search MC Versions</string>
+    <!-- Section title for required dependencies in the addon install dialog -->
+    <string name="download_addon_dependency_projects">Dependencies</string>
+    <!-- Section title for optional dependencies in the addon install dialog -->
+    <string name="download_addon_optional_projects">Optional Projects</string>
     <!-- Progress text shown while the project version list starts loading in pages -->
-    <string name="download_assets_loading_page_data">Starting to load paged data</string>
+    <string name="download_addon_loading_page_data">Starting to load paged data</string>
     <!-- Progress text while the project version list loads; %1$d is the chunk number, %2$d the page -->
-    <string name="download_assets_loaded_chunk_page">Paged data loaded, chunk %1$d, page %2$d</string>
+    <string name="download_addon_loaded_chunk_page">Paged data loaded, chunk %1$d, page %2$d</string>
     <!-- Progress text of the dependency download task; %s is the project ID -->
-    <string name="download_assets_loading_dep_project">Loading and caching dependency project, ID: %s</string>
+    <string name="download_addon_loading_dep_project">Loading and caching dependency project, ID: %s</string>
     <!-- Title of the related links section on a project detail page -->
-    <string name="download_assets_links">Related Links</string>
+    <string name="download_addon_links">Related Links</string>
     <!-- Button opening the project page on Modrinth or CurseForge -->
-    <string name="download_assets_project_link">Project Page</string>
+    <string name="download_addon_project_link">Project Page</string>
     <!-- Button opening the source code page of a project -->
-    <string name="download_assets_source_link">View Source Code</string>
+    <string name="download_addon_source_link">View Source Code</string>
     <!-- Button opening the issue tracker of a project -->
-    <string name="download_assets_issues_link">Report Issues</string>
+    <string name="download_addon_issues_link">Report Issues</string>
     <!-- Button opening the wiki page of a project -->
-    <string name="download_assets_wiki_link">View Wiki</string>
+    <string name="download_addon_wiki_link">View Wiki</string>
     <!-- Release channel label next to a project version -->
-    <string name="download_assets_release_type_release">Stable</string>
+    <string name="download_addon_release_type_release">Stable</string>
     <!-- Release channel label next to a project version -->
-    <string name="download_assets_release_type_beta">Beta</string>
+    <string name="download_addon_release_type_beta">Beta</string>
     <!-- Release channel label next to a project version -->
-    <string name="download_assets_release_type_alpha">Alpha</string>
-    <!-- Warning dialog text when installing an asset with no game version installed -->
-    <string name="download_assets_no_installed_versions">No available game version is currently installed, so the target download location for the asset cannot be determined. Please install a game version first!</string>
-    <!-- Title of the game version picker in the asset install dialog -->
-    <string name="download_assets_install_assets_for_versions">Install for which game versions?</string>
-    <!-- Progress text of the asset download task; %1$s is the file name, %2$s and %3$s are sizes -->
-    <string name="download_assets_install_progress_downloading">Downloading and installing assets\n%1$s\n (%2$s / %3$s)</string>
+    <string name="download_addon_release_type_alpha">Alpha</string>
+    <!-- Warning dialog text when installing an addon with no game version installed -->
+    <string name="download_addon_no_installed_versions">No available game version is currently installed, so the target download location for the addon cannot be determined. Please install a game version first!</string>
+    <!-- Title of the game version picker in the addon install dialog -->
+    <string name="download_addon_install_addons_for_versions">Install for which game versions?</string>
+    <!-- Progress text of the addon download task; %1$s is the file name, %2$s and %3$s are sizes -->
+    <string name="download_addon_install_progress_downloading">Downloading and installing addons\n%1$s\n (%2$s / %3$s)</string>
     <!-- Progress text while the downloaded file is copied into the game folders; %s is the file name -->
-    <string name="download_assets_install_progress_installing">Installing assets\n%s</string>
-    <!-- Title of the error notification when downloading or installing an asset fails -->
-    <string name="download_assets_install_failed">Failed to install assets!</string>
+    <string name="download_addon_install_progress_installing">Installing addons\n%s</string>
+    <!-- Title of the error notification when downloading or installing an addon fails -->
+    <string name="download_addon_install_failed">Failed to install addons!</string>
     <!-- Error line for a dependency without a compatible version; %s is the project title -->
-    <string name="download_assets_dependency_no_compatible_version">No compatible version was found for dependency %s</string>
+    <string name="download_addon_dependency_no_compatible_version">No compatible version was found for dependency %s</string>
     <!-- Status on a dependency item in the install dialog when its info cannot be loaded -->
-    <string name="download_assets_dependency_project_unavailable">Project information is unavailable</string>
+    <string name="download_addon_dependency_project_unavailable">Project information is unavailable</string>
     <!-- Label of the project ID input field on the search by ID page -->
-    <string name="download_assets_id_holder">Project ID</string>
+    <string name="download_addon_id_holder">Project ID</string>
     <!-- Hint shown on the search by ID page before a search is made -->
-    <string name="download_assets_id_tip">Quickly get the corresponding project by project ID</string>
+    <string name="download_addon_id_tip">Quickly get the corresponding project by project ID</string>
     <!-- Message on the search by ID page when no project matches; also a status on failed dependencies -->
-    <string name="download_assets_id_not_found">Project not found!</string>
+    <string name="download_addon_id_not_found">Project not found!</string>
     <!-- Message on the search by ID page when the project type is not supported -->
-    <string name="download_assets_id_unsupported">Project not supported!</string>
+    <string name="download_addon_id_unsupported">Project not supported!</string>
     <!-- First paragraph of the compatibility warning dialog shown before installing a modpack -->
     <string name="download_modpack_warning1">Before installation, you need to understand that most modpacks are made for PC, and there\'s a high chance of crashes or other issues when you try to launch them. These problems are often beyond what the launcher can resolve.</string>
     <!-- Second paragraph of the modpack compatibility warning dialog -->
@@ -528,171 +525,171 @@
     <!-- Task step in the modpack install dialog that moves the files into place -->
     <string name="download_modpack_final_move">Moving modpack files</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_worldgen">World Generation</string>
+    <string name="download_addon_category_worldgen">World Generation</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_biomes">Biomes</string>
+    <string name="download_addon_category_biomes">Biomes</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_dimensions">Dimensions</string>
+    <string name="download_addon_category_dimensions">Dimensions</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_ores_resources">Ores &amp; Resources</string>
+    <string name="download_addon_category_ores_resources">Ores &amp; Resources</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_structures">Structures</string>
+    <string name="download_addon_category_structures">Structures</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_technology">Technology</string>
+    <string name="download_addon_category_technology">Technology</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_item_fluid_energy_transport">Pipes &amp; Logistics</string>
+    <string name="download_addon_category_item_fluid_energy_transport">Pipes &amp; Logistics</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_automation">Automation</string>
+    <string name="download_addon_category_automation">Automation</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_energy">Energy</string>
+    <string name="download_addon_category_energy">Energy</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_redstone">Redstone</string>
+    <string name="download_addon_category_redstone">Redstone</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_food">Food &amp; Cooking</string>
+    <string name="download_addon_category_food">Food &amp; Cooking</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_farming">Farming</string>
+    <string name="download_addon_category_farming">Farming</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_transport">Transportation</string>
+    <string name="download_addon_category_transport">Transportation</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_storage">Storage</string>
+    <string name="download_addon_category_storage">Storage</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_magic">Magic</string>
+    <string name="download_addon_category_magic">Magic</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_adventure">Adventure</string>
+    <string name="download_addon_category_adventure">Adventure</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_decoration">Decoration</string>
+    <string name="download_addon_category_decoration">Decoration</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_mobs">Mobs</string>
+    <string name="download_addon_category_mobs">Mobs</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_equipment">Equipment</string>
+    <string name="download_addon_category_equipment">Equipment</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_information">HUD &amp; Information</string>
+    <string name="download_addon_category_information">HUD &amp; Information</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_social">Server</string>
+    <string name="download_addon_category_social">Server</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_utility">Utility</string>
+    <string name="download_addon_category_utility">Utility</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_library">Library</string>
+    <string name="download_addon_category_library">Library</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_game_mechanics">Game Mechanics</string>
+    <string name="download_addon_category_game_mechanics">Game Mechanics</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_optimization">Optimization</string>
+    <string name="download_addon_category_optimization">Optimization</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_multiplayer">Multiplayer</string>
+    <string name="download_addon_category_multiplayer">Multiplayer</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_challenging">Hardcore</string>
+    <string name="download_addon_category_challenging">Hardcore</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_combat">Combat</string>
+    <string name="download_addon_category_combat">Combat</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_quests">Quests</string>
+    <string name="download_addon_category_quests">Quests</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_exploration">Exploration</string>
+    <string name="download_addon_category_exploration">Exploration</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_mini_game">Minigames</string>
+    <string name="download_addon_category_mini_game">Minigames</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_sci_fi">Sci-Fi</string>
+    <string name="download_addon_category_sci_fi">Sci-Fi</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_skyblock">Skyblock</string>
+    <string name="download_addon_category_skyblock">Skyblock</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_vanilla">Vanilla Tweaks</string>
+    <string name="download_addon_category_vanilla">Vanilla Tweaks</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_ftb">FTB Team</string>
+    <string name="download_addon_category_ftb">FTB Team</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_map_based">Map-Based</string>
+    <string name="download_addon_category_map_based">Map-Based</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_lightweight">Lightweight</string>
+    <string name="download_addon_category_lightweight">Lightweight</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_extra_large">Extra Large</string>
+    <string name="download_addon_category_extra_large">Extra Large</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_kitchen_sink">Kitchen Sink</string>
+    <string name="download_addon_category_kitchen_sink">Kitchen Sink</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_traditional">Traditional</string>
+    <string name="download_addon_category_traditional">Traditional</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_steampunk">Steampunk</string>
+    <string name="download_addon_category_steampunk">Steampunk</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_modern">Modern</string>
+    <string name="download_addon_category_modern">Modern</string>
     <!-- Category filter option in the download search filter panel -->
-    <string name="download_assets_category_photo_realistic">Photorealistic</string>
+    <string name="download_addon_category_photo_realistic">Photorealistic</string>
     <!-- Resource pack style filter in the download search filter panel -->
-    <string name="download_assets_category_animated">Animated</string>
+    <string name="download_addon_category_animated">Animated</string>
     <!-- Resource pack category filter in the download search, for packs intended for use with mods -->
-    <string name="download_assets_category_mod_support">Mod Support</string>
+    <string name="download_addon_category_mod_support">Mod Support</string>
     <!-- Catch-all category filter in the mod and resource pack download search -->
-    <string name="download_assets_category_miscellaneous">Miscellaneous</string>
+    <string name="download_addon_category_miscellaneous">Miscellaneous</string>
     <!-- Resource pack resolution filter in the download search, here 16x16 pixel textures -->
-    <string name="download_assets_category_16x">16x16 Pixels</string>
+    <string name="download_addon_category_16x">16x16 Pixels</string>
     <!-- Resource pack resolution filter in the download search, here 32x32 pixel textures -->
-    <string name="download_assets_category_32x">32x32 Pixels</string>
+    <string name="download_addon_category_32x">32x32 Pixels</string>
     <!-- Resource pack resolution filter in the download search, here 64x64 pixel textures -->
-    <string name="download_assets_category_64x">64x64 Pixels</string>
+    <string name="download_addon_category_64x">64x64 Pixels</string>
     <!-- Resource pack resolution filter in the download search, here 128x128 pixel textures -->
-    <string name="download_assets_category_128x">128x128 Pixels</string>
+    <string name="download_addon_category_128x">128x128 Pixels</string>
     <!-- Resource pack resolution filter in the download search, here 256x256 pixel textures -->
-    <string name="download_assets_category_256x">256x256 Pixels</string>
+    <string name="download_addon_category_256x">256x256 Pixels</string>
     <!-- Resource pack resolution filter in the download search, here 512x512 pixels or higher -->
-    <string name="download_assets_category_512x">512x512 Pixels &amp; Up</string>
+    <string name="download_addon_category_512x">512x512 Pixels &amp; Up</string>
     <!-- Map type filter in the world saves download search, for challenge maps -->
-    <string name="download_assets_category_game_map">Game Challenges</string>
+    <string name="download_addon_category_game_map">Game Challenges</string>
     <!-- Map type filter in the world saves download search, for modded worlds -->
-    <string name="download_assets_category_modded_world">Modded Worlds</string>
+    <string name="download_addon_category_modded_world">Modded Worlds</string>
     <!-- Map type filter in the world saves download search, for parkour maps -->
-    <string name="download_assets_category_parkour">Parkour</string>
+    <string name="download_addon_category_parkour">Parkour</string>
     <!-- Map type filter in the world saves download search, for puzzle maps -->
-    <string name="download_assets_category_puzzle">Puzzle</string>
+    <string name="download_addon_category_puzzle">Puzzle</string>
     <!-- Shader pack style filter in the download search filter panel -->
-    <string name="download_assets_category_cartoon">Cartoon</string>
+    <string name="download_addon_category_cartoon">Cartoon</string>
     <!-- Shader pack style filter in the download search filter panel -->
-    <string name="download_assets_category_cursed">Cursed</string>
+    <string name="download_addon_category_cursed">Cursed</string>
     <!-- Shader pack style filter in the download search, on both Modrinth and CurseForge -->
-    <string name="download_assets_category_fantasy">Fantasy</string>
+    <string name="download_addon_category_fantasy">Fantasy</string>
     <!-- Shader pack style filter in the download search filter panel -->
-    <string name="download_assets_category_semi_realistic">Semi-Realistic</string>
+    <string name="download_addon_category_semi_realistic">Semi-Realistic</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_atmosphere">Atmosphere</string>
+    <string name="download_addon_category_atmosphere">Atmosphere</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_bloom">Bloom</string>
+    <string name="download_addon_category_bloom">Bloom</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_colored_lighting">Colored Lighting</string>
+    <string name="download_addon_category_colored_lighting">Colored Lighting</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_foliage">Foliage</string>
+    <string name="download_addon_category_foliage">Foliage</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_path_tracing">Path Tracing</string>
+    <string name="download_addon_category_path_tracing">Path Tracing</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_pbr">PBR</string>
+    <string name="download_addon_category_pbr">PBR</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_reflections">Reflections</string>
+    <string name="download_addon_category_reflections">Reflections</string>
     <!-- Shader pack visual effect filter in the download search filter panel -->
-    <string name="download_assets_category_shadows">Shadows</string>
+    <string name="download_addon_category_shadows">Shadows</string>
     <!-- Shader pack performance tier filter in the download search, the lowest tier for weak devices -->
-    <string name="download_assets_category_configuration_potato">Potato</string>
+    <string name="download_addon_category_configuration_potato">Potato</string>
     <!-- Shader pack performance tier filter in the download search filter panel -->
-    <string name="download_assets_category_configuration_low">Low</string>
+    <string name="download_addon_category_configuration_low">Low</string>
     <!-- Shader pack performance tier filter in the download search filter panel -->
-    <string name="download_assets_category_configuration_medium">Medium</string>
+    <string name="download_addon_category_configuration_medium">Medium</string>
     <!-- Shader pack performance tier filter in the download search filter panel -->
-    <string name="download_assets_category_configuration_high">High</string>
+    <string name="download_addon_category_configuration_high">High</string>
     <!-- Shader pack filter in the download search, for shaders meant for taking screenshots -->
-    <string name="download_assets_category_screenshot">Screenshots</string>
+    <string name="download_addon_category_screenshot">Screenshots</string>
     <!-- Modrinth search filter option, for content that changes the game audio -->
-    <string name="download_assets_features_audio">Audio</string>
+    <string name="download_addon_features_audio">Audio</string>
     <!-- Modrinth search filter option, for content that changes blocks -->
-    <string name="download_assets_features_blocks">Blocks</string>
+    <string name="download_addon_features_blocks">Blocks</string>
     <!-- Modrinth search filter option, for content that changes the core shaders -->
-    <string name="download_assets_features_core_shaders">Core Shaders</string>
+    <string name="download_addon_features_core_shaders">Core Shaders</string>
     <!-- Modrinth search filter option, for content that changes entities -->
-    <string name="download_assets_features_entities">Entities</string>
+    <string name="download_addon_features_entities">Entities</string>
     <!-- Modrinth search filter option, for content that changes the environment -->
-    <string name="download_assets_features_environment">Environment</string>
+    <string name="download_addon_features_environment">Environment</string>
     <!-- Modrinth search filter option, for content that changes the fonts -->
-    <string name="download_assets_features_fonts">Fonts</string>
+    <string name="download_addon_features_fonts">Fonts</string>
     <!-- Modrinth search filter option, for content that changes the GUI -->
-    <string name="download_assets_features_gui">GUI</string>
+    <string name="download_addon_features_gui">GUI</string>
     <!-- Modrinth search filter option, for content that changes items -->
-    <string name="download_assets_features_items">Items</string>
+    <string name="download_addon_features_items">Items</string>
     <!-- Modrinth search filter option, for content that changes translations -->
-    <string name="download_assets_features_locale">Locale</string>
+    <string name="download_addon_features_locale">Locale</string>
     <!-- Modrinth search filter option, for content that changes the 3D models -->
-    <string name="download_assets_features_models">Models</string>
+    <string name="download_addon_features_models">Models</string>
     <!-- Button in the modpack download screen to import a local modpack file; also the import progress dialog title -->
     <string name="import_modpack">Import Modpack</string>
     <!-- Text in the dialog shown before importing a local modpack, above the list of supported formats -->
@@ -1481,9 +1478,9 @@
     <!-- Second tip line when choosing the modpack export type, continues the previous sentence -->
     <string name="versions_export_tip_2">make sure your Minecraft is a release version (mod loaders allowed), not a snapshot or third-party client,</string>
     <!-- Third tip line when choosing the modpack export type, continues the previous sentence -->
-    <string name="versions_export_tip_3">and that it does not include mods, resource packs, or other assets that are not permitted to be distributed through unofficial channels,</string>
+    <string name="versions_export_tip_3">and that it does not include mods, resource packs, or other addons that are not permitted to be distributed through unofficial channels,</string>
     <!-- Fourth tip line when choosing the modpack export type, continues the previous sentence -->
-    <string name="versions_export_tip_4">nor should it contain mods, resource packs, or other assets that violate the EULA,</string>
+    <string name="versions_export_tip_4">nor should it contain mods, resource packs, or other addons that violate the EULA,</string>
     <!-- Last tip line when choosing the modpack export type, a standalone note about the output file -->
     <string name="versions_export_tip_5">The modpack will be exported to the directory you selected, using the modpack name you provided as the final file name.</string>
     <!-- Tip shown when the export embeds remote links instead of files; %s is the platform name(s) -->
@@ -1827,7 +1824,6 @@
     <!-- Summary of the renderer plugin SFPEW compatibility layer switch -->
     <string name="settings_renderer_sfpew_plugin_layer_summary">Adds SimpleFPEWrapper to renderer plugins without fixed-function pipeline support for legacy OpenGL 1.x/2.1 rendering</string>
     <!-- Label shown when a built-in renderer supports all Minecraft versions -->
-    <string name="renderer_version_all">All versions</string>
     <!-- Title of the relaxed context switch in SFPEW compatibility layer settings -->
     <string name="renderer_config_sfpew_relaxed_context_title">Relaxed Context</string>
     <!-- Description of the relaxed context switch in SFPEW compatibility layer settings -->
@@ -2209,7 +2205,7 @@
     <!-- Title of the game download source picker in Launcher settings -->
     <string name="settings_launcher_mirror_game_source_title">Game Download Source</string>
     <!-- Title of the mod download source picker in Launcher settings -->
-    <string name="settings_launcher_mirror_asset_platform_source_title">Mod Download Source</string>
+    <string name="settings_launcher_mirror_addon_platform_source_title">Mod Download Source</string>
     <!-- Auto option of the download source pickers in Launcher settings -->
     <string name="settings_launcher_mirror_auto">Auto</string>
     <!-- Official sources option of the download source pickers in Launcher settings -->
@@ -3056,113 +3052,91 @@
     <string name="guide_tip_blank">Tap any blank area to continue to the next step</string>
     <!-- Next-step hint shown near a screen corner during the final guide step; tapping any blank area finishes the whole guide -->
     <string name="guide_tip_finish">Tap any blank area to finish the guide</string>
-
-    <!-- ================= CS Launcher Lite shell & screens ================= -->
-    <string name="cs_brand_name">CS Launcher Lite</string>
-    <string name="cs_brand_tagline">Craft. Play. Repeat.</string>
-    <string name="cs_brand_version">v%1$s</string>
-    <string name="cs_brand_powered_by">Powered by ZalithLauncher2</string>
+    <!-- ================= CS Launcher Lite — redesigned UI ================= -->
+    <string name="cs_app_name">CS Launcher Lite</string>
     <string name="cs_nav_home">Home</string>
-    <string name="cs_nav_instances">Instances</string>
     <string name="cs_nav_discover">Discover</string>
-    <string name="cs_nav_downloads">Downloads</string>
+    <string name="cs_nav_library">Library</string>
     <string name="cs_nav_settings">Settings</string>
-    <string name="cs_topbar_files">File manager</string>
-    <string name="cs_account_sign_in">Sign in</string>
-    <string name="cs_home_greeting">Good evening, Player</string>
-    <string name="cs_home_greeting_named">Good evening, %1$s</string>
-    <string name="cs_home_subtitle">Ready to play some Minecraft?</string>
-    <string name="cs_home_recent">Recent instances</string>
-    <string name="cs_home_recent_desc">Jump back into another instance</string>
-    <string name="cs_home_view_all">View all</string>
-    <string name="cs_home_quick_actions">Quick actions</string>
-    <string name="cs_home_activity">Recent activity</string>
-    <string name="cs_home_activity_desc">Downloads, installs and launcher tasks</string>
-    <string name="cs_home_tasks_running">%1$d task running</string>
-    <string name="cs_home_tasks_none">Everything is up to date</string>
-    <string name="cs_home_tasks_active">Active</string>
-    <string name="cs_home_classic">Card grid home</string>
-    <string name="cs_home_no_instance_title">No instances yet</string>
-    <string name="cs_home_no_instance_message">Create your first Minecraft instance to get started.</string>
-    <string name="cs_quick_download">Install new game</string>
-    <string name="cs_quick_import_modpack">Import modpack</string>
-    <string name="cs_quick_files">File manager</string>
-    <string name="cs_quick_settings">Settings</string>
-    <string name="cs_quick_multiplayer">Multiplayer</string>
-    <string name="cs_quick_account">Accounts</string>
-    <string name="cs_instance_play">Play</string>
-    <string name="cs_instance_settings">Instance settings</string>
-    <string name="cs_instance_current">Current</string>
-    <string name="cs_instance_set_current">Set as current</string>
-    <string name="cs_instance_vanilla">Vanilla</string>
-    <string name="cs_instance_unknown_version">Unknown version</string>
-    <string name="cs_instance_mods">%1$d mods</string>
-    <string name="cs_instances_search_hint">Search instances…</string>
-    <string name="cs_instances_filter_all">All</string>
-    <string name="cs_instances_filter_modded">Modded</string>
-    <string name="cs_instances_filter_vanilla">Vanilla</string>
-    <string name="cs_instances_create">Create instance</string>
-    <string name="cs_instances_manage_folders">Game folders</string>
-    <string name="cs_instances_empty_title">No instances found</string>
-    <string name="cs_instances_empty_message">Install a Minecraft version or import a modpack to begin.</string>
-    <string name="cs_discover_subtitle">Add content to your instances</string>
-    <string name="cs_discover_game">Minecraft</string>
-    <string name="cs_discover_game_desc">Install a new game version</string>
-    <string name="cs_discover_modpack">Modpacks</string>
-    <string name="cs_discover_modpack_desc">Complete, ready-to-play packs</string>
-    <string name="cs_discover_mod">Mods</string>
-    <string name="cs_discover_mod_desc">Change how the game plays</string>
-    <string name="cs_discover_resource_pack">Resource packs</string>
-    <string name="cs_discover_resource_pack_desc">New textures and sounds</string>
-    <string name="cs_discover_shaders">Shaders</string>
-    <string name="cs_discover_shaders_desc">Beautiful lighting effects</string>
-    <string name="cs_discover_saves">Worlds</string>
-    <string name="cs_discover_saves_desc">Download adventure maps</string>
-    <string name="cs_discover_by_id">Search by ID</string>
-    <string name="cs_discover_by_id_desc">Open a project by its identifier</string>
-    <string name="cs_discover_favorites">Favorites</string>
-    <string name="cs_discover_favorites_desc">Your saved projects</string>
+    <string name="cs_nav_account">Accounts</string>
+    <string name="cs_more_menu">More options</string>
 
-    <!-- ================= CS Launcher Lite: catalog / home / discover ================= -->
-    <string name="cs_home_popular_modpacks">Popular Modpacks</string>
-    <string name="cs_home_popular_modpacks_subtitle">The most downloaded packs on Modrinth</string>
-    <string name="cs_home_your_instances">Recent instances</string>
-    <string name="cs_home_your_instances_subtitle">Pick up where you left off</string>
-    <string name="cs_home_all_instances">All instances</string>
-    <string name="cs_catalog_modpacks">Modpacks</string>
-    <string name="cs_catalog_mods">Mods</string>
-    <string name="cs_catalog_resource_packs">Resource Packs</string>
-    <string name="cs_catalog_shaders">Shaders</string>
-    <string name="cs_catalog_worlds">Worlds</string>
-    <string name="cs_catalog_install">Install</string>
-    <string name="cs_catalog_versions_unknown">Any version</string>
-    <string name="cs_catalog_empty_title">Nothing found</string>
-    <string name="cs_catalog_empty_message">Try another search term or pick a different category.</string>
-    <string name="cs_catalog_error_title">Couldn\'t load the catalog</string>
-    <string name="cs_catalog_error_message">The content provider did not answer. Check your connection and try again.</string>
-    <string name="cs_catalog_retry">Retry</string>
-    <string name="cs_discover_search_hint">Search modpacks, mods, shaders…</string>
+    <string name="cs_home_welcome_back">Welcome back!</string>
+    <string name="cs_home_featured_modpacks">Featured modpacks</string>
+    <string name="cs_home_playing_as">Playing as</string>
+    <string name="cs_home_select_account">Select account</string>
+    <string name="cs_home_no_account">No account selected</string>
+    <string name="cs_home_friends">Friends</string>
+    <string name="cs_home_friends_empty">Add friends to share what you\'re playing. Friend activity is not available in CS Launcher Lite yet.</string>
+    <string name="cs_home_news">News</string>
+    <string name="cs_home_manage_accounts">Manage accounts</string>
+    <string name="cs_home_retry">Retry</string>
+    <string name="cs_home_modpacks_error">Couldn\'t load featured modpacks. Check your connection and try again.</string>
+    <string name="cs_home_instances_heading">Your instances</string>
+    <string name="cs_home_no_instances">You don\'t have any instances yet.</string>
 
-    <!-- ================= CS Launcher Lite: account panel ================= -->
-    <string name="cs_account_select_title">Select account or username</string>
-    <string name="cs_account_select_subtitle">Sign in with Microsoft or continue offline.</string>
-    <string name="cs_account_playing_as">Playing as</string>
-    <string name="cs_account_microsoft">Microsoft account</string>
-    <string name="cs_account_microsoft_desc">Sign in with your Xbox Live account</string>
-    <string name="cs_account_local">Local / Offline account</string>
-    <string name="cs_account_local_desc">Choose a username, no internet needed</string>
-    <string name="cs_account_not_signed_in">Not signed in</string>
-    <string name="cs_account_your_accounts">Your accounts</string>
-    <string name="cs_account_manage">Manage accounts</string>
-    <string name="cs_account_switch">Switch account</string>
-    <string name="cs_classic_home">Card grid home</string>
-    <string name="cs_downloads_title">Downloads</string>
-    <string name="cs_downloads_subtitle">Tasks and installation history</string>
-    <string name="cs_downloads_active">Active tasks</string>
-    <string name="cs_downloads_history">Installation history</string>
-    <string name="cs_downloads_empty">No active downloads</string>
-    <string name="cs_downloads_no_history">No recent installations</string>
-    <string name="cs_news_title">News &amp; Updates</string>
-    <string name="cs_news_subtitle">Latest from Minecraft &amp; CS Launcher</string>
-    <string name="cs_account_offline">Local Account / Offline</string>
+    <string name="cs_status_idle">No instances running</string>
+    <string name="cs_status_tasks">%1$d task(s) running</string>
+
+    <string name="cs_discover_tab_modpacks">Modpacks</string>
+    <string name="cs_discover_tab_mods">Mods</string>
+    <string name="cs_discover_tab_resourcepacks">Resource Packs</string>
+    <string name="cs_discover_tab_datapacks">Data Packs</string>
+    <string name="cs_discover_tab_shaders">Shaders</string>
+    <string name="cs_discover_search_modpacks">Search modpacks…</string>
+    <string name="cs_discover_search_mods">Search mods…</string>
+    <string name="cs_discover_search_resourcepacks">Search resource packs…</string>
+    <string name="cs_discover_search_shaders">Search shaders…</string>
+    <string name="cs_discover_sort_by">Sort by</string>
+    <string name="cs_discover_per_page">Per page</string>
+    <string name="cs_discover_filters">Filters</string>
+    <string name="cs_discover_filter_categories">Categories</string>
+    <string name="cs_discover_filter_environment">Environment</string>
+    <string name="cs_discover_filter_game_version">Game version</string>
+    <string name="cs_discover_filter_loader">Loader</string>
+    <string name="cs_discover_filter_license">License</string>
+    <string name="cs_discover_filter_clear">Clear all</string>
+    <string name="cs_discover_no_results">No results found</string>
+    <string name="cs_discover_no_results_desc">Try a different search term or clear your filters.</string>
+    <string name="cs_discover_install">Install</string>
+    <string name="cs_discover_view">View</string>
+    <string name="cs_discover_page_of">Page %1$d of %2$d</string>
+    <string name="cs_discover_previous_page">Previous page</string>
+    <string name="cs_discover_next_page">Next page</string>
+    <string name="cs_discover_all">All</string>
+    <string name="cs_discover_datapack_unsupported">Data packs are not available in this launcher build yet.</string>
+    <string name="cs_discover_environment_client">Client</string>
+    <string name="cs_discover_environment_server">Server</string>
+    <string name="cs_discover_license_note">License filtering is applied through Modrinth project facets.</string>
+
+    <string name="cs_library_tab_all">All instances</string>
+    <string name="cs_library_tab_modded">Modded</string>
+    <string name="cs_library_tab_vanilla">Vanilla</string>
+    <string name="cs_library_empty_title">No instances found</string>
+    <string name="cs_library_empty_desc">Create your first instance to start playing Minecraft: Java Edition on your device.</string>
+    <string name="cs_library_create_instance">Create new instance</string>
+    <string name="cs_library_launch">Launch</string>
+    <string name="cs_library_pin">Pin to top</string>
+    <string name="cs_library_unpin">Unpin from top</string>
+    <string name="cs_library_settings">Instance settings</string>
+    <string name="cs_library_instances_count">%1$d instances</string>
+
+    <string name="cs_menu_file_manager">File manager</string>
+    <string name="cs_menu_multiplayer">Multiplayer</string>
+    <string name="cs_menu_download">Download centre</string>
+    <string name="cs_menu_versions">Versions &amp; instances</string>
+
+    <string name="cs_welcome_made_with">MADE WITH HEART</string>
+    <string name="cs_welcome_heading">WELCOME!</string>
+    <string name="cs_welcome_message">A premium, lightweight way to run Minecraft: Java Edition on Android. Built for touch, tuned for performance.</string>
+    <string name="cs_welcome_agreements">User agreements</string>
+    <string name="cs_welcome_short_intro">CS Launcher Lite is a third-party launcher that runs Minecraft: Java Edition on Android devices. It is not affiliated with Mojang Studios or Microsoft.</string>
+    <string name="cs_welcome_get_started">Get started</string>
+    <string name="cs_welcome_starting">Starting…</string>
+    <string name="cs_discover_license_open_source">Open source only</string>
+    <string name="cs_discover_source_note">Result data provided by Modrinth</string>
+    <string name="cs_discover_loading">Loading results…</string>
+    <string name="cs_discover_error">Couldn\'t load results. Check your connection and try again.</string>
+    <string name="cs_home_featured_loading">Loading featured modpacks…</string>
+    <string name="cs_home_no_features">No featured modpacks available yet.</string>
 </resources>

@@ -31,8 +31,6 @@ data class ColorTheme(
 )
 
 enum class ColorThemeType {
-    /** CS Launcher Lite 默认配色：炭灰 + 绿色强调色 */
-    CS_LITE,
     DYNAMIC,
     EMBERMIRE,
     VELVET_ROSE,

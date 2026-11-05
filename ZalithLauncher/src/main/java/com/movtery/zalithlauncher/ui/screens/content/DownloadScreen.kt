@@ -19,7 +19,6 @@
 package com.movtery.zalithlauncher.ui.screens.content
 
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -33,7 +32,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,13 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.entryProvider
 import com.movtery.zalithlauncher.R
-import com.movtery.zalithlauncher.game.download.assets.favorites.FavoriteProjectsRepository
-import com.movtery.zalithlauncher.game.download.assets.platform.Platform
-import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
+import com.movtery.zalithlauncher.game.download.addon.favorites.FavoriteProjectsRepository
+import com.movtery.zalithlauncher.game.download.addon.platform.Platform
+import com.movtery.zalithlauncher.game.download.addon.platform.PlatformClasses
 import com.movtery.zalithlauncher.ui.base.BaseScreen
-import com.movtery.zalithlauncher.ui.design.CsDivider
-import com.movtery.zalithlauncher.ui.design.CsNavItem
-import com.movtery.zalithlauncher.ui.design.CsSpace
 import com.movtery.zalithlauncher.ui.components.AnimatedDirection
 import com.movtery.zalithlauncher.ui.components.animated
 import com.movtery.zalithlauncher.ui.components.fadeEdge
@@ -67,7 +65,7 @@ import com.movtery.zalithlauncher.ui.screens.content.download.DownloadModScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.DownloadResourcePackScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.DownloadSavesScreen
 import com.movtery.zalithlauncher.ui.screens.content.download.DownloadShadersScreen
-import com.movtery.zalithlauncher.ui.screens.content.download.assets.search.SearchIdScreen
+import com.movtery.zalithlauncher.ui.screens.content.download.addon.search.SearchIdScreen
 import com.movtery.zalithlauncher.ui.screens.content.elements.CategoryIcon
 import com.movtery.zalithlauncher.ui.screens.content.elements.CategoryItem
 import com.movtery.zalithlauncher.ui.screens.navigateOnce
@@ -93,7 +91,7 @@ fun ScreenBackStackViewModel.navigateToDownload(targetScreen: TitledNavKey? = nu
 /**
  * 跳转到资源类型对应的下载分类屏幕，并进入项目详情页
  */
-fun ScreenBackStackViewModel.swapToCategoryAssets(
+private fun ScreenBackStackViewModel.swapToCategoryAddon(
     platform: Platform,
     classes: PlatformClasses,
     projectId: String,
@@ -109,7 +107,7 @@ fun ScreenBackStackViewModel.swapToCategoryAssets(
     navigateToDownload(
         targetScreen = targetScreen.apply {
             navigateTo(
-                NormalNavKey.DownloadAssets(
+                NormalNavKey.DownloadAddon(
                     platform = platform,
                     projectId = projectId,
                     classes = classes,
@@ -166,14 +164,14 @@ private fun TabMenu(
     backScreenViewModel: ScreenBackStackViewModel,
 ) {
     val downloadsList = listOf(
-        DownloadCategory(backScreenViewModel.downloadGameScreen, R.drawable.ic_sports_esports_outlined, R.string.download_category_game),
-        DownloadCategory(backScreenViewModel.downloadModPackScreen, R.drawable.ic_package_2_outlined, R.string.download_category_modpack),
-        DownloadCategory(backScreenViewModel.downloadModScreen, R.drawable.ic_extension_outlined, R.string.download_category_mod, division = true),
-        DownloadCategory(backScreenViewModel.downloadResourcePackScreen, R.drawable.ic_format_paint_outlined, R.string.download_category_resource_pack),
-        DownloadCategory(backScreenViewModel.downloadSavesScreen, R.drawable.ic_public, R.string.download_category_saves),
-        DownloadCategory(backScreenViewModel.downloadShadersScreen, R.drawable.ic_lightbulb, R.string.download_category_shaders),
-        DownloadCategory(NormalNavKey.SearchId, R.drawable.ic_card, R.string.download_category_by_id, division = true),
-        DownloadCategory(backScreenViewModel.downloadFavoritesScreen, R.drawable.ic_favorite_outlined, R.string.download_category_favorites)
+        CategoryItem(backScreenViewModel.downloadGameScreen, { CategoryIcon(R.drawable.ic_sports_esports_outlined, R.string.download_category_game) }, R.string.download_category_game),
+        CategoryItem(backScreenViewModel.downloadModPackScreen, { CategoryIcon(R.drawable.ic_package_2_outlined, R.string.download_category_modpack) }, R.string.download_category_modpack),
+        CategoryItem(backScreenViewModel.downloadModScreen, { CategoryIcon(R.drawable.ic_extension_outlined, R.string.download_category_mod) }, R.string.download_category_mod, division = true),
+        CategoryItem(backScreenViewModel.downloadResourcePackScreen, { CategoryIcon(R.drawable.ic_format_paint_outlined, R.string.download_category_resource_pack) }, R.string.download_category_resource_pack),
+        CategoryItem(backScreenViewModel.downloadSavesScreen, { CategoryIcon(R.drawable.ic_public, R.string.download_category_saves) }, R.string.download_category_saves),
+        CategoryItem(backScreenViewModel.downloadShadersScreen, { CategoryIcon(R.drawable.ic_lightbulb, R.string.download_category_shaders) }, R.string.download_category_shaders),
+        CategoryItem(NormalNavKey.SearchId, { CategoryIcon(R.drawable.ic_card, R.string.download_category_by_id) }, R.string.download_category_by_id, division = true),
+        CategoryItem(backScreenViewModel.downloadFavoritesScreen, { CategoryIcon(R.drawable.ic_favorite_outlined, R.string.download_category_favorites) }, R.string.download_category_favorites),
     )
 
     val ctx = rememberAnimatedContext(isVisible = isVisible)
@@ -181,40 +179,47 @@ private fun TabMenu(
     val scrollState = rememberScrollState()
     Column(
         modifier = modifier
-            .width(176.dp)
             .fadeEdge(scrollState)
-            .padding(start = CsSpace.l, end = CsSpace.s)
+            .width(IntrinsicSize.Min)
+            .padding(start = 8.dp)
             .animated(ctx, from = AnimatedDirection.Left)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(CsSpace.xxs)
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(CsSpace.s))
+        Spacer(modifier = Modifier.height(12.dp))
         downloadsList.forEach { item ->
             if (item.division) {
-                CsDivider(
-                    modifier = Modifier.padding(vertical = CsSpace.s, horizontal = CsSpace.s)
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .fillMaxWidth(0.4f)
+                        .alpha(0.4f),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            CsNavItem(
-                label = stringResource(item.textRes),
-                iconRes = item.iconRes,
+            NavigationRailItem(
                 selected = backScreenViewModel.downloadScreen.currentKey == item.key,
                 onClick = {
                     backStack.navigateOnce(item.key)
+                },
+                icon = {
+                    item.icon()
+                },
+                label = {
+                    Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                        text = stringResource(item.textRes),
+                        maxLines = 1,
+                        style = MaterialTheme.typography.labelMedium
+                    )
                 }
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
         }
-        Spacer(modifier = Modifier.height(CsSpace.m))
     }
 }
-
-private class DownloadCategory(
-    val key: TitledNavKey,
-    val iconRes: Int,
-    val textRes: Int,
-    val division: Boolean = false
-)
 
 @Composable
 private fun NavigationUI(
@@ -324,7 +329,7 @@ private fun NavigationUI(
                         mainScreenKey = backScreenViewModel.mainScreen.currentKey,
                         downloadScreenKey = backScreenViewModel.downloadScreen.currentKey,
                         swapToDownload = { platform, classes, projectId, iconUrl ->
-                            backScreenViewModel.swapToCategoryAssets(platform, classes, projectId, iconUrl)
+                            backScreenViewModel.swapToCategoryAddon(platform, classes, projectId, iconUrl)
                         },
                         openLink = { link ->
                             eventViewModel.sendEvent(EventViewModel.Event.OpenLink(link))
@@ -341,7 +346,7 @@ private fun NavigationUI(
                             backScreenViewModel.downloadFavoritesScreen.currentKey = newKey
                         },
                         swapToDownload = { platform, classes, projectId, iconUrl ->
-                            backScreenViewModel.swapToCategoryAssets(platform, classes, projectId, iconUrl)
+                            backScreenViewModel.swapToCategoryAddon(platform, classes, projectId, iconUrl)
                         }
                     )
                 }

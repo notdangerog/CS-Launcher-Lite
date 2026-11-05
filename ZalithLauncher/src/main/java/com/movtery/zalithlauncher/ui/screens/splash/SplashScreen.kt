@@ -102,7 +102,7 @@ private fun NavigationUI(
                     LoadingScreen(screenViewModel = screenViewModel)
                 }
                 entry<SplashOperation.Welcome> {
-                    WelcomeScreen(
+                    com.movtery.zalithlauncher.ui.cs.screens.CsWelcomeScreen(
                         modifier = Modifier.fillMaxSize(),
                         onFinished = onWelcomeFinished,
                         availableAgreement = availableAgreement,
@@ -145,7 +145,7 @@ private fun LoadingScreen(
             ) {
                 Image(
                     modifier = Modifier.size(58.dp),
-                    painter = painterResource(R.drawable.ic_cs_logo),
+                    painter = painterResource(R.drawable.img_launcher),
                     contentDescription = stringResource(R.string.generic_loading)
                 )
                 LinearWavyProgressIndicator(

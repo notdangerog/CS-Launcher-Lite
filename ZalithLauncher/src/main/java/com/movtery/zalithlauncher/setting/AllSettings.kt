@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.materialkolor.PaletteStyle
 import com.movtery.layer_controller.utils.snap.SnapMode
 import com.movtery.zalithlauncher.BuildKeys
-import com.movtery.zalithlauncher.game.download.assets.platform.Platform
+import com.movtery.zalithlauncher.game.download.addon.platform.Platform
 import com.movtery.zalithlauncher.game.path.GamePathManager
 import com.movtery.zalithlauncher.game.version.installed.GraphicsApi
 import com.movtery.zalithlauncher.setting.enums.ActionMenuSide
@@ -383,7 +383,8 @@ object AllSettings : SettingsRegistry() {
      */
     val launcherColorTheme = enumSetting(
         "launcherColorTheme",
-        ColorThemeType.CS_LITE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ColorThemeType.DYNAMIC
+        else ColorThemeType.EMBERMIRE
     )
 
     /**
@@ -473,7 +474,8 @@ object AllSettings : SettingsRegistry() {
     /**
      * 资源平台下载源
      */
-    val assetPlatformSource = enumSetting(
+    val addonPlatformSource = enumSetting(
+        //历史遗留键名，保留原值以兼容旧版本数据
         "assetPlatformSource",
         MirrorSourceType.AUTO,
         MirrorSourceType.LEGACY_NAMES

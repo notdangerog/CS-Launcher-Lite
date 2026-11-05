@@ -39,10 +39,6 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.setting.enums.isLauncherInDarkTheme
-import com.movtery.zalithlauncher.ui.design.CsShapes
-import com.movtery.zalithlauncher.ui.design.CsTypography
-import com.movtery.zalithlauncher.ui.design.csLiteDark
-import com.movtery.zalithlauncher.ui.design.csLiteLight
 import com.movtery.zalithlauncher.ui.theme.components.activeMaskView
 import com.movtery.zalithlauncher.utils.festival.Festival
 import com.movtery.zalithlauncher.utils.festival.LocalFestivals
@@ -626,7 +622,6 @@ fun ZalithLauncherTheme(
             }
 
             darkTheme -> when (colorTheme) {
-                ColorThemeType.CS_LITE -> csLiteDark
                 ColorThemeType.EMBERMIRE -> embermireDark
                 ColorThemeType.VELVET_ROSE -> velvetRoseDark
                 ColorThemeType.MISTWAVE -> mistwaveDark
@@ -638,11 +633,10 @@ fun ZalithLauncherTheme(
                     color = customColor,
                     style = customPaletteStyle
                 )
-                else -> csLiteDark
+                else -> embermireDark
             }
 
             else -> when (colorTheme) {
-                ColorThemeType.CS_LITE -> csLiteLight
                 ColorThemeType.EMBERMIRE -> embermireLight
                 ColorThemeType.VELVET_ROSE -> velvetRoseLight
                 ColorThemeType.MISTWAVE -> mistwaveLight
@@ -654,7 +648,7 @@ fun ZalithLauncherTheme(
                     color = customColor,
                     style = customPaletteStyle
                 )
-                else -> csLiteLight
+                else -> embermireLight
             }
         }
     }
@@ -686,8 +680,7 @@ fun ZalithLauncherTheme(
         MaterialExpressiveTheme(
             colorScheme = currentDisplayScheme,
             motionScheme = MotionScheme.expressive(),
-            typography = CsTypography,
-            shapes = CsShapes,
+            typography = AppTypography,
             content = content
         )
     }

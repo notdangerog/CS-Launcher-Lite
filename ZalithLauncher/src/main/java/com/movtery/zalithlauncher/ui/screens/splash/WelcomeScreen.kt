@@ -486,7 +486,7 @@ private fun ProductBanner(
     ) {
         Image(
             modifier = Modifier.size(52.dp),
-            painter = painterResource(R.drawable.ic_cs_logo),
+            painter = painterResource(R.drawable.img_launcher),
             contentDescription = null
         )
 

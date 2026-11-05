@@ -4,13 +4,13 @@
     android:height="48dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <path android:fillColor="#121212" android:pathData="M0,0 L48,0 L48,48 L0,48 Z"/>
-    <!-- Crescent moon -->
-    <path android:fillColor="#FFFFFF" android:pathData="M22,6 A20,20 0 1,0 30,28 A14,14 0 1,1 22,6 Z" android:strokeColor="#00000000"/>
-    <!-- CS letters - simplified block letters -->
-    <path android:fillColor="#C8D0DC" android:pathData="M28,14 L36,14 L38,18 L30,22 L36,26 L38,30 L30,34 L28,30 L32,28 L26,24 L32,20 Z"/>
-    <path android:fillColor="#E8ECF2" android:pathData="M36,16 L42,16 L44,20 L36,24 L42,28 L44,32 L36,36 L34,32 L38,30 L32,26 L38,22 Z"/>
-    <!-- stars -->
-    <path android:fillColor="#FFFFFF" android:pathData="M40,8 L40.6,9.8 L42.4,10 L41,11.2 L41.4,13 L40,12 L38.6,13 L39,11.2 L37.6,10 L39.4,9.8 Z"/>
-    <path android:fillColor="#FFFFFF" android:pathData="M44,14 L44.4,15.2 L45.6,15.4 L44.7,16.2 L45,17.4 L44,16.8 L43,17.4 L43.3,16.2 L42.4,15.4 L43.6,15.2 Z"/>
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M24,4L42,13.5L42,34.5L24,44L6,34.5L6,13.5Z" />
+    <path
+        android:fillColor="#FF121212"
+        android:pathData="M24,10.2L36.4,16.9L36.4,31.1L24,37.8L11.6,31.1L11.6,16.9Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M30.8,18.6L30.8,21.6C29.5,20.6 27.9,20.1 26.2,20.1C22.6,20.1 19.8,22.7 19.8,26C19.8,29.3 22.6,31.9 26.2,31.9C27.9,31.9 29.5,31.4 30.8,30.4L30.8,33.4C29.4,34.2 27.8,34.6 26,34.6C20.9,34.6 16.9,30.8 16.9,26C16.9,21.2 20.9,17.4 26,17.4C27.8,17.4 29.4,17.8 30.8,18.6Z" />
 </vector>

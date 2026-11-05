@@ -174,7 +174,6 @@ fun LauncherSettingsScreen(
                         },
                         getRadioText = { enum ->
                             when (enum) {
-                                ColorThemeType.CS_LITE -> stringResource(R.string.theme_color_cs_lite)
                                 ColorThemeType.DYNAMIC -> stringResource(R.string.theme_color_dynamic)
                                 ColorThemeType.EMBERMIRE -> stringResource(R.string.theme_color_embermire)
                                 ColorThemeType.VELVET_ROSE -> stringResource(R.string.theme_color_velvet_rose)
@@ -375,9 +374,9 @@ fun LauncherSettingsScreen(
                         ListSettingsCard(
                             modifier = Modifier.fillMaxWidth(),
                             position = CardPosition.Middle,
-                            unit = AllSettings.assetPlatformSource,
+                            unit = AllSettings.addonPlatformSource,
                             items = MirrorSourceType.entries,
-                            title = stringResource(R.string.settings_launcher_mirror_asset_platform_source_title),
+                            title = stringResource(R.string.settings_launcher_mirror_addon_platform_source_title),
                             getItemText = { stringResource(it.textRes) }
                         )
                     }

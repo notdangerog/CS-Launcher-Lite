@@ -19,8 +19,8 @@
 package com.movtery.zalithlauncher.ui.screens
 
 import com.movtery.zalithlauncher.R
-import com.movtery.zalithlauncher.game.download.assets.platform.Platform
-import com.movtery.zalithlauncher.game.download.assets.platform.PlatformClasses
+import com.movtery.zalithlauncher.game.download.addon.platform.Platform
+import com.movtery.zalithlauncher.game.download.addon.platform.PlatformClasses
 import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersion
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.androidText
@@ -37,17 +37,13 @@ sealed interface NormalNavKey : TitledNavKey {
 
     /** 启动器主页屏幕 */
     @Serializable data object LauncherMain : NormalNavKey
-    /** CS 实例列表屏幕 */
-    @Serializable data object Instances : NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.cs_nav_instances)
-    }
-    /** CS 内容发现屏幕 */
+    /** 内容发现屏幕 */
     @Serializable data object Discover : NormalNavKey {
         @Contextual override val title: AndroidStringText = androidText(R.string.cs_nav_discover)
     }
-    /** CS 下载管理屏幕 — tasks + history */
-    @Serializable data object Downloads : NormalNavKey {
-        @Contextual override val title: AndroidStringText = androidText(R.string.cs_nav_downloads)
+    /** 本地实例库屏幕 */
+    @Serializable data object Library : NormalNavKey {
+        @Contextual override val title: AndroidStringText = androidText(R.string.cs_nav_library)
     }
     /** 账号管理屏幕 */
     @Serializable data class AccountManager(
@@ -203,7 +199,7 @@ sealed interface NormalNavKey : TitledNavKey {
     }
 
     /** 下载资源屏幕 */
-    @Serializable data class DownloadAssets(
+    @Serializable data class DownloadAddon(
         val platform: Platform,
         val projectId: String,
         val classes: PlatformClasses,

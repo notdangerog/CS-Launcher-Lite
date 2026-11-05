@@ -30,10 +30,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,9 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.ui.base.BaseScreen
-import com.movtery.zalithlauncher.ui.design.CsDivider
-import com.movtery.zalithlauncher.ui.design.CsNavItem
-import com.movtery.zalithlauncher.ui.design.CsSpace
 import com.movtery.zalithlauncher.ui.components.AnimatedDirection
 import com.movtery.zalithlauncher.ui.components.animated
 import com.movtery.zalithlauncher.ui.components.fadeEdge
@@ -111,22 +109,15 @@ fun SettingsScreen(
     }
 }
 
-private class SettingItem(
-    val key: TitledNavKey,
-    val iconRes: Int,
-    val textRes: Int,
-    val division: Boolean = false
-)
-
 private val settingItems = listOf(
-    SettingItem(NormalNavKey.Settings.Renderer, R.drawable.ic_video_settings, R.string.settings_tab_renderer),
-    SettingItem(NormalNavKey.Settings.Game, R.drawable.ic_rocket_launch_filled, R.string.settings_tab_game),
-    SettingItem(NormalNavKey.Settings.Control, R.drawable.ic_videogame_asset_outlined, R.string.settings_tab_control),
-    SettingItem(NormalNavKey.Settings.Gamepad, R.drawable.ic_sports_esports_outlined, R.string.settings_tab_gamepad),
-    SettingItem(NormalNavKey.Settings.Launcher, R.drawable.ic_setting_launcher, R.string.settings_tab_launcher),
-    SettingItem(NormalNavKey.Settings.JavaManager, R.drawable.ic_java, R.string.settings_tab_java_manage, division = true),
-    SettingItem(NormalNavKey.Settings.ControlManager, R.drawable.ic_videogame_asset_outlined, R.string.settings_tab_control_manage),
-    SettingItem(NormalNavKey.Settings.AboutInfo, R.drawable.ic_info_outlined, R.string.settings_tab_info_about, division = true)
+    CategoryItem(NormalNavKey.Settings.Renderer, { CategoryIcon(R.drawable.ic_video_settings, R.string.settings_tab_renderer) }, R.string.settings_tab_renderer),
+    CategoryItem(NormalNavKey.Settings.Game, { CategoryIcon(R.drawable.ic_rocket_launch_filled, R.string.settings_tab_game) }, R.string.settings_tab_game),
+    CategoryItem(NormalNavKey.Settings.Control, { CategoryIcon(R.drawable.ic_videogame_asset_outlined, R.string.settings_tab_control) }, R.string.settings_tab_control),
+    CategoryItem(NormalNavKey.Settings.Gamepad, { CategoryIcon(R.drawable.ic_sports_esports_outlined, R.string.settings_tab_gamepad) }, R.string.settings_tab_gamepad),
+    CategoryItem(NormalNavKey.Settings.Launcher, { CategoryIcon(R.drawable.ic_setting_launcher, R.string.settings_tab_launcher) }, R.string.settings_tab_launcher),
+    CategoryItem(NormalNavKey.Settings.JavaManager, { CategoryIcon(R.drawable.ic_java, R.string.settings_tab_java_manage) }, R.string.settings_tab_java_manage, division = true),
+    CategoryItem(NormalNavKey.Settings.ControlManager, { CategoryIcon(R.drawable.ic_videogame_asset_outlined, R.string.settings_tab_control_manage) }, R.string.settings_tab_control_manage),
+    CategoryItem(NormalNavKey.Settings.AboutInfo, { CategoryIcon(R.drawable.ic_info_outlined, R.string.settings_tab_info_about) }, R.string.settings_tab_info_about, division = true)
 )
 
 @Composable
@@ -141,29 +132,45 @@ private fun TabMenu(
     val scrollState = rememberScrollState()
     Column(
         modifier = modifier
-            .width(176.dp)
             .fadeEdge(scrollState)
-            .padding(start = CsSpace.l, end = CsSpace.s)
+            .width(IntrinsicSize.Min)
+            .padding(start = 8.dp)
             .animated(ctx, from = AnimatedDirection.Left)
             .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(CsSpace.xxs)
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(CsSpace.s))
+        Spacer(modifier = Modifier.height(12.dp))
         settingItems.forEach { item ->
             if (item.division) {
-                CsDivider(
-                    modifier = Modifier.padding(vertical = CsSpace.s, horizontal = CsSpace.s)
+                HorizontalDivider(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .fillMaxWidth(0.4f)
+                        .alpha(0.4f),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            CsNavItem(
-                label = stringResource(item.textRes),
-                iconRes = item.iconRes,
+            NavigationRailItem(
                 selected = settingsScreenKey == item.key,
-                onClick = { navigateTo(item.key) }
+                onClick = {
+                    navigateTo(item.key)
+                },
+                icon = {
+                    item.icon()
+                },
+                label = {
+                    Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                        text = stringResource(item.textRes),
+                        maxLines = 1,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
         }
-        Spacer(modifier = Modifier.height(CsSpace.m))
     }
 }
 
