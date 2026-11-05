@@ -25,7 +25,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.ExperimentalLayoutApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -658,7 +657,6 @@ private fun EmptyFilterHint() {
 /**
  * 可折叠的过滤器分组
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FilterSection(
     title: String,
@@ -713,7 +711,6 @@ private fun FilterSection(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FilterChipFlow(
     labels: List<String>,

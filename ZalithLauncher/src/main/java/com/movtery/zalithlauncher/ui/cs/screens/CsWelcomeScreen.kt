@@ -127,6 +127,9 @@ fun CsWelcomeScreen(
         ) {
             val isCompact = maxWidth < 720.dp
             val gap = if (isCompact) 12.dp else 18.dp
+            // 在进入 Row 的 lambda 之前先取出 BoxWithConstraints 的宽度，
+            // 避免在 RowScope 中隐式使用 maxWidth 造成的编译错误
+            val brandPanelWidth = if (isCompact) 220.dp else (maxWidth * 0.38f).coerceIn(280.dp, 440.dp)
 
             Row(
                 modifier = Modifier
@@ -138,7 +141,7 @@ fun CsWelcomeScreen(
                 WelcomeBrandPanel(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .width(if (isCompact) 220.dp else (maxWidth * 0.38f).coerceIn(280.dp, 440.dp))
+                        .width(brandPanelWidth)
                 )
 
                 // 右侧：信息 + 协议 + 开始按钮

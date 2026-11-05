@@ -111,7 +111,6 @@ import com.movtery.zalithlauncher.ui.screens.onBack
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
 import com.movtery.zalithlauncher.ui.theme.backgroundColor
 import androidx.compose.runtime.mutableIntStateOf
-import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.resolveAndroidString
 import com.movtery.zalithlauncher.ui.cs.data.CsAddonItem
 import com.movtery.zalithlauncher.ui.cs.screens.CsDiscoverScreen
