@@ -37,7 +37,7 @@ import com.movtery.zalithlauncher.ui.screens.content.download.addon.elements.Add
  * （Modrinth 官方源 / 镜像源，由现有设置决定）实时获取，
  * 点击项目后进入现有的资源详情/安装流程。
  */
-private const val CS_BROWSE_PLATFORM = Platform.MODRINTH
+private val CS_BROWSE_PLATFORM = Platform.MODRINTH
 
 /** 界面使用的项目数据模型 */
 data class CsAddonItem(
