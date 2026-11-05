@@ -183,12 +183,16 @@ enum class CsLicenseFacet(private val facetValueValue: String) : ModrinthFacet, 
  * Discover 屏幕在组合时消费该请求，消费后立即清空，避免重复触发。
  */
 object CsDiscoverRequest {
-    var pendingCategory by androidx.compose.runtime.mutableStateOf<CsBrowseCategory?>(null)
-        private set
+    private var pendingCategory: CsBrowseCategory? = null
 
     fun request(category: CsBrowseCategory) {
         pendingCategory = category
     }
 
-    fun consume(): CsBrowseCategory? = pendingCategory.also { pendingCategory = null }
+    /** 取出一次性请求（取出即清空） */
+    fun consume(): CsBrowseCategory? {
+        val value = pendingCategory
+        pendingCategory = null
+        return value
+    }
 }

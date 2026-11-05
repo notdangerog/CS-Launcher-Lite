@@ -158,10 +158,8 @@ private fun TaskRow(task: Task) {
     val message by task.message.collectAsStateWithLifecycle()
     val speed by task.rateBytesPerSec.collectAsStateWithLifecycle()
 
-    val title = remember(message) {
-        message?.let { resolveAndroidString(it).text }
-            ?: resolveAndroidString(androidText(R.string.cs_downloads_task_fallback)).text
-    }
+    val title = message?.let { resolveAndroidString(it).text }
+        ?: resolveAndroidString(androidText(R.string.cs_downloads_task_fallback)).text
 
     CsCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {

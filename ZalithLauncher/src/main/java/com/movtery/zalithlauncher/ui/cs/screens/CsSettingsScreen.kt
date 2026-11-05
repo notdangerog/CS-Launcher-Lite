@@ -74,9 +74,9 @@ fun CsSettingsScreen(
     val accounts by AccountsManager.accountsFlow.collectAsStateWithLifecycle()
     val currentAccount by AccountsManager.currentAccountFlow.collectAsStateWithLifecycle()
 
-    val animateSpeed by AllSettings.launcherAnimateSpeedLevel.state
-    val backgroundOpacity by AllSettings.launcherBackgroundOpacity.state
-    val taskMenuExpanded by AllSettings.launcherTaskMenuExpanded.state
+    val animateSpeed = AllSettings.launcherAnimateSpeedLevel.state
+    val backgroundOpacity = AllSettings.launcherBackgroundOpacity.state
+    val taskMenuExpanded = AllSettings.launcherTaskMenuExpanded.state
 
     Column(
         modifier = modifier
@@ -319,7 +319,7 @@ fun CsSettingsScreen(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = stringResource(R.string.cs_settings_version, BuildKeys.LAUNCHER_VERSION_NAME),
+                            text = stringResource(R.string.cs_settings_version, BuildKeys.LAUNCHER_SHORT_NAME),
                             style = MaterialTheme.typography.labelSmall,
                             color = CsColors.TextTertiary,
                             maxLines = 1,
