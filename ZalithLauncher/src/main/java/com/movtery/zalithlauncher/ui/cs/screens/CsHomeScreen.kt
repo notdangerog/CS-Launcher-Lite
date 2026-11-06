@@ -142,7 +142,12 @@ private fun HomeSplitLayout(
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val isWide = maxWidth >= 600.dp
+        // Read every constraint-derived value before entering any layout scope:
+        // BoxWithConstraintsScope members cannot be used from inside Row/Box content lambdas.
+        val availableWidth = maxWidth
+        val isWide = availableWidth >= 600.dp
+        val sidePanelWidth = availableWidth * 0.28f
+        val overlayPanelWidth = (availableWidth * 0.9f).coerceAtMost(340.dp)
 
         if (isWide) {
             Row(modifier = Modifier.fillMaxSize()) {
@@ -161,7 +166,7 @@ private fun HomeSplitLayout(
                 )
                 Box(
                     modifier = Modifier
-                        .width(maxWidth * 0.28f)
+                        .width(sidePanelWidth)
                         .fillMaxHeight()
                         .background(CsColors.BackgroundSecondary)
                 ) {
@@ -170,7 +175,7 @@ private fun HomeSplitLayout(
             }
         } else {
             var panelOpen by remember { mutableStateOf(false) }
-            val panelWidth = (maxWidth * 0.9f).coerceAtMost(340.dp)
+            val panelWidth = overlayPanelWidth
 
             Box(modifier = Modifier.fillMaxSize()) {
                 Box(
