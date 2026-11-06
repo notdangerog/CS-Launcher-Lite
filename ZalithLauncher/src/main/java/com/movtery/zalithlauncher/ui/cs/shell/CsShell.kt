@@ -371,39 +371,3 @@ private fun CsTopBar(
         }
     }
 }
-
-/** Two-column helper: wide screens get the right widget panel, narrow screens stack it below. */
-@Composable
-fun CsDashboardLayout(
-    modifier: Modifier = Modifier,
-    sidePanelWidth: androidx.compose.ui.unit.Dp = 300.dp,
-    wideBreakpoint: androidx.compose.ui.unit.Dp = 860.dp,
-    main: @Composable () -> Unit,
-    side: @Composable () -> Unit
-) {
-    androidx.compose.foundation.layout.BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val isWide = maxWidth >= wideBreakpoint
-        val sideWidth = (maxWidth * 0.30f).coerceIn(268.dp, sidePanelWidth)
-
-        if (isWide) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.weight(1f)) { main() }
-                Box(
-                    modifier = Modifier
-                        .width(sideWidth)
-                        .fillMaxHeight()
-                        .background(CsColors.BackgroundSecondary)
-                ) { side() }
-            }
-        } else {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.weight(1f)) { main() }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(CsColors.BackgroundSecondary)
-                ) { side() }
-            }
-        }
-    }
-}

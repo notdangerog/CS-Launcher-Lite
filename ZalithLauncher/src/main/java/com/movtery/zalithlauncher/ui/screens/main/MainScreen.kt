@@ -375,6 +375,11 @@ private fun NavigationUI(
                             screenBackStackModel.mainScreen.navigateTo(
                                 screenKey = NormalNavKey.AccountManager(FirstLoginMenu.NONE)
                             )
+                        },
+                        onOpenMultiplayer = {
+                            screenBackStackModel.mainScreen.navigateTo(
+                                screenKey = NormalNavKey.Multiplayer
+                            )
                         }
                     )
                 }

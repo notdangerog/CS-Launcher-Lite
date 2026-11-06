@@ -64,7 +64,7 @@ class CsHomeViewModel : ViewModel() {
         featured = CsFeaturedState.Loading
         job = viewModelScope.launch {
             try {
-                // 2 列 × 2 行，只取 4 个，保证首页信息密度
+                // 首页固定展示 12 个精选整合包（2 列 × 6 行）
                 val page = csBrowsePage(
                     classes = PlatformClasses.MOD_PACK,
                     filter = PlatformSearchFilter(
@@ -87,7 +87,7 @@ class CsHomeViewModel : ViewModel() {
     }
 
     private companion object {
-        const val FEATURED_COUNT = 4
+        const val FEATURED_COUNT = 12
     }
 }
 
