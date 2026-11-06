@@ -924,54 +924,67 @@ private fun NewsList() {
             val gradient = remember(id) { CsColors.coverGradientFor(id) }
 
             CsCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(9.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Thumbnail: stable per-release gradient cover with the version badge
-                    Box(
-                        modifier = Modifier
-                            .size(width = 52.dp, height = 48.dp)
-                            .clip(RoundedCornerShape(9.dp))
-                            .background(Brush.linearGradient(listOf(gradient.first, gradient.second)))
-                            .border(1.dp, CsColors.Border, RoundedCornerShape(9.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = id,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = CsColors.TextPrimary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(horizontal = 3.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(9.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.cs_home_news_release, id),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = CsColors.TextPrimary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = stringResource(
-                                R.string.cs_home_news_desc,
-                                release.version.releaseTime.take(10)
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = CsColors.TextTertiary,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(6.dp))
-                    CsTag(
-                        text = stringResource(R.string.cs_home_news_release_tag),
-                        accent = true
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    // A 28% panel can be narrow on small tablets: stack the thumbnail above the text
+                    // instead of squeezing the copy into a few characters.
+                    val stacked = maxWidth < 232.dp
+                    val title = stringResource(R.string.cs_home_news_release, id)
+                    val description = stringResource(
+                        R.string.cs_home_news_desc,
+                        release.version.releaseTime.take(10)
                     )
+
+                    if (stacked) {
+                        Column(modifier = Modifier.padding(9.dp)) {
+                            NewsThumbnail(id = id, gradient = gradient, width = 56.dp, height = 44.dp)
+                            Spacer(modifier = Modifier.height(7.dp))
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = CsColors.TextPrimary,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = CsColors.TextTertiary,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.padding(9.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            NewsThumbnail(id = id, gradient = gradient, width = 52.dp, height = 48.dp)
+                            Spacer(modifier = Modifier.width(9.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = CsColors.TextPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = description,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = CsColors.TextTertiary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(6.dp))
+                            CsTag(
+                                text = stringResource(R.string.cs_home_news_release_tag),
+                                accent = true
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -989,6 +1002,33 @@ private fun NewsList() {
         overflow = TextOverflow.Ellipsis
     )
     Spacer(modifier = Modifier.height(10.dp))
+}
+
+/** Release thumbnail: stable per-version gradient cover carrying the version badge. */
+@Composable
+private fun NewsThumbnail(
+    id: String,
+    gradient: Pair<Color, Color>,
+    width: Dp,
+    height: Dp
+) {
+    Box(
+        modifier = Modifier
+            .size(width = width, height = height)
+            .clip(RoundedCornerShape(9.dp))
+            .background(Brush.linearGradient(listOf(gradient.first, gradient.second)))
+            .border(1.dp, CsColors.Border, RoundedCornerShape(9.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 3.dp),
+            text = id,
+            style = MaterialTheme.typography.labelMedium,
+            color = CsColors.TextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
 }
 
 @Composable
