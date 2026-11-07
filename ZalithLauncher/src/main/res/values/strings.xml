@@ -3195,4 +3195,9 @@
     <string name="cs_home_side_open">Show account and news panel</string>
     <string name="cs_home_side_close">Hide account and news panel</string>
     <string name="cs_home_news_desc">Released %1$s · Java Edition</string>
+    <!-- Home screen: instances section + new sidebar entries -->
+    <string name="cs_nav_exit">Exit</string>
+    <string name="cs_home_instances_view_all">Open Library</string>
+    <string name="cs_home_instances_empty_title">No instances yet</string>
+    <string name="cs_home_instances_empty_desc">Create a Minecraft instance and it will appear here, above the featured modpacks.</string>
 </resources>

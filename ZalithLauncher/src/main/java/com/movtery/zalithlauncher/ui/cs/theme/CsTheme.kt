@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.sp
  * 以便后续统一调整主题。
  */
 object CsColors {
-    /** 主背景 */
-    val Background = Color(0xFF121212)
+    /** 主背景：纯黑 */
+    val Background = Color(0xFF000000)
 
     /** 次级背景（侧边栏、右侧信息栏） */
     val BackgroundSecondary = Color(0xFF171717)
@@ -50,14 +50,14 @@ object CsColors {
     /** 悬浮/强调卡片 */
     val CardElevated = Color(0xFF252525)
 
-    /** 主强调色：祖母绿 */
-    val Accent = Color(0xFF1FD760)
+    /** 主强调色：鲜艳的祖母绿（Modrinth 风格） */
+    val Accent = Color(0xFF1BD96A)
 
     /** 强调色的深色变体（边框、渐变） */
-    val AccentDark = Color(0xFF12A04A)
+    val AccentDark = Color(0xFF00AF5C)
 
     /** 强调色的柔和背景（选中态、标签底色） */
-    val AccentSoft = Color(0x1F1FD760)
+    val AccentSoft = Color(0x331BD96A)
 
     /** 强调色上的文字 */
     val OnAccent = Color(0xFF06130A)

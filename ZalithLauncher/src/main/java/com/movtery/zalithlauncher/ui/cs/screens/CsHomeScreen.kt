@@ -47,8 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -66,6 +64,9 @@ import com.movtery.zalithlauncher.game.account.Account
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.account.getAccountTypeName
 import com.movtery.zalithlauncher.game.account.isMicrosoftAccount
+import com.movtery.zalithlauncher.game.version.installed.Version
+import com.movtery.zalithlauncher.game.version.installed.VersionType
+import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersion
 import com.movtery.zalithlauncher.game.versioninfo.MinecraftVersions
 import com.movtery.zalithlauncher.ui.cs.components.CsCard
@@ -92,6 +93,7 @@ import com.movtery.zalithlauncher.ui.screens.content.elements.PlayerFace
  * Layout contract:
  *  - the left navigation rail belongs to `CsShell` and is untouched here;
  *  - of the remaining space, the main column takes ~72% and the right activity panel ~28%;
+ *  - the content order is heading -> instances -> featured modpacks;
  *  - the modpack grid is a compact 2-column grid of exactly 12 entries;
  *  - the main column and the right panel scroll independently;
  *  - the right panel never drops below the grid and never disappears while the grid scrolls.
@@ -99,6 +101,10 @@ import com.movtery.zalithlauncher.ui.screens.content.elements.PlayerFace
 @Composable
 fun CsHomeScreen(
     onInstall: (CsAddonItem) -> Unit,
+    onLaunch: (Version) -> Unit,
+    onOpenInstance: (Version) -> Unit,
+    onCreateInstance: () -> Unit,
+    onOpenLibrary: () -> Unit,
     onOpenDiscover: () -> Unit,
     onManageAccounts: () -> Unit,
     onOpenMultiplayer: () -> Unit,
@@ -111,7 +117,11 @@ fun CsHomeScreen(
             HomeMainContent(
                 featured = viewModel.featured,
                 onInstall = onInstall,
+                onLaunch = onLaunch,
+                onOpenInstance = onOpenInstance,
+                onCreateInstance = onCreateInstance,
                 onOpenDiscover = onOpenDiscover,
+                onOpenLibrary = onOpenLibrary,
                 onRetry = { viewModel.loadFeatured() }
             )
         },
@@ -307,7 +317,11 @@ private fun SideDock(
 private fun HomeMainContent(
     featured: CsFeaturedState,
     onInstall: (CsAddonItem) -> Unit,
+    onLaunch: (Version) -> Unit,
+    onOpenInstance: (Version) -> Unit,
+    onCreateInstance: () -> Unit,
     onOpenDiscover: () -> Unit,
+    onOpenLibrary: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -339,6 +353,23 @@ private fun HomeMainContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // 1) Minecraft Instances — shown above the featured modpacks
+        CsSectionHeader(
+            title = stringResource(R.string.cs_home_instances_heading),
+            actionText = stringResource(R.string.cs_home_instances_view_all),
+            onAction = onOpenLibrary
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        HomeInstancesSection(
+            onLaunch = onLaunch,
+            onOpenInstance = onOpenInstance,
+            onCreateInstance = onCreateInstance,
+            onOpenLibrary = onOpenLibrary
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // 2) Featured modpacks stay below the instances
         CsSectionHeader(
             title = stringResource(R.string.cs_home_recommended),
             actionText = stringResource(R.string.cs_home_view_all),
@@ -354,6 +385,183 @@ private fun HomeMainContent(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Minecraft instances (above the featured modpacks)                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Installed instances, newest/pinned first, in a 2-column grid when the width allows it.
+ * When nothing is installed yet the section keeps its place with a compact empty state.
+ */
+@Composable
+private fun HomeInstancesSection(
+    onLaunch: (Version) -> Unit,
+    onOpenInstance: (Version) -> Unit,
+    onCreateInstance: () -> Unit,
+    onOpenLibrary: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val versions by VersionsManager.versions.collectAsStateWithLifecycle()
+
+    val sorted = remember(versions) {
+        versions.sortedWith(
+            compareByDescending<Version> { it.pinnedState }.thenBy { it.getVersionName().lowercase() }
+        )
+    }
+
+    if (sorted.isEmpty()) {
+        CsCard(modifier = modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(CsColors.CardElevated)
+                        .border(1.dp, CsColors.Border, RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        modifier = Modifier.size(17.dp),
+                        painter = painterResource(R.drawable.ic_cs_layers),
+                        contentDescription = null,
+                        tint = CsColors.TextSecondary
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.cs_home_instances_empty_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = CsColors.TextPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.cs_home_instances_empty_desc),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = CsColors.TextTertiary,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                CsPrimaryButton(
+                    text = stringResource(R.string.cs_library_create_instance),
+                    onClick = onCreateInstance,
+                    iconRes = R.drawable.ic_add,
+                    compact = true
+                )
+            }
+        }
+        return
+    }
+
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val spacing = 10.dp
+        val columns = if (maxWidth >= 460.dp) 2 else 1
+        val cellWidth = if (columns == 2) (maxWidth - spacing) / 2 else maxWidth
+
+        Column(verticalArrangement = Arrangement.spacedBy(spacing)) {
+            sorted.chunked(columns).forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing)
+                ) {
+                    rowItems.forEach { version ->
+                        HomeInstanceCard(
+                            modifier = Modifier.width(cellWidth),
+                            version = version,
+                            onLaunch = { onLaunch(version) },
+                            onOpenInstance = { onOpenInstance(version) }
+                        )
+                    }
+                    if (rowItems.size < columns) {
+                        Spacer(modifier = Modifier.width(cellWidth))
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Compact instance card: icon, name, loader/version tags and a launch action. */
+@Composable
+private fun HomeInstanceCard(
+    version: Version,
+    onLaunch: () -> Unit,
+    onOpenInstance: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val info = remember(version) { version.getVersionInfo() }
+    val loaderName = info?.primaryLoader?.loader?.displayName?.takeIf { it.isNotBlank() }
+    val mcVersion = info?.minecraftVersion
+
+    CsCard(
+        modifier = modifier,
+        onClick = onOpenInstance
+    ) {
+        Column(modifier = Modifier.padding(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                InstanceIcon(version = version, size = 36.dp)
+                Spacer(modifier = Modifier.width(9.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = version.getVersionName(),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = CsColors.TextPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(1.dp))
+                    Text(
+                        text = info?.getInfoString().orEmpty(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = CsColors.TextTertiary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (version.pinnedState) {
+                    Icon(
+                        modifier = Modifier.size(14.dp),
+                        painter = painterResource(R.drawable.ic_pinned_filled),
+                        contentDescription = null,
+                        tint = CsColors.Accent
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (mcVersion != null) {
+                    CsTag(text = mcVersion)
+                }
+                if (loaderName != null) {
+                    CsTag(text = loaderName, accent = true)
+                } else {
+                    CsTag(text = stringResource(R.string.cs_library_tab_vanilla))
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                CsPrimaryButton(
+                    text = stringResource(R.string.cs_library_launch),
+                    onClick = onLaunch,
+                    iconRes = R.drawable.ic_play_arrow_filled,
+                    compact = true
+                )
+            }
+        }
     }
 }
 
@@ -500,32 +708,21 @@ private fun ModpackCard(
                 .height(coverHeight)
         ) {
             val gradient = remember(item.title) { CsColors.coverGradientFor(item.title) }
+            // Gradient only shows while the cover image is missing/loading — never over the image.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Brush.linearGradient(listOf(gradient.first, gradient.second)))
             )
             if (!item.iconUrl.isNullOrEmpty()) {
+                // Original cover at natural brightness and colour: no dimming, no blur, no overlay.
                 AsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(0.34f)
-                        .blur(14.dp),
+                    modifier = Modifier.fillMaxSize(),
                     model = item.iconUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
             }
-            // Soft vignette so the cover blends into the card and the badge stays readable
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color.Transparent, CsColors.Card.copy(alpha = 0.35f))
-                        )
-                    )
-            )
 
             val badge = item.loaders.firstOrNull()
                 ?: item.categories.firstOrNull()?.let { stringResource(it.getDisplayName()) }
@@ -535,7 +732,7 @@ private fun ModpackCard(
                         .align(Alignment.TopStart)
                         .padding(8.dp)
                         .clip(RoundedCornerShape(6.dp))
-                        .background(CsColors.Background.copy(alpha = 0.74f))
+                        .background(CsColors.Card.copy(alpha = 0.82f))
                         .padding(horizontal = 7.dp, vertical = 2.dp)
                 ) {
                     Text(

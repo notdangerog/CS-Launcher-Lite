@@ -63,16 +63,22 @@ import com.movtery.zalithlauncher.ui.cs.theme.CsColors
 import com.movtery.zalithlauncher.ui.cs.theme.CsSpacing
 
 /**
- * The five — and only five — destinations of CS Launcher Lite.
- * Order matches the sidebar, top to bottom: Home, Instances, Discover, Downloads, Settings.
+ * The sidebar destinations. Home, Discover and Library form the top group;
+ * Settings is pinned to the bottom (Exit sits below it as an action, not a destination).
  */
 enum class CsDestination(val labelRes: Int, val iconRes: Int) {
     HOME(R.string.cs_nav_home, R.drawable.ic_home_filled),
-    INSTANCES(R.string.cs_nav_instances, R.drawable.ic_cs_layers),
     DISCOVER(R.string.cs_nav_discover, R.drawable.ic_cs_explore),
-    DOWNLOADS(R.string.cs_nav_downloads, R.drawable.ic_download_2_outlined),
+    LIBRARY(R.string.cs_nav_library, R.drawable.ic_photo_library_outlined),
     SETTINGS(R.string.cs_nav_settings, R.drawable.ic_settings_filled)
 }
+
+/** The three destinations grouped together at the top of the rail. */
+private val topDestinations = listOf(
+    CsDestination.HOME,
+    CsDestination.DISCOVER,
+    CsDestination.LIBRARY
+)
 
 /** Extra tools that are not primary destinations (engine features, kept out of the rail). */
 data class CsMenuItem(
@@ -90,6 +96,7 @@ data class CsMenuItem(
 fun CsShell(
     selected: CsDestination?,
     onNavigate: (CsDestination) -> Unit,
+    onExit: () -> Unit,
     onBack: () -> Unit,
     title: String,
     canGoBack: Boolean,
@@ -106,7 +113,8 @@ fun CsShell(
     ) {
         CsNavRail(
             selected = selected,
-            onNavigate = onNavigate
+            onNavigate = onNavigate,
+            onExit = onExit
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -137,7 +145,8 @@ fun CsShell(
 @Composable
 private fun CsNavRail(
     selected: CsDestination?,
-    onNavigate: (CsDestination) -> Unit
+    onNavigate: (CsDestination) -> Unit,
+    onExit: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -146,38 +155,90 @@ private fun CsNavRail(
             .background(CsColors.BackgroundSecondary),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Brand mark (identity, not navigation)
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(34.dp)
                 .clip(RoundedCornerShape(11.dp))
                 .background(CsColors.AccentSoft)
                 .border(1.dp, CsColors.AccentDark, RoundedCornerShape(11.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(19.dp),
                 painter = painterResource(R.drawable.ic_cs_logo),
                 contentDescription = stringResource(R.string.cs_app_name),
                 tint = CsColors.Accent
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        CsDestination.entries.forEach { destination ->
+        // Main navigation: Home, Discover, Library — grouped, compact spacing
+        topDestinations.forEach { destination ->
             CsRailItem(
                 destination = destination,
                 selected = destination == selected,
                 onClick = { onNavigate(destination) }
             )
-            Spacer(modifier = Modifier.height(4.dp))
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        Spacer(modifier = Modifier.height(10.dp))
+
+        // Bottom: Settings, then Exit
+        CsRailItem(
+            destination = CsDestination.SETTINGS,
+            selected = selected == CsDestination.SETTINGS,
+            onClick = { onNavigate(CsDestination.SETTINGS) }
+        )
+        CsRailActionItem(
+            iconRes = R.drawable.ic_exit_to_app,
+            contentDescription = stringResource(R.string.cs_nav_exit),
+            tint = CsColors.TextSecondary,
+            onClick = onExit
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+/** Rail entry that performs an action (Exit) instead of navigating. */
+@Composable
+private fun CsRailActionItem(
+    iconRes: Int,
+    contentDescription: String,
+    tint: Color,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Box(
+        modifier = Modifier
+            .width(CsSpacing.sidebarWidth)
+            .height(44.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .width(26.dp)
+                .height(30.dp)
+                .clip(CircleShape)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                )
+                .csPressScale(interactionSource, pressedScale = 0.9f),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                modifier = Modifier.size(18.dp),
+                painter = painterResource(iconRes),
+                contentDescription = contentDescription,
+                tint = tint
+            )
+        }
     }
 }
 
@@ -199,7 +260,7 @@ private fun CsRailItem(
         label = "csRailCapsuleWidth"
     )
     val capsuleHeight by animateDpAsState(
-        targetValue = if (selected) 44.dp else 32.dp,
+        targetValue = if (selected) 40.dp else 30.dp,
         label = "csRailCapsuleHeight"
     )
     val tint by animateColorAsState(
@@ -210,7 +271,7 @@ private fun CsRailItem(
     Box(
         modifier = Modifier
             .width(CsSpacing.sidebarWidth)
-            .height(50.dp),
+            .height(44.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(

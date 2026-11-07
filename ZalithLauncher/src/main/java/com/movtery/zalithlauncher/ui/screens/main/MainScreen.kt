@@ -60,6 +60,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -180,9 +181,8 @@ fun MainScreen(
     /** 侧边栏当前选中项 */
     val selectedDestination = when (mainScreenKey) {
         null, is NormalNavKey.LauncherMain -> CsDestination.HOME
-        is NormalNavKey.Instances -> CsDestination.INSTANCES
         is NormalNavKey.Discover -> CsDestination.DISCOVER
-        is NormalNavKey.Downloads -> CsDestination.DOWNLOADS
+        is NormalNavKey.Instances -> CsDestination.LIBRARY
         is NormalNavKey.SettingsHome -> CsDestination.SETTINGS
         else -> null
     }
@@ -194,9 +194,8 @@ fun MainScreen(
     val navigateTopLevel: (CsDestination) -> Unit = { destination ->
         val target: TitledNavKey = when (destination) {
             CsDestination.HOME -> NormalNavKey.LauncherMain
-            CsDestination.INSTANCES -> NormalNavKey.Instances
             CsDestination.DISCOVER -> NormalNavKey.Discover
-            CsDestination.DOWNLOADS -> NormalNavKey.Downloads
+            CsDestination.LIBRARY -> NormalNavKey.Instances
             CsDestination.SETTINGS -> NormalNavKey.SettingsHome
         }
         screenBackStackModel.mainScreen.clearWith(target)
@@ -268,6 +267,19 @@ fun MainScreen(
         )
     )
 
+    /** Exit the launcher from the sidebar's bottom Exit icon */
+    val activityContext = LocalContext.current
+    val exitApp: () -> Unit = {
+        var context: android.content.Context? = activityContext
+        while (context is android.content.ContextWrapper) {
+            if (context is android.app.Activity) {
+                context.finish()
+                break
+            }
+            context = context.baseContext
+        }
+    }
+
     CsTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -277,6 +289,7 @@ fun MainScreen(
             CsShell(
                 selected = selectedDestination,
                 onNavigate = navigateTopLevel,
+                onExit = exitApp,
                 title = titleText,
                 canGoBack = selectedDestination == null,
                 onBack = {
@@ -368,6 +381,14 @@ private fun NavigationUI(
                     }
                     CsHomeScreen(
                         onInstall = openProject,
+                        onLaunch = { version ->
+                            eventViewModel.sendEvent(EventViewModel.Event.Launch.Game(version))
+                        },
+                        onOpenInstance = { version -> navigateToVersions(version) },
+                        onCreateInstance = { screenBackStackModel.navigateToDownload() },
+                        onOpenLibrary = {
+                            screenBackStackModel.mainScreen.clearWith(NormalNavKey.Instances)
+                        },
                         onOpenDiscover = {
                             screenBackStackModel.mainScreen.clearWith(NormalNavKey.Discover)
                         },
