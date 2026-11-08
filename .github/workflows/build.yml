@@ -67,9 +67,18 @@ jobs:
       - name: Install cargo-ndk
         run: |
           version="4.1.2"
-          curl -sL "https://github.com/bbqsrc/cargo-ndk/releases/download/v${version}/cargo-ndk-x86_64-unknown-linux-gnu-v${version}.tgz" |
-            tar xz -C "$HOME/.cargo/bin" --strip-components=1
-          chmod +x "$HOME/.cargo/bin"/cargo-ndk*
+          # Prefer the prebuilt release, but fall back to crates.io: the release CDN
+          # (github.com/.../releases/download) intermittently serves 504 HTML, which
+          # broke the tarball extraction ("not in gzip format") for the whole matrix.
+          if curl -fsSL --retry 3 --retry-delay 5 -o /tmp/cargo-ndk.tgz \
+              "https://github.com/bbqsrc/cargo-ndk/releases/download/v${version}/cargo-ndk-x86_64-unknown-linux-gnu-v${version}.tgz" \
+             && tar tzf /tmp/cargo-ndk.tgz >/dev/null 2>&1; then
+            tar xzf /tmp/cargo-ndk.tgz -C "$HOME/.cargo/bin" --strip-components=1
+            chmod +x "$HOME/.cargo/bin"/cargo-ndk*
+          else
+            echo "Prebuilt cargo-ndk unavailable, building from crates.io"
+            cargo install cargo-ndk --version "${version}" --locked
+          fi
           cargo ndk --version
 
       - name: Setup Android NDK
