@@ -18,6 +18,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -52,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -103,6 +105,7 @@ fun CsShell(
     runningTaskCount: Int,
     onOpenTasks: () -> Unit,
     menuItems: List<CsMenuItem>,
+    showBrandLogo: Boolean = false,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -120,6 +123,7 @@ fun CsShell(
         Column(modifier = Modifier.fillMaxSize()) {
             CsTopBar(
                 title = title,
+                showBrandLogo = showBrandLogo,
                 canGoBack = canGoBack,
                 onBack = onBack,
                 runningTaskCount = runningTaskCount,
@@ -306,6 +310,7 @@ private fun CsRailItem(
 @Composable
 private fun CsTopBar(
     title: String,
+    showBrandLogo: Boolean,
     canGoBack: Boolean,
     onBack: () -> Unit,
     runningTaskCount: Int,
@@ -343,6 +348,17 @@ private fun CsTopBar(
                 }
             }
 
+            if (showBrandLogo) {
+                // Launcher logo, aspect ratio preserved (ContentScale.Fit + fixed height)
+                Image(
+                    modifier = Modifier.height(26.dp),
+                    painter = painterResource(R.drawable.ic_cs_brand),
+                    contentDescription = stringResource(R.string.cs_app_name),
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.width(9.dp))
+            }
+
             Text(
                 modifier = Modifier.weight(1f),
                 text = title,
@@ -351,6 +367,17 @@ private fun CsTopBar(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
+            if (showBrandLogo) {
+                Spacer(modifier = Modifier.width(7.dp))
+                Text(
+                    text = stringResource(R.string.cs_header_minecraft),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = CsColors.BrandGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             Spacer(modifier = Modifier.width(10.dp))
 

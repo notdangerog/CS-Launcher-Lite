@@ -19,6 +19,12 @@
 
 package com.movtery.zalithlauncher.ui.cs.screens
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -124,6 +130,15 @@ fun CsDiscoverScreen(
         viewModel.submitQuery()
     }
 
+    // Results list state drives the collapsing header (scroll-position based, so no jumps)
+    val listState = rememberLazyListState()
+    val collapsed = listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 6
+    val collapseProgress by animateFloatAsState(
+        targetValue = if (collapsed) 1f else 0f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "csDiscoverCollapse"
+    )
+
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -138,16 +153,25 @@ fun CsDiscoverScreen(
                     .fillMaxHeight()
                     .padding(start = 24.dp, end = if (isWide) 16.dp else 24.dp, top = 14.dp)
             ) {
-                // 分类标签
-                CsTabs(
-                    labels = CsBrowseCategory.entries.map { stringResource(it.labelRes) },
-                    selectedIndex = CsBrowseCategory.entries.indexOf(viewModel.category),
-                    onSelected = { index ->
-                        viewModel.selectCategory(CsBrowseCategory.entries[index])
+                // 分类标签：随滚动收起，平滑动画
+                AnimatedVisibility(
+                    visible = collapseProgress < 0.5f,
+                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeOut(animationSpec = tween(140))
+                ) {
+                    Column {
+                        CsTabs(
+                            labels = CsBrowseCategory.entries.map { stringResource(it.labelRes) },
+                            selectedIndex = CsBrowseCategory.entries.indexOf(viewModel.category),
+                            onSelected = { index ->
+                                viewModel.selectCategory(CsBrowseCategory.entries[index])
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
+                }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CsSearchField(
@@ -173,8 +197,15 @@ fun CsDiscoverScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
-
+                // 滚动后仅保留这条细搜索栏
+                AnimatedVisibility(
+                    visible = collapseProgress < 0.5f,
+                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeOut(animationSpec = tween(140))
+                ) {
+                    Column {
                 // 排序 / 每页数量 / 分页
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -207,6 +238,11 @@ fun CsDiscoverScreen(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
+
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(if (collapseProgress > 0.5f) 4.dp else 12.dp))
 
                 Box(modifier = Modifier.weight(1f)) {
                     when (val state = viewModel.state) {
@@ -267,6 +303,7 @@ fun CsDiscoverScreen(
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
+                                    state = listState,
                                     verticalArrangement = Arrangement.spacedBy(10.dp),
                                     contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 20.dp)
                                 ) {

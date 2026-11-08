@@ -11,6 +11,15 @@
 
 package com.movtery.zalithlauncher.ui.cs.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +67,8 @@ import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionType
 import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.ui.cs.components.CsCard
+import com.movtery.zalithlauncher.ui.cs.components.CsEmptyState
+import com.movtery.zalithlauncher.ui.cs.components.CsSearchField
 import com.movtery.zalithlauncher.ui.cs.components.CsIconButton
 import com.movtery.zalithlauncher.ui.cs.components.CsPrimaryButton
 import com.movtery.zalithlauncher.ui.cs.components.CsTabs
@@ -83,58 +94,102 @@ fun CsInstancesScreen(
 ) {
     val versions by VersionsManager.versions.collectAsStateWithLifecycle()
     var filterIndex by remember { mutableIntStateOf(0) }
+    var query by remember { mutableStateOf("") }
     val filter = InstanceFilter.entries[filterIndex]
 
-    val filtered = remember(versions, filter) {
-        when (filter) {
+    val filtered = remember(versions, filter, query) {
+        val byType = when (filter) {
             InstanceFilter.ALL -> versions
             InstanceFilter.MODDED -> versions.filter { it.versionType == VersionType.MODLOADERS }
             InstanceFilter.VANILLA -> versions.filter { it.versionType != VersionType.MODLOADERS }
         }
+        val needle = query.trim()
+        if (needle.isEmpty()) byType
+        else byType.filter { it.getVersionName().contains(needle, ignoreCase = true) }
     }
+
+    // Grid scroll state drives the collapsing header (scroll-position based, so no jumps)
+    val gridState = rememberLazyGridState()
+    val collapsed = gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 6
+    val collapseProgress by animateFloatAsState(
+        targetValue = if (collapsed) 1f else 0f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "csLibraryCollapse"
+    )
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(CsColors.Background)
-            .padding(horizontal = 22.dp, vertical = 16.dp)
+            .padding(horizontal = 22.dp, vertical = 14.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.cs_nav_instances),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = CsColors.TextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(3.dp))
-                Text(
-                    text = stringResource(R.string.cs_instances_subtitle, versions.size),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = CsColors.TextSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+        // 大标题：随滚动收起
+        AnimatedVisibility(
+            visible = collapseProgress < 0.5f,
+            enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                fadeIn(animationSpec = tween(220)),
+            exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                fadeOut(animationSpec = tween(140))
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.cs_nav_instances),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = CsColors.TextPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Text(
+                            text = stringResource(R.string.cs_instances_subtitle, versions.size),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = CsColors.TextSecondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    CsPrimaryButton(
+                        text = stringResource(R.string.cs_library_create_instance),
+                        onClick = onCreateInstance,
+                        iconRes = R.drawable.ic_add,
+                        compact = true
+                    )
+                }
+                Spacer(modifier = Modifier.height(14.dp))
             }
-            Spacer(modifier = Modifier.width(12.dp))
-            CsPrimaryButton(
-                text = stringResource(R.string.cs_library_create_instance),
-                onClick = onCreateInstance,
-                iconRes = R.drawable.ic_add,
-                compact = true
-            )
         }
 
-        Spacer(modifier = Modifier.height(14.dp))
-
-        CsTabs(
-            labels = InstanceFilter.entries.map { stringResource(it.labelRes) },
-            selectedIndex = filterIndex,
-            onSelected = { filterIndex = it }
+        // 细搜索栏：始终固定在顶部
+        CsSearchField(
+            modifier = Modifier.fillMaxWidth(),
+            value = query,
+            onValueChange = { query = it },
+            placeholder = stringResource(R.string.cs_library_search)
         )
 
-        Spacer(modifier = Modifier.height(14.dp))
+        // 分类标签：随滚动收起
+        AnimatedVisibility(
+            visible = collapseProgress < 0.5f,
+            enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                fadeIn(animationSpec = tween(220)),
+            exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                fadeOut(animationSpec = tween(140))
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(12.dp))
+                CsTabs(
+                    labels = InstanceFilter.entries.map { stringResource(it.labelRes) },
+                    selectedIndex = filterIndex,
+                    onSelected = { filterIndex = it }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(if (collapseProgress > 0.5f) 8.dp else 2.dp))
 
         if (filtered.isEmpty()) {
             Box(
@@ -143,14 +198,22 @@ fun CsInstancesScreen(
                     .padding(bottom = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
-                EmptyInstances(
-                    isFirstRun = versions.isEmpty(),
-                    onCreateInstance = onCreateInstance
-                )
+                if (versions.isNotEmpty() && query.isNotBlank()) {
+                    CsEmptyState(
+                        title = stringResource(R.string.cs_library_no_results),
+                        description = stringResource(R.string.cs_library_search)
+                    )
+                } else {
+                    EmptyInstances(
+                        isFirstRun = versions.isEmpty(),
+                        onCreateInstance = onCreateInstance
+                    )
+                }
             }
         } else {
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
+                state = gridState,
                 columns = GridCells.Adaptive(minSize = 250.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),

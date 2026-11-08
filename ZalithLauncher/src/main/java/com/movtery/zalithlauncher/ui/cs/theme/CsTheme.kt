@@ -62,6 +62,9 @@ object CsColors {
     /** 强调色上的文字 */
     val OnAccent = Color(0xFF06130A)
 
+    /** 顶栏 “Minecraft” 标识用色：比强调色稍暗的绿 */
+    val BrandGreen = Color(0xFF2E8B57)
+
     /** 主文字 */
     val TextPrimary = Color(0xFFFFFFFF)
 

@@ -3200,4 +3200,9 @@
     <string name="cs_home_instances_view_all">Open Library</string>
     <string name="cs_home_instances_empty_title">No instances yet</string>
     <string name="cs_home_instances_empty_desc">Create a Minecraft instance and it will appear here, above the featured modpacks.</string>
+    <!-- Top header branding + collapsing headers + library search -->
+    <string name="cs_header_title">CS Launcher Lite v1</string>
+    <string name="cs_header_minecraft">Minecraft</string>
+    <string name="cs_library_search">Search instances…</string>
+    <string name="cs_library_no_results">No instances match your search</string>
 </resources>

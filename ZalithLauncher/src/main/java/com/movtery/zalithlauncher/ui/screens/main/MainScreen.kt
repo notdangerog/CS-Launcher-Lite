@@ -201,10 +201,10 @@ fun MainScreen(
         screenBackStackModel.mainScreen.clearWith(target)
     }
 
-    /** 顶栏标题 */
+    /** 顶栏标题：首页显示启动器名称（"Home" 只保留在页面内容里，避免重复） */
     val titleText: String = when (mainScreenKey) {
-        null -> stringResource(R.string.cs_nav_home)
-        is NormalNavKey.LauncherMain -> stringResource(R.string.cs_nav_home)
+        null -> stringResource(R.string.cs_header_title)
+        is NormalNavKey.LauncherMain -> stringResource(R.string.cs_header_title)
         else -> {
             val parent = mainScreenKey?.title
             val child = (mainScreenKey as? BackStackNavKey<*>)?.currentKey?.title
@@ -299,7 +299,9 @@ fun MainScreen(
                 onOpenTasks = {
                     screenBackStackModel.mainScreen.clearWith(NormalNavKey.Downloads)
                 },
-                menuItems = menuItems
+                menuItems = menuItems,
+                // 首页顶栏：品牌 Logo + 名称 + Minecraft 标识
+                showBrandLogo = selectedDestination == CsDestination.HOME
             ) {
                 NavStateHost(rootKey = screenBackStackModel.mainScreen) {
                     NavigationUI(

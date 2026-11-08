@@ -156,7 +156,8 @@ private fun HomeSplitLayout(
         // BoxWithConstraintsScope members cannot be used from inside Row/Box content lambdas.
         val availableWidth = maxWidth
         val isWide = availableWidth >= 600.dp
-        val sidePanelWidth = availableWidth * 0.28f
+        // 28% minus ~0.5 cm (≈32 dp): the panel was slightly too wide
+        val sidePanelWidth = (availableWidth * 0.28f - 32.dp).coerceAtLeast(196.dp)
         val overlayPanelWidth = (availableWidth * 0.9f).coerceAtMost(340.dp)
 
         if (isWide) {
