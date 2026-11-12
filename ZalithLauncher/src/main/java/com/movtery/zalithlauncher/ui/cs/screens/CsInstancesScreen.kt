@@ -11,14 +11,7 @@
 
 package com.movtery.zalithlauncher.ui.cs.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -108,14 +101,7 @@ fun CsInstancesScreen(
         else byType.filter { it.getVersionName().contains(needle, ignoreCase = true) }
     }
 
-    // Grid scroll state drives the collapsing header (scroll-position based, so no jumps)
     val gridState = rememberLazyGridState()
-    val collapsed = gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 6
-    val collapseProgress by animateFloatAsState(
-        targetValue = if (collapsed) 1f else 0f,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "csLibraryCollapse"
-    )
 
     Column(
         modifier = modifier
@@ -123,46 +109,7 @@ fun CsInstancesScreen(
             .background(CsColors.Background)
             .padding(horizontal = 22.dp, vertical = 14.dp)
     ) {
-        // 大标题：随滚动收起
-        AnimatedVisibility(
-            visible = collapseProgress < 0.5f,
-            enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                fadeIn(animationSpec = tween(220)),
-            exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                fadeOut(animationSpec = tween(140))
-        ) {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.cs_nav_instances),
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = CsColors.TextPrimary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.height(3.dp))
-                        Text(
-                            text = stringResource(R.string.cs_instances_subtitle, versions.size),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = CsColors.TextSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    CsPrimaryButton(
-                        text = stringResource(R.string.cs_library_create_instance),
-                        onClick = onCreateInstance,
-                        iconRes = R.drawable.ic_add,
-                        compact = true
-                    )
-                }
-                Spacer(modifier = Modifier.height(14.dp))
-            }
-        }
-
-        // 细搜索栏：始终固定在顶部
+        // 细搜索栏：固定在顶部
         CsSearchField(
             modifier = Modifier.fillMaxWidth(),
             value = query,
@@ -170,28 +117,16 @@ fun CsInstancesScreen(
             placeholder = stringResource(R.string.cs_library_search)
         )
 
-        // 分类标签：随滚动收起
-        AnimatedVisibility(
-            visible = collapseProgress < 0.5f,
-            enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                fadeIn(animationSpec = tween(220)),
-            exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                fadeOut(animationSpec = tween(140))
-        ) {
-            Column {
-                Spacer(modifier = Modifier.height(12.dp))
-                CsTabs(
-                    labels = InstanceFilter.entries.map { stringResource(it.labelRes) },
-                    selectedIndex = filterIndex,
-                    onSelected = { filterIndex = it }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(if (collapseProgress > 0.5f) 8.dp else 2.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (filtered.isEmpty()) {
+            // 空状态：标题信息保持可见，列表区域居中显示提示
+            LibraryHeader(
+                versionCount = versions.size,
+                filter = filter,
+                onFilterSelected = { filterIndex = it },
+                onCreateInstance = onCreateInstance
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -211,6 +146,8 @@ fun CsInstancesScreen(
                 }
             }
         } else {
+            // 标题、分类与实例卡片在同一个网格里滚动：
+            // 头部随内容一起移动，不存在高度变化引起的跳动、闪烁或重叠。
             LazyVerticalGrid(
                 modifier = Modifier.fillMaxSize(),
                 state = gridState,
@@ -219,7 +156,22 @@ fun CsInstancesScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = 20.dp)
             ) {
-                items(items = filtered, key = { "${it.getGameHome()}_${it.getVersionName()}" }) { version ->
+                item(
+                    key = "cs_library_header",
+                    span = { GridItemSpan(maxLineSpan) }
+                ) {
+                    LibraryHeader(
+                        versionCount = versions.size,
+                        filter = filter,
+                        onFilterSelected = { filterIndex = it },
+                        onCreateInstance = onCreateInstance
+                    )
+                }
+
+                items(
+                    items = filtered,
+                    key = { "${it.getGameHome()}_${it.getVersionName()}" }
+                ) { version ->
                     InstanceCard(
                         version = version,
                         onLaunch = { onLaunch(version) },
@@ -228,6 +180,58 @@ fun CsInstancesScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Library header block: title, instance count, create button and the outlined category chips.
+ * It is a full-span grid item, so it scrolls with the cards instead of being re-laid out on scroll.
+ */
+@Composable
+private fun LibraryHeader(
+    versionCount: Int,
+    filter: InstanceFilter,
+    onFilterSelected: (Int) -> Unit,
+    onCreateInstance: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.cs_nav_instances),
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = CsColors.TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
+                    text = stringResource(R.string.cs_instances_subtitle, versionCount),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = CsColors.TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            CsPrimaryButton(
+                text = stringResource(R.string.cs_library_create_instance),
+                onClick = onCreateInstance,
+                iconRes = R.drawable.ic_add,
+                compact = true
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        CsTabs(
+            labels = InstanceFilter.entries.map { stringResource(it.labelRes) },
+            selectedIndex = filter.ordinal,
+            onSelected = onFilterSelected,
+            outlined = true
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
     }
 }
 

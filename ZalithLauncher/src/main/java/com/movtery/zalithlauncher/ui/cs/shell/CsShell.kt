@@ -161,22 +161,15 @@ private fun CsNavRail(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Brand mark (identity, not navigation)
-        Box(
+        // Brand mark: the CS Launcher Lite logo (identity, not navigation)
+        Image(
             modifier = Modifier
                 .size(34.dp)
-                .clip(RoundedCornerShape(11.dp))
-                .background(CsColors.AccentSoft)
-                .border(1.dp, CsColors.AccentDark, RoundedCornerShape(11.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                modifier = Modifier.size(19.dp),
-                painter = painterResource(R.drawable.ic_cs_logo),
-                contentDescription = stringResource(R.string.cs_app_name),
-                tint = CsColors.Accent
-            )
-        }
+                .clip(RoundedCornerShape(10.dp)),
+            painter = painterResource(R.drawable.ic_cs_brand),
+            contentDescription = stringResource(R.string.cs_app_name),
+            contentScale = ContentScale.Fit
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -351,12 +344,14 @@ private fun CsTopBar(
             if (showBrandLogo) {
                 // Launcher logo, aspect ratio preserved (ContentScale.Fit + fixed height)
                 Image(
-                    modifier = Modifier.height(26.dp),
+                    modifier = Modifier
+                        .height(24.dp)
+                        .width(24.dp),
                     painter = painterResource(R.drawable.ic_cs_brand),
                     contentDescription = stringResource(R.string.cs_app_name),
                     contentScale = ContentScale.Fit
                 )
-                Spacer(modifier = Modifier.width(9.dp))
+                Spacer(modifier = Modifier.width(8.dp))
             }
 
             Text(

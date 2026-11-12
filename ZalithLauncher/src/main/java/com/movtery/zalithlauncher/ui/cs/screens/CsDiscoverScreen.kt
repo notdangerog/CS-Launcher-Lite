@@ -206,39 +206,25 @@ fun CsDiscoverScreen(
                         fadeOut(animationSpec = tween(140))
                 ) {
                     Column {
-                // 排序 / 每页数量 / 分页
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CsDropdownField(
-                        value = viewModel.sort,
-                        options = CsDiscoverViewModel.SORT_OPTIONS.map {
-                            stringResource(it.getDisplayName()) to it
-                        },
-                        onSelected = { viewModel.selectSort(it) },
-                        label = stringResource(R.string.cs_discover_sort_by)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    CsDropdownField(
-                        value = viewModel.pageSize,
-                        options = CsDiscoverViewModel.PAGE_SIZE_OPTIONS.map { it.toString() to it },
-                        onSelected = { viewModel.selectPageSize(it) },
-                        label = stringResource(R.string.cs_discover_per_page)
-                    )
+                        // 排序 / 每页数量 / 分页：窄屏自动换行，控件不会被挤压或溢出
+                        DiscoverControlRow(
+                            sortLabel = stringResource(R.string.cs_discover_sort_by),
+                            sortOptions = CsDiscoverViewModel.SORT_OPTIONS.map {
+                                stringResource(it.getDisplayName()) to it
+                            },
+                            sort = viewModel.sort,
+                            onSortSelected = { viewModel.selectSort(it) },
+                            pageSizeLabel = stringResource(R.string.cs_discover_per_page),
+                            pageSizeOptions = CsDiscoverViewModel.PAGE_SIZE_OPTIONS.map { it.toString() to it },
+                            pageSize = viewModel.pageSize,
+                            onPageSizeSelected = { viewModel.selectPageSize(it) },
+                            pageNumber = viewModel.pageNumber,
+                            totalPages = viewModel.totalPages,
+                            onPrevious = { viewModel.previousPage() },
+                            onNext = { viewModel.nextPage() }
+                        )
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    PaginationControls(
-                        pageNumber = viewModel.pageNumber,
-                        totalPages = viewModel.totalPages,
-                        onPrevious = { viewModel.previousPage() },
-                        onNext = { viewModel.nextPage() }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
 
@@ -377,6 +363,100 @@ fun CsDiscoverScreen(
                             .padding(horizontal = 14.dp, vertical = 16.dp)
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Sort / page-size / paging controls.
+ *
+ * Wide: one row — sort, page size, flexible space, paging on the right.
+ * Narrow: sort and page size share one row (equal weight, ellipsized labels) and the paging controls
+ * move to their own row, so nothing overlaps, clips or escapes its container.
+ */
+@Composable
+private fun <T, P> DiscoverControlRow(
+    sortLabel: String,
+    sortOptions: List<Pair<String, T>>,
+    sort: T,
+    onSortSelected: (T) -> Unit,
+    pageSizeLabel: String,
+    pageSizeOptions: List<Pair<String, P>>,
+    pageSize: P,
+    onPageSizeSelected: (P) -> Unit,
+    pageNumber: Int,
+    totalPages: Int,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit
+) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val stacked = maxWidth < 560.dp
+
+        if (stacked) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CsDropdownField(
+                        modifier = Modifier.weight(1f),
+                        value = sort,
+                        options = sortOptions,
+                        onSelected = onSortSelected,
+                        label = sortLabel,
+                        fillWidth = true
+                    )
+                    CsDropdownField(
+                        modifier = Modifier.weight(1f),
+                        value = pageSize,
+                        options = pageSizeOptions,
+                        onSelected = onPageSizeSelected,
+                        label = pageSizeLabel,
+                        fillWidth = true
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    PaginationControls(
+                        pageNumber = pageNumber,
+                        totalPages = totalPages,
+                        onPrevious = onPrevious,
+                        onNext = onNext
+                    )
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CsDropdownField(
+                    value = sort,
+                    options = sortOptions,
+                    onSelected = onSortSelected,
+                    label = sortLabel
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                CsDropdownField(
+                    value = pageSize,
+                    options = pageSizeOptions,
+                    onSelected = onPageSizeSelected,
+                    label = pageSizeLabel
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                PaginationControls(
+                    pageNumber = pageNumber,
+                    totalPages = totalPages,
+                    onPrevious = onPrevious,
+                    onNext = onNext
+                )
             }
         }
     }

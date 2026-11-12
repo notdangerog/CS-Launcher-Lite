@@ -576,7 +576,8 @@ fun <T> CsDropdownField(
     onSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
     label: String? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    fillWidth: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
     val selectedLabel = options.firstOrNull { it.second == value }?.first ?: options.firstOrNull()?.first ?: ""
@@ -586,6 +587,7 @@ fun <T> CsDropdownField(
     Box(modifier = modifier) {
         Surface(
             modifier = Modifier
+                .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
                 .heightIn(min = 34.dp)
                 .clip(shape)
                 .background(CsColors.CardElevated, shape)
@@ -604,7 +606,9 @@ fun <T> CsDropdownField(
             color = Color.Transparent
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                modifier = Modifier
+                    .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
+                    .padding(horizontal = 10.dp, vertical = 7.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (label != null) {
@@ -618,7 +622,11 @@ fun <T> CsDropdownField(
                     Spacer(modifier = Modifier.width(6.dp))
                 }
                 Text(
-                    modifier = Modifier.widthIn(max = 150.dp),
+                    modifier = if (fillWidth) {
+                        Modifier.weight(1f, fill = false)
+                    } else {
+                        Modifier.widthIn(max = 150.dp)
+                    },
                     text = selectedLabel,
                     style = MaterialTheme.typography.labelLarge,
                     color = if (enabled) CsColors.TextPrimary else CsColors.TextTertiary,
@@ -665,20 +673,68 @@ fun <T> CsDropdownField(
 
 /**
  * 标签页（带下划线动画效果）
+ *
+ * @param outlined 为 true 时改为浅灰描边的圆角胶囊样式（当前选中项仍用强调色区分）
  */
 @Composable
 fun CsTabs(
     labels: List<String>,
     selectedIndex: Int,
     onSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    outlined: Boolean = false
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        verticalAlignment = Alignment.CenterVertically
+            .horizontalScroll(rememberScrollState())
+            .then(if (outlined) Modifier.padding(vertical = 2.dp) else Modifier),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = if (outlined) Arrangement.spacedBy(8.dp) else Arrangement.Start
     ) {
+        if (outlined) {
+            labels.forEachIndexed { index, label ->
+                val selected = index == selectedIndex
+                val textColor by animateColorAsState(
+                    targetValue = if (selected) CsColors.Accent else CsColors.TextSecondary,
+                    label = "csOutlinedTabColor"
+                )
+                Surface(
+                    modifier = Modifier
+                        .heightIn(min = 32.dp)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(
+                            if (selected) CsColors.AccentSoft else Color.Transparent,
+                            RoundedCornerShape(9.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (selected) CsColors.AccentDark else CsColors.Border,
+                            shape = RoundedCornerShape(9.dp)
+                        )
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onSelected(index) },
+                    color = Color.Transparent
+                ) {
+                    Box(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = textColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+            return@Row
+        }
+
         labels.forEachIndexed { index, label ->
             val selected = index == selectedIndex
             val textColor by animateColorAsState(
