@@ -19,14 +19,13 @@
 
 package com.movtery.zalithlauncher.ui.cs.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -133,12 +132,6 @@ fun CsDiscoverScreen(
     // Results list state drives the collapsing header (scroll-position based, so no jumps)
     val listState = rememberLazyListState()
     val collapsed = listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 6
-    val collapseProgress by animateFloatAsState(
-        targetValue = if (collapsed) 1f else 0f,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
-        label = "csDiscoverCollapse"
-    )
-
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -155,7 +148,7 @@ fun CsDiscoverScreen(
             ) {
                 // 分类标签：随滚动收起，平滑动画
                 AnimatedVisibility(
-                    visible = collapseProgress < 0.5f,
+                    visible = !collapsed,
                     enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
                         fadeIn(animationSpec = tween(220)),
                     exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
@@ -197,13 +190,18 @@ fun CsDiscoverScreen(
                     }
                 }
 
-                // 滚动后仅保留这条细搜索栏
+                // 滚动后仅保留这条细搜索栏。
+                // 先淡出、再收起高度：控件不会在动画中被“切掉一半”，避免看起来像裁切/重叠。
                 AnimatedVisibility(
-                    visible = collapseProgress < 0.5f,
-                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                        fadeIn(animationSpec = tween(220)),
-                    exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                        fadeOut(animationSpec = tween(140))
+                    visible = !collapsed,
+                    enter = fadeIn(animationSpec = tween(140)) +
+                        expandVertically(
+                            animationSpec = tween(200, delayMillis = 140, easing = FastOutSlowInEasing)
+                        ),
+                    exit = fadeOut(animationSpec = tween(110)) +
+                        shrinkVertically(
+                            animationSpec = tween(180, delayMillis = 110, easing = FastOutSlowInEasing)
+                        )
                 ) {
                     Column {
                         // 排序 / 每页数量 / 分页：窄屏自动换行，控件不会被挤压或溢出
@@ -228,7 +226,7 @@ fun CsDiscoverScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(if (collapseProgress > 0.5f) 4.dp else 12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Box(modifier = Modifier.weight(1f)) {
                     when (val state = viewModel.state) {
@@ -371,9 +369,14 @@ fun CsDiscoverScreen(
 /**
  * Sort / page-size / paging controls.
  *
- * Wide: one row — sort, page size, flexible space, paging on the right.
- * Narrow: sort and page size share one row (equal weight, ellipsized labels) and the paging controls
- * move to their own row, so nothing overlaps, clips or escapes its container.
+ * Layout contract (this is what fixes the glitch):
+ *  - the row never relies on intrinsic widths: paging is measured first and is width-bounded,
+ *    the two dropdowns then share the remaining space with `weight`, so the row can never be
+ *    wider than its parent (previously the intrinsic-width dropdowns plus paging could exceed the
+ *    available width once the filter panel was visible, which pushed/clipped the controls);
+ *  - every dropdown is in `fillWidth` mode, so its label/value ellipsize instead of overflowing;
+ *  - below 520 dp (the measured minimum for one line: ≈180 + 180 + 124 + gaps) the paging controls
+ *    move to their own end-aligned row.
  */
 @Composable
 private fun <T, P> DiscoverControlRow(
@@ -391,10 +394,42 @@ private fun <T, P> DiscoverControlRow(
     onNext: () -> Unit
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val stacked = maxWidth < 560.dp
+        val singleLine = maxWidth >= 520.dp
 
-        if (stacked) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (singleLine) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CsDropdownField(
+                    modifier = Modifier.weight(1f),
+                    value = sort,
+                    options = sortOptions,
+                    onSelected = onSortSelected,
+                    label = sortLabel,
+                    fillWidth = true
+                )
+                CsDropdownField(
+                    modifier = Modifier.weight(1f),
+                    value = pageSize,
+                    options = pageSizeOptions,
+                    onSelected = onPageSizeSelected,
+                    label = pageSizeLabel,
+                    fillWidth = true
+                )
+                PaginationControls(
+                    pageNumber = pageNumber,
+                    totalPages = totalPages,
+                    onPrevious = onPrevious,
+                    onNext = onNext
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -430,38 +465,15 @@ private fun <T, P> DiscoverControlRow(
                     )
                 }
             }
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CsDropdownField(
-                    value = sort,
-                    options = sortOptions,
-                    onSelected = onSortSelected,
-                    label = sortLabel
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                CsDropdownField(
-                    value = pageSize,
-                    options = pageSizeOptions,
-                    onSelected = onPageSizeSelected,
-                    label = pageSizeLabel
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                PaginationControls(
-                    pageNumber = pageNumber,
-                    totalPages = totalPages,
-                    onPrevious = onPrevious,
-                    onNext = onNext
-                )
-            }
         }
     }
 }
 
+/**
+ * Previous / page indicator / next.
+ * The indicator has a bounded width (72–96 dp) so the group is at most ~140 dp wide and can always
+ * be placed on one line without pushing other controls out of their container.
+ */
 @Composable
 private fun PaginationControls(
     pageNumber: Int,
@@ -469,7 +481,10 @@ private fun PaginationControls(
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         CsIconButton(
             iconRes = R.drawable.ic_arrow_back,
             contentDescription = stringResource(R.string.cs_discover_previous_page),
@@ -482,8 +497,7 @@ private fun PaginationControls(
         )
         Text(
             modifier = Modifier
-                .widthIn(min = 92.dp)
-                .padding(horizontal = 8.dp),
+                .widthIn(min = 72.dp, max = 96.dp),
             text = stringResource(R.string.cs_discover_page_of, pageNumber, totalPages),
             style = MaterialTheme.typography.labelMedium,
             color = CsColors.TextSecondary,

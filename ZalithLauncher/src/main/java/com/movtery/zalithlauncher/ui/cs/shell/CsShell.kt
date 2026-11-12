@@ -341,19 +341,6 @@ private fun CsTopBar(
                 }
             }
 
-            if (showBrandLogo) {
-                // Launcher logo, aspect ratio preserved (ContentScale.Fit + fixed height)
-                Image(
-                    modifier = Modifier
-                        .height(24.dp)
-                        .width(24.dp),
-                    painter = painterResource(R.drawable.ic_cs_brand),
-                    contentDescription = stringResource(R.string.cs_app_name),
-                    contentScale = ContentScale.Fit
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-
             Text(
                 modifier = Modifier.weight(1f),
                 text = title,

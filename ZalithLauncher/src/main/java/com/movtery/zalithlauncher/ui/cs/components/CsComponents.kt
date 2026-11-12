@@ -613,6 +613,11 @@ fun <T> CsDropdownField(
             ) {
                 if (label != null) {
                     Text(
+                        modifier = if (fillWidth) {
+                            Modifier.weight(1f, fill = false)
+                        } else {
+                            Modifier
+                        },
                         text = label,
                         style = MaterialTheme.typography.labelMedium,
                         color = CsColors.TextTertiary,
@@ -623,7 +628,7 @@ fun <T> CsDropdownField(
                 }
                 Text(
                     modifier = if (fillWidth) {
-                        Modifier.weight(1f, fill = false)
+                        Modifier.weight(2f, fill = false)
                     } else {
                         Modifier.widthIn(max = 150.dp)
                     },
