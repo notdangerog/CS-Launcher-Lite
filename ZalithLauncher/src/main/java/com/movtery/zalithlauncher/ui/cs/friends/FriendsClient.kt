@@ -143,6 +143,7 @@ object FriendsClient {
     private val mInbox = ArrayList<Note>()
     private val mHistory = ArrayList<Message>()
     @Volatile private var mSnapshot = Snapshot()
+    fun snapshot(): Snapshot = mSnapshot
     @Volatile private var mStatus = "online"
     @Volatile private var mAddress: String? = null
     @Volatile private var mWorld: String? = null

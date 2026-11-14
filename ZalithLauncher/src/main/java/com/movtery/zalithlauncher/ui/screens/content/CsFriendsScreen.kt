@@ -5,15 +5,11 @@
 
 package com.movtery.zalithlauncher.ui.screens.content
 
-import android.os.Bundle
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
+import androidx.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,9 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,13 +30,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,18 +48,18 @@ import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.androidText
+import com.movtery.zalithlauncher.ui.cs.components.CsCard
+import com.movtery.zalithlauncher.ui.cs.components.CsIconButton
+import com.movtery.zalithlauncher.ui.cs.components.CsPrimaryButton
+import com.movtery.zalithlauncher.ui.cs.components.CsSecondaryButton
+import com.movtery.zalithlauncher.ui.cs.theme.CsColors
 import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient
 import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Friend
 import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Invite
 import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Message
 import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Request
 import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Snapshot
-import com.movtery.zalithlauncher.ui.cs.components.CsCard
-import com.movtery.zalithlauncher.ui.cs.components.CsIconButton
-import com.movtery.zalithlauncher.ui.cs.components.CsPrimaryButton
-import com.movtery.zalithlauncher.ui.cs.components.CsSecondaryButton
-import com.movtery.zalithlauncher.ui.cs.theme.CsColors
-import com.movtery.zalithlauncher.ui.cs.friends.*
+import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Note
 
 @Composable
 fun CsFriendsScreen(
@@ -72,9 +68,8 @@ fun CsFriendsScreen(
     modifier: Modifier = Modifier
 ) {
     val client = FriendsClient
-    val account = CsAccount
 
-    val snapshot by remember { mutableStateOf(client.snapshot) }
+    val snapshot by remember { mutableStateOf(client.snapshot()) }
     val inbox by remember { mutableStateOf(client.inbox()) }
 
     var tab by remember { mutableStateOf(0) } // 0 friends, 1 requests, 2 invites, 3 messages
@@ -110,8 +105,7 @@ fun CsFriendsScreen(
                         Icon(modifier = Modifier.size(24.dp), painter = painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.generic_back), tint = CsColors.TextPrimary)
                     }
                 },
-                colors = MaterialTheme.colorScheme.copy(backgroundColor = Color.Transparent),
-                containerColor = Color.Transparent
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             ) {}
 
             Row(
@@ -128,9 +122,9 @@ fun CsFriendsScreen(
                     Box(
                         modifier = Modifier
                             .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
+                                interactionSource = androidx.compose.foundation.interaction.MutableInteractionSource(),
                                 indication = null,
-                                onClick = { tab.value = id }
+                                onClick = { tab = id }
                             )
                             .background(if (selected) CsColors.AccentSoft else Color.Transparent, RoundedCornerShape(8.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -154,10 +148,10 @@ fun CsFriendsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             when (tab) {
-                0 -> FriendsList(snapshot.friends, client, onToast)
-                1 -> RequestsList(snapshot.requests, client, onToast)
-                2 -> InvitesList(snapshot.invites, client, onToast)
-                3 -> MessagesList(snapshot.messages, client, onToast)
+                0 -> FriendsList(snapshot.value.friends, client, onToast)
+                1 -> RequestsList(snapshot.value.requests, client, onToast)
+                2 -> InvitesList(snapshot.value.invites, client, onToast)
+                3 -> MessagesList(snapshot.value.messages, client, onToast)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -167,13 +161,13 @@ fun CsFriendsScreen(
             AddFriendDialog(
                 onDismiss = { showAddDialog = false },
                 code = addCode,
-                onCodeChange = { addCode.value = it },
+                onCodeChange = { addCode = it },
                 onAdd = { code ->
                     client.addFriend(code) { error ->
                         if (error == null) {
                             onToast?.invoke(androidText(stringResource(R.string.cs_friends_request_sent)))
                             showAddDialog = false
-                            addCode.value = ""
+                            addCode = ""
                         } else {
                             onToast?.invoke(androidText(error))
                         }
@@ -202,7 +196,7 @@ private fun FriendsList(friends: List<Friend>, client: FriendsClient, onToast: (
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(friends, key = { it.id }) { friend ->
             CsCard(
@@ -234,7 +228,7 @@ private fun FriendsList(friends: List<Friend>, client: FriendsClient, onToast: (
                         }
                     }
                     CsSecondaryButton(
-                        text = stringResource(if (friend.online()) R.string.cs_friends_join else R.string.generic_send),
+                        text = stringResource(if (friend.online()) R.string.cs_friends_join else R.string.cs_friends_add),
                         onClick = { friend.address?.let { addr -> onToast?.invoke(androidText("Join $addr")) } ?: onToast?.invoke(androidText("Open chat")) },
                         compact = true
                     )
@@ -255,7 +249,7 @@ private fun RequestsList(requests: List<Request>, client: FriendsClient, onToast
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(requests, key = { it.id }) { req ->
             CsCard(
@@ -296,7 +290,7 @@ private fun InvitesList(invites: List<Invite>, client: FriendsClient, onToast: (
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         items(openInvites, key = { it.id }) { inv ->
             CsCard(

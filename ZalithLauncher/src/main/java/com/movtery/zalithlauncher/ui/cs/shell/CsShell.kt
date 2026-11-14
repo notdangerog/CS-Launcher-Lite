@@ -197,7 +197,8 @@ private fun CsNavRail(
         // Brand mark: the single CS Launcher Lite logo, top-left of the rail, above Home
         Image(
             modifier = Modifier
-                .size(34.dp)
+                .width(34.dp)
+                .height(34.dp)
                 .clip(RoundedCornerShape(10.dp)),
             painter = painterResource(R.drawable.ic_cs_brand_round),
             contentDescription = stringResource(R.string.cs_brand_name),
