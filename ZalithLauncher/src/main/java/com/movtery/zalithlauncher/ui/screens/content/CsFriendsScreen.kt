@@ -338,7 +338,7 @@ private fun AddFriendDialog(
     DropdownMenu(
         expanded = true,
         onDismissRequest = onDismiss,
-        modifier = widthIn(min = 260.dp, max = 340.dp)
+        modifier = Modifier.widthIn(min = 260.dp, max = 340.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = stringResource(R.string.cs_friends_add), style = MaterialTheme.typography.titleLarge, color = CsColors.TextPrimary)

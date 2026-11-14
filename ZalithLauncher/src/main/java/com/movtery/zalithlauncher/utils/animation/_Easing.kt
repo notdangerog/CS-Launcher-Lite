@@ -51,7 +51,7 @@ val BounceEasing = Easing { fraction ->
     val a = 0.05f
     val b = 0.3f
     if (t == 0f || t == 1f) t
-    else -(a * kotlin.math.pow(2f, 10f * (t - 1f)) * sin((t - 1f - b / (4f * Math.PI)) * 2f * Math.PI / b)).toFloat()
+    else -(a * Math.pow(2.0, 10.0 * (t - 1f)).toFloat() * sin((t - 1f - b / (4f * Math.PI)) * 2f * Math.PI / b)).toFloat()
 }
 
 /**
@@ -80,7 +80,7 @@ val QuickSpringEasing = Easing { fraction ->
  */
 val SlowEaseOutEasing = Easing { fraction ->
     val t = fraction.coerceIn(0f, 1f)
-    1f - kotlin.math.pow(1f - t, 3f)
+    1f - Math.pow((1f - t).toDouble(), 3.0).toFloat()
 }
 
 /**
