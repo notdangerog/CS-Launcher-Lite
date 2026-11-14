@@ -105,6 +105,22 @@ fun writeComponentAssetManifests(assetsDir: File) {
     }
 }
 
+// The host agent is a -javaagent jar handed to the game JVM at launch. It is built by :HostAgent
+// (shaded, with ASM relocated so Fabric Loader does not see a second org.objectweb.asm on the system
+// class path) and copied into the app assets here rather than committed as a binary.
+val hostAgentAssetDir = layout.projectDirectory.dir("src/main/assets/components/host_agent")
+val copyHostAgent by tasks.registering(Copy::class) {
+    group = "build"
+    description = "Copies the shaded cs-host-agent.jar into the app assets."
+    dependsOn(":HostAgent:shadowJar")
+    from(project(":HostAgent").layout.buildDirectory.dir("libs")) {
+        include("cs-host-agent.jar")
+    }
+    into(hostAgentAssetDir)
+    // A stale jar would be shipped silently if the agent build were skipped.
+    outputs.cacheIf("the agent jar is deterministic for a given source set") { false }
+}
+
 android {
     namespace = zalithPackageName
     compileSdk {
@@ -207,6 +223,12 @@ android {
             isReturnDefaultValues = true
         }
     }
+}
+
+// Every variant must see the agent jar before its assets are merged, otherwise the launch-time
+// extraction finds nothing and world hosting silently reports "no tunnel library".
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("Assets") }.configureEach {
+    dependsOn(copyHostAgent)
 }
 
 androidComponents {
