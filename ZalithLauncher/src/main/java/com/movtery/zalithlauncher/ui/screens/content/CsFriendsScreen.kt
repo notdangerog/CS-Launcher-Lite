@@ -71,8 +71,8 @@ fun CsFriendsScreen(
 ) {
     val client = FriendsClient
 
-    val friendsSnapshot by remember { mutableStateOf(client.snapshot()) }
-    val inbox by remember { mutableStateOf(client.inbox()) }
+    val friendsSnapshot = remember { mutableStateOf(client.snapshot()) }
+    val inbox = remember { mutableStateOf(client.inbox()) }
 
     var tab by remember { mutableStateOf(0) } // 0 friends, 1 requests, 2 invites, 3 messages
     var addCode by remember { mutableStateOf("") }
@@ -86,6 +86,7 @@ fun CsFriendsScreen(
             override fun onNote(n: Note) {
                 inbox.value = client.inbox()
             }
+
             override fun onFriendsError(message: String) {
                 onToast?.invoke(androidText(message))
             }
@@ -337,7 +338,7 @@ private fun AddFriendDialog(
     DropdownMenu(
         expanded = true,
         onDismissRequest = onDismiss,
-        modifier = androidx.compose.foundation.layout.widthIn(min = 260.dp, max = 340.dp)
+        modifier = widthIn(min = 260.dp, max = 340.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = stringResource(R.string.cs_friends_add), style = MaterialTheme.typography.titleLarge, color = CsColors.TextPrimary)

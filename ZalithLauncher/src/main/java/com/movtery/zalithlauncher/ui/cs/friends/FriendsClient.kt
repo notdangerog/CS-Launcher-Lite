@@ -154,7 +154,8 @@ object FriendsClient {
     @Volatile private var mLoaded = false
     @Volatile private var mBackground = false
     private var mWatchers = 0
-    private var mSince: Long = 0
+    private class SinceRef(var value: Long)
+    private val mSinceRef = SinceRef(0L)
     @Volatile private var mLastError: String? = null
     private val mDeclined = HashSet<String>()
     private val mTick = Runnable { tick() }
@@ -214,7 +215,7 @@ object FriendsClient {
     }
 
     fun onAccountChanged() {
-        mSince = 0
+        mSinceRef.value = 0
         mSnapshot = Snapshot()
         synchronized(mHistory) { mHistory.clear() }
         mLastError = null
@@ -275,7 +276,7 @@ object FriendsClient {
             a.put("p_address", if (mAddress == null) JSONObject.NULL else mAddress)
             a.put("p_world", if (mWorld == null) JSONObject.NULL else mWorld)
             a.put("p_engine", if (mEngine == null) "launcher" else mEngine)
-            a.put("p_since", mSince)
+            a.put("p_since", mSinceRef.value)
             a.put("p_version", if (mVersion == null) JSONObject.NULL else mVersion)
         } catch (_: JSONException) {}
         return a
@@ -419,7 +420,7 @@ object FriendsClient {
                 if (mHistory.none { it.id == m.id }) mHistory.add(m)
                 try {
                     val id = m.id.toLong()
-                    if (id > mSince) mSince = id
+                    if (id > mSinceRef.value) mSinceRef.value = id
                 } catch (_: NumberFormatException) {}
             }
             while (mHistory.size > 600) mHistory.removeAt(0)
@@ -718,7 +719,8 @@ object FriendsClient {
                 val r = FriendsApi.call(if (register) "cs_account_register" else "cs_account_login", a)
                 if (!r.has("token")) throw IOException("Unexpected reply from the account service")
                 CsAccount.store(r)
-            } catch (e: IOException | JSONException) { err = e.message }
+            } catch (e: IOException) { err = e.message }
+            catch (e: JSONException) { err = e.message }
             val fe = err
             mMain.post { cb?.done(fe) }
         }
