@@ -26,6 +26,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "ZalithLauncher"
 include(":ZalithLauncher")
+// -javaagent that lifts the integrated server's 8-player LAN limit; its shaded jar is copied
+// into the app assets at build time (see :ZalithLauncher copyHostAgent).
+include(":HostAgent")
 include(":LWJGL")
 include(":LWJGL:patches")
 project(":LWJGL:patches").projectDir = file("LWJGL/patches")

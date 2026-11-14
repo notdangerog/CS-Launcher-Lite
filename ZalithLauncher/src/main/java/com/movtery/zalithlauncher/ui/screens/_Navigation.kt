@@ -22,7 +22,6 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
@@ -30,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.scene.Scene
 import com.movtery.zalithlauncher.setting.AllSettings
+import com.movtery.zalithlauncher.ui.design.CsEasing
+import com.movtery.zalithlauncher.ui.design.csTween
 import com.movtery.zalithlauncher.utils.animation.SwapClock
 import com.movtery.zalithlauncher.utils.animation.SwapTimeline
 import kotlin.reflect.KClass
@@ -109,11 +110,16 @@ fun <E: TitledNavKey> NavBackStack<E>.addIfEmpty(navKey: E) {
     }
 }
 
+/**
+ * The shared tween for page-swap fades, routed through the CS motion system so it picks up the
+ * launcher's curve library and honours the system animator scale as well as the speed dial.
+ */
 @Composable
 fun rememberSwapTween(): FiniteAnimationSpec<Float> {
     val level = AllSettings.launcherAnimateSpeedLevel.state
-    return remember(level) {
-        tween(durationMillis = SwapTimeline.time(SwapTimeline.CONTENT_BASE))
+    val swapEnabled = AllSettings.launcherSwapAnimEnabled.state
+    return remember(level, swapEnabled) {
+        csTween<Float>(durationMillis = SwapTimeline.CONTENT_BASE, easing = CsEasing.Standard)
     }
 }
 

@@ -36,6 +36,7 @@ import com.kyant.fishnet.Fishnet
 import com.movtery.zalithlauncher.context.GlobalContext
 import com.movtery.zalithlauncher.context.refreshContext
 import com.movtery.zalithlauncher.coroutine.TaskSystem
+import com.movtery.zalithlauncher.friends.FriendsClient
 import com.movtery.zalithlauncher.game.account.AccountsManager
 import com.movtery.zalithlauncher.game.path.GamePathManager
 import com.movtery.zalithlauncher.keepalive.TaskKeepAlive
@@ -95,6 +96,12 @@ class ZLApplication : Application(), SingletonImageLoader.Factory {
             loadAllSettings(this)
 
             Logger.initialize(this)
+
+            // Friends presence starts here rather than on the first screen: a signed-in player should
+            // show as online from the moment the launcher is open, not from the moment they happen to
+            // visit the friends screen. initialize() only restores a stored session and starts a poll
+            // loop, so it costs no first-frame time and does nothing at all when signed out.
+            FriendsClient.initialize(this)
 
             initializeData()
             PathManager.DIR_FILES_PRIVATE = getDir("files", MODE_PRIVATE)

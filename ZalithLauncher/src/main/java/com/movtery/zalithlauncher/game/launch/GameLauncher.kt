@@ -50,6 +50,10 @@ import com.movtery.zalithlauncher.game.renderer.prepareRendererLaunchConfig
 import com.movtery.zalithlauncher.game.support.touch_controller.ControllerProxy
 import com.movtery.zalithlauncher.game.version.installed.Version
 import com.movtery.zalithlauncher.game.version.installed.VersionInfoParser
+import com.movtery.zalithlauncher.host.HostAgentInstaller
+import com.movtery.zalithlauncher.host.HostSettings
+import com.movtery.zalithlauncher.host.HostServerIcon
+import com.movtery.zalithlauncher.host.WorldHostManager
 import com.movtery.zalithlauncher.game.versioninfo.models.GameManifest
 import com.movtery.zalithlauncher.path.LibPath
 import com.movtery.zalithlauncher.path.PathManager
@@ -101,6 +105,10 @@ class GameLauncher(
 
     override fun exit() {
         offlineServer.stop()
+        // The tunnel and the hosting presence live in this process, so they have to go with it. This
+        // runs from the native exit hook, where there is no dispatcher left to resume on; the manager
+        // does a bounded blocking clear so friends do not keep seeing a world that no longer exists.
+        WorldHostManager.shutdownForProcessExit()
     }
 
     override suspend fun launch(screenSize: IntSize): Int {
@@ -267,7 +275,9 @@ class GameLauncher(
             getCacioJavaArgs = { isJava8 ->
                 getCacioJavaArgs(screenSize, isJava8)
             }
-        ).getAllArgs()
+        ).getAllArgs().toMutableList()
+
+        prepareWorldHosting(gameDirPath, launchArgs)
 
         tryStartTouchProxy()
 
@@ -285,6 +295,42 @@ class GameLauncher(
         return jnaDir?.absolutePath?.let { dirPath ->
             "$parent:$dirPath"
         } ?: parent
+    }
+
+    /**
+     * Sets the world up to be shared with friends before the JVM starts.
+     *
+     * Three things have to happen in this order, and all three are best-effort:
+     *
+     *  1. **Server icon** — written into the game folder, because the integrated server reads
+     *     `server-icon.png` when it publishes to LAN and never picks one up afterwards.
+     *  2. **Host agent** — `-javaagent` plus `-Dcs.host.maxPlayers`, which lifts the hard-coded
+     *     8-player LAN limit. Without it the world still hosts; it just caps at 8.
+     *  3. **Log watch** — starts tailing now, before the JVM exists. The tail skips missing files, so
+     *     it is already listening by the time the game prints "Local game hosted on port N"; attaching
+     *     after launch instead would race the line and miss the port entirely.
+     *
+     * None of this may fail the launch: a player who cannot host is still a player who wants to play.
+     */
+    private fun prepareWorldHosting(gameDirPath: File, launchArgs: MutableList<String>) {
+        runCatching {
+            if (HostSettings.sharingEnabled) {
+                HostServerIcon.write(activity, gameDirPath)
+            }
+        }.onFailure { Logger.warning(TAG, "Failed to write the hosted world's server icon", it) }
+
+        runCatching {
+            val hostArgs = HostAgentInstaller.jvmArgs(activity)
+            if (hostArgs.isNotEmpty()) {
+                // Before the main class: the JVM only honours -javaagent ahead of the class name.
+                val insertAt = launchArgs.indexOf("mio.Wrapper").takeIf { it >= 0 } ?: launchArgs.size
+                launchArgs.addAll(insertAt, hostArgs)
+                appendInfo("World hosting: ${hostArgs.joinToString(" ")}")
+            }
+        }.onFailure { Logger.warning(TAG, "Failed to attach the world host agent", it) }
+
+        runCatching { WorldHostManager.attach(getLogFile()) }
+            .onFailure { Logger.warning(TAG, "Failed to start watching the game log", it) }
     }
 
     private fun tryStartTouchProxy() {

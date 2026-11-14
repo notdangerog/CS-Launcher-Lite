@@ -11,7 +11,7 @@
 package com.movtery.zalithlauncher.ui.screens.lite
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,9 +49,17 @@ import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.design.CsCard
 import com.movtery.zalithlauncher.ui.design.CsColor
+import com.movtery.zalithlauncher.ui.design.CsDuration
+import com.movtery.zalithlauncher.ui.design.CsEasing
 import com.movtery.zalithlauncher.ui.design.CsIconButton
+import com.movtery.zalithlauncher.ui.design.CsPress
 import com.movtery.zalithlauncher.ui.design.CsSize
 import com.movtery.zalithlauncher.ui.design.CsSpace
+import com.movtery.zalithlauncher.ui.design.CsSpring
+import com.movtery.zalithlauncher.ui.design.csPressLayer
+import com.movtery.zalithlauncher.ui.design.csScale
+import com.movtery.zalithlauncher.ui.design.csTween
+import com.movtery.zalithlauncher.ui.design.rememberCsPressScale
 import com.movtery.zalithlauncher.ui.screens.NestedNavKey
 import com.movtery.zalithlauncher.ui.screens.NormalNavKey
 import com.movtery.zalithlauncher.ui.screens.TitledNavKey
@@ -65,6 +73,10 @@ enum class CsSection {
     INSTANCES,
     DISCOVER,
     DOWNLOADS,
+    /** CS friends: presence, requests, world invites and chat. */
+    FRIENDS,
+    /** World hosting: player limit, access, and the live address of an open world. */
+    HOST,
     SETTINGS
 }
 
@@ -118,6 +130,18 @@ fun CsRail(
             selected = selected == CsSection.DOWNLOADS,
             onClick = { onNavigate(CsSection.DOWNLOADS) }
         )
+        CsRailItem(
+            iconRes = R.drawable.ic_group_filled,
+            contentDescription = stringResource(R.string.cs_friends_title),
+            selected = selected == CsSection.FRIENDS,
+            onClick = { onNavigate(CsSection.FRIENDS) }
+        )
+        CsRailItem(
+            iconRes = R.drawable.ic_public,
+            contentDescription = stringResource(R.string.cs_host_title),
+            selected = selected == CsSection.HOST,
+            onClick = { onNavigate(CsSection.HOST) }
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -164,22 +188,39 @@ private fun CsRailItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val press = rememberCsPressScale(interactionSource, CsPress.Icon)
+
     val container by animateColorAsState(
         targetValue = if (selected) CsColor.Accent else CsColor.Background,
-        animationSpec = tween(180),
+        animationSpec = csTween(durationMillis = CsDuration.Normal, easing = CsEasing.Standard),
         label = "CsRailContainer"
     )
     val content by animateColorAsState(
         targetValue = if (selected) Color.White else CsColor.TextSecondary,
-        animationSpec = tween(180),
+        animationSpec = csTween(durationMillis = CsDuration.Normal, easing = CsEasing.Standard),
         label = "CsRailContent"
     )
-    val interactionSource = remember { MutableInteractionSource() }
+
+    // The rail's signature motion: the active icon springs up through a single visible overshoot
+    // while inactive icons sit slightly recessed. Bouncy on the way in (the tab you just chose
+    // should feel like it arrived), stiff on the way out (the tab you left should get out of the
+    // way immediately). Both are springs, so hammering through tabs never interrupts a tween.
+    val iconScale by animateFloatAsState(
+        targetValue = if (selected) 1f else 0.88f,
+        animationSpec = if (selected) {
+            CsSpring.bouncy(visibilityThreshold = 0.001f)
+        } else {
+            CsSpring.stiff(visibilityThreshold = 0.001f)
+        },
+        label = "CsRailIconScale"
+    )
 
     Box(
         modifier = Modifier
             .width(CsSize.railCapsuleWidth)
             .height(CsSize.railCapsuleHeight)
+            .csPressLayer(press)
             .clip(RoundedCornerShape(16.dp))
             .background(container)
             .clickable(
@@ -191,7 +232,9 @@ private fun CsRailItem(
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            modifier = Modifier.size(CsSize.railIconSize),
+            modifier = Modifier
+                .size(CsSize.railIconSize)
+                .csScale(iconScale),
             painter = painterResource(iconRes),
             contentDescription = contentDescription,
             tint = content
@@ -329,6 +372,10 @@ fun csSectionOf(key: TitledNavKey?): CsSection? = when (key) {
 
     NormalNavKey.Downloads -> CsSection.DOWNLOADS
 
+    NormalNavKey.Friends -> CsSection.FRIENDS
+
+    NormalNavKey.WorldHost -> CsSection.HOST
+
     is NormalNavKey.Settings,
     is NestedNavKey.Settings -> CsSection.SETTINGS
 
@@ -343,7 +390,9 @@ fun isCsSectionRoot(key: TitledNavKey?): Boolean = when (key) {
     NormalNavKey.LauncherMain,
     NormalNavKey.Instances,
     NormalNavKey.Discover,
-    NormalNavKey.Downloads -> true
+    NormalNavKey.Downloads,
+    NormalNavKey.Friends,
+    NormalNavKey.WorldHost -> true
     is NestedNavKey.Settings -> true
     else -> false
 }

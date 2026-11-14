@@ -42,11 +42,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +63,7 @@ import com.movtery.zalithlauncher.game.version.installed.VersionsManager
 import com.movtery.zalithlauncher.path.PathManager
 import com.movtery.zalithlauncher.setting.AllSettings
 import com.movtery.zalithlauncher.ui.AndroidStringText
+import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.ui.components.BackgroundCard
 import com.movtery.zalithlauncher.ui.components.CardTitleLayout
@@ -88,6 +91,10 @@ import com.movtery.zalithlauncher.ui.screens.lite.CsCatalogViewModel
 import com.movtery.zalithlauncher.ui.screens.lite.CsDetailTitle
 import com.movtery.zalithlauncher.ui.screens.lite.CsDiscoverScreen
 import com.movtery.zalithlauncher.ui.screens.lite.CsDownloadsScreen
+import com.movtery.zalithlauncher.ui.screens.lite.CsFriendsScreen
+import com.movtery.zalithlauncher.ui.screens.lite.CsWorldHostScreen
+import com.movtery.zalithlauncher.host.JoinWorld
+import com.movtery.zalithlauncher.host.WorldHostManager
 import com.movtery.zalithlauncher.ui.screens.lite.CsHomeScreen
 import com.movtery.zalithlauncher.ui.screens.lite.CsInstancesScreen
 import com.movtery.zalithlauncher.ui.screens.lite.CsRail
@@ -102,15 +109,19 @@ import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
 import com.movtery.zalithlauncher.ui.design.CsColor
+import com.movtery.zalithlauncher.ui.design.CsMotion
+import com.movtery.zalithlauncher.ui.design.refreshSystemScale
 import com.movtery.zalithlauncher.utils.animation.getAnimateTween
 import com.movtery.zalithlauncher.utils.file.formatFileSize
 import com.movtery.zalithlauncher.viewmodel.ErrorViewModel
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
+import com.movtery.zalithlauncher.viewmodel.sendToast
 import com.movtery.zalithlauncher.viewmodel.ModifyVersionViewModel
 import com.movtery.zalithlauncher.viewmodel.ModpackImportViewModel
 import com.movtery.zalithlauncher.viewmodel.ScreenBackStackViewModel
 import com.movtery.zalithlauncher.viewmodel.sendKeepScreen
 import com.movtery.zalithlauncher.viewmodel.sendToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
@@ -145,6 +156,8 @@ fun MainScreen(
         CsSection.INSTANCES -> stringResource(R.string.cs_nav_instances)
         CsSection.DISCOVER -> stringResource(R.string.cs_nav_discover)
         CsSection.DOWNLOADS -> stringResource(R.string.cs_nav_downloads)
+        CsSection.FRIENDS -> stringResource(R.string.cs_friends_title)
+        CsSection.HOST -> stringResource(R.string.cs_host_title)
         CsSection.SETTINGS -> stringResource(R.string.cs_nav_settings)
         null -> "CS Launcher Lite"
     }
@@ -157,6 +170,8 @@ fun MainScreen(
             CsSection.INSTANCES -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.Instances)
             CsSection.DISCOVER -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.Discover)
             CsSection.DOWNLOADS -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.Downloads)
+            CsSection.FRIENDS -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.Friends)
+            CsSection.HOST -> stack.removeAndNavigateTo(removes = removes, screenKey = NormalNavKey.WorldHost)
             CsSection.SETTINGS -> stack.removeAndNavigateTo(
                 removes = removes,
                 screenKey = screenBackStackModel.settingsScreen
@@ -176,6 +191,12 @@ fun MainScreen(
         contentColor = CsColor.TextPrimary
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // Sync the OS animator scale into the motion system once per composition of the shell,
+            // so a user who turns animations off in Developer options gets instant state changes
+            // everywhere instead of animations that ignore the system setting.
+            val motionContext = LocalContext.current
+            LaunchedEffect(motionContext) { CsMotion.refreshSystemScale(motionContext) }
+
             val wideLayout = maxWidth >= 720.dp
             var rightPanelOpen by remember { mutableStateOf(false) }
             val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
@@ -310,6 +331,10 @@ private fun NavigationUI(
     val backStack = screenBackStackModel.mainScreen.backStack
     val currentKey = backStack.lastOrNull()
 
+    // Inviting friends is a one-shot call from a click handler; the request itself hops to IO inside
+    // the friends API, so the composition scope is enough and no extra dispatcher is needed here.
+    val hostScope = rememberCoroutineScope()
+
     val versions by VersionsManager.versions.collectAsStateWithLifecycle()
     val currentVersion by VersionsManager.currentVersion.collectAsStateWithLifecycle()
     val isRefreshing by VersionsManager.isRefreshing.collectAsStateWithLifecycle()
@@ -382,6 +407,32 @@ private fun NavigationUI(
                 }
                 entry<NormalNavKey.Downloads> {
                     CsDownloadsScreen()
+                }
+                entry<NormalNavKey.Friends> {
+                    CsFriendsScreen(
+                        // Joining goes through the same event the server list uses, so the launch
+                        // pipeline keeps the only copy of the quick-play argument logic and the pending
+                        // address survives the version check that follows.
+                        onJoinWorld = { address, hostVersion ->
+                            val version = VersionsManager.currentVersion.value
+                            if (version == null) {
+                                eventViewModel.sendToast(androidText(R.string.cs_friends_no_version))
+                            } else {
+                                JoinWorld.remember(address, hostVersion)
+                                eventViewModel.sendEvent(
+                                    EventViewModel.Event.Launch.PlayServer(version, address)
+                                )
+                            }
+                        },
+                        onOpenHostSettings = { backStack.navigateTo(NormalNavKey.WorldHost) }
+                    )
+                }
+                entry<NormalNavKey.WorldHost> {
+                    CsWorldHostScreen(
+                        // The manager owns the address and the fan-out; the screen only asks.
+                        onInviteAll = { hostScope.launch { WorldHostManager.invite() } },
+                        onOpenFriends = { backStack.navigateTo(NormalNavKey.Friends) }
+                    )
                 }
                 entry<NestedNavKey.Settings> { key ->
                     SettingsScreen(

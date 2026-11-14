@@ -11,8 +11,6 @@
 package com.movtery.zalithlauncher.ui.design
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -81,14 +79,18 @@ fun CsCard(
     } else null
 
     if (onClick != null) {
+        // Press physics: a stiff snap down under the finger, one springy overshoot on release.
+        // Applied through graphicsLayer so a tapped card never re-measures its contents.
+        val interactionSource = remember { MutableInteractionSource() }
+        val press = rememberCsPressScale(interactionSource, CsPress.Card)
         Surface(
-            modifier = modifier,
+            modifier = modifier.csPressLayer(press),
             onClick = onClick,
             shape = shape,
             color = color,
             contentColor = contentColor,
             border = borderStroke,
-            interactionSource = remember { MutableInteractionSource() }
+            interactionSource = interactionSource
         ) {
             Column(
                 modifier = Modifier.padding(contentPadding),
@@ -166,20 +168,30 @@ fun CsPrimaryButton(
     val container by animateColorAsState(
         targetValue = if (enabled) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.surfaceContainerHighest,
-        animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+        animationSpec = csTween(easing = CsEasing.Standard, durationMillis = CsDuration.Fast),
         label = "CsPrimaryButtonContainer"
     )
     val contentColor = if (enabled) MaterialTheme.colorScheme.onPrimary
     else MaterialTheme.colorScheme.onSurfaceVariant
 
+    // The large variant is the launcher's hero action, so it gets deeper, bouncier travel.
+    val interactionSource = remember { MutableInteractionSource() }
+    val press = rememberCsPressScale(
+        interactionSource = interactionSource,
+        pressedScale = if (large) CsPress.Hero else CsPress.Card,
+        enabled = enabled
+    )
+
     Surface(
-        modifier = modifier.defaultMinSize(minHeight = if (large) CsSize.buttonHeightLarge else CsSize.buttonHeight),
+        modifier = modifier
+            .defaultMinSize(minHeight = if (large) CsSize.buttonHeightLarge else CsSize.buttonHeight)
+            .csPressLayer(press),
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(if (large) 14.dp else 12.dp),
         color = container,
         contentColor = contentColor,
-        interactionSource = remember { MutableInteractionSource() }
+        interactionSource = interactionSource
     ) {
         Row(
             modifier = Modifier.padding(horizontal = if (large) CsSpace.xl else CsSpace.l),
@@ -214,15 +226,20 @@ fun CsTonalButton(
     iconRes: Int? = null,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val press = rememberCsPressScale(interactionSource, CsPress.Card, enabled = enabled)
+
     Surface(
-        modifier = modifier.defaultMinSize(minHeight = CsSize.buttonHeight),
+        modifier = modifier
+            .defaultMinSize(minHeight = CsSize.buttonHeight)
+            .csPressLayer(press),
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        interactionSource = remember { MutableInteractionSource() }
+        interactionSource = interactionSource
     ) {
         Row(
             modifier = Modifier.padding(horizontal = CsSpace.l),
@@ -260,14 +277,21 @@ fun CsIconButton(
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
+    // Small targets need the deepest relative travel to be felt at all.
+    val interactionSource = remember { MutableInteractionSource() }
+    val press = rememberCsPressScale(interactionSource, CsPress.Icon, enabled = enabled)
+
     Surface(
-        modifier = modifier.size(size.dp).alpha(if (enabled) 1f else DisabledAlpha),
+        modifier = modifier
+            .size(size.dp)
+            .alpha(if (enabled) 1f else DisabledAlpha)
+            .csPressLayer(press),
         onClick = onClick,
         enabled = enabled,
         shape = CircleShape,
         color = containerColor,
         contentColor = contentColor,
-        interactionSource = remember { MutableInteractionSource() }
+        interactionSource = interactionSource
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
@@ -293,24 +317,27 @@ fun CsChip(
     val container by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
         else MaterialTheme.colorScheme.surfaceContainerHigh,
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = csTween(durationMillis = CsDuration.Fast, easing = CsEasing.Standard),
         label = "CsChipContainer"
     )
     val content by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(durationMillis = 150),
+        animationSpec = csTween(durationMillis = CsDuration.Fast, easing = CsEasing.Standard),
         label = "CsChipContent"
     )
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val press = rememberCsPressScale(interactionSource, CsPress.Icon)
+
     Surface(
-        modifier = modifier,
+        modifier = modifier.csPressLayer(press),
         onClick = onClick,
         shape = CircleShape,
         color = container,
         contentColor = content,
         border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)) else null,
-        interactionSource = remember { MutableInteractionSource() }
+        interactionSource = interactionSource
     ) {
         Row(
             modifier = Modifier.padding(horizontal = CsSpace.m, vertical = CsSpace.s),
@@ -478,13 +505,22 @@ fun CsMetaLabel(
 
 /**
  * A tiny accent "dot + text" status pill, e.g. current instance indicator.
+ *
+ * @param live when true the dot breathes on a slow sine, marking a state that is actively running —
+ *   a hosted world, a live download, a connected friend. Off by default, so existing pills are
+ *   pixel-identical to before; the motion is opt-in per call site.
  */
 @Composable
 fun CsStatusPill(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary
+    color: Color = MaterialTheme.colorScheme.primary,
+    live: Boolean = false
 ) {
+    // A breathing dot rather than a blinking one: the sine has no acceleration kink at the turns,
+    // so it reads as "alive" at the edge of your vision instead of demanding attention.
+    val breath = rememberCsBreathPhase(CsDuration.LoopSlow)
+
     Surface(
         modifier = modifier,
         shape = CircleShape,
@@ -500,6 +536,7 @@ fun CsStatusPill(
                 modifier = Modifier
                     .size(6.dp)
                     .background(color, CircleShape)
+                    .then(if (live) Modifier.csBreathLayer(breath, minAlpha = 0.45f, minScale = 0.80f) else Modifier)
             )
             Text(
                 text = text,
@@ -526,23 +563,28 @@ fun CsNavItem(
     val container by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)
         else Color.Transparent,
-        animationSpec = tween(durationMillis = 160),
+        animationSpec = csTween(durationMillis = CsDuration.Fast, easing = CsEasing.Standard),
         label = "CsNavItemContainer"
     )
     val content by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(durationMillis = 160),
+        animationSpec = csTween(durationMillis = CsDuration.Fast, easing = CsEasing.Standard),
         label = "CsNavItemContent"
     )
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val press = rememberCsPressScale(interactionSource, CsPress.Card)
+
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .csPressLayer(press),
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         color = container,
         contentColor = content,
-        interactionSource = remember { MutableInteractionSource() }
+        interactionSource = interactionSource
     ) {
         Row(
             modifier = Modifier.padding(

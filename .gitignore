@@ -38,3 +38,6 @@ build/
 
 # module build outputs
 build/
+
+# Built by :HostAgent:shadowJar and copied in at build time (see copyHostAgent).
+ZalithLauncher/src/main/assets/components/host_agent/*.jar
