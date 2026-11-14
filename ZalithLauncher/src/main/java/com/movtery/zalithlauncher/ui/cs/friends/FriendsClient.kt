@@ -13,6 +13,7 @@ import androidx.annotation.Nullable
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ExecutorService
@@ -152,7 +153,7 @@ object FriendsClient {
     @Volatile private var mLoaded = false
     @Volatile private var mBackground = false
     private var mWatchers = 0
-    private var mSince: Long = 0
+    @Volatile private var mSince: Long = 0
     @Volatile private var mLastError: String? = null
     private val mDeclined = HashSet<String>()
     private val mTick = Runnable { tick() }
@@ -222,7 +223,6 @@ object FriendsClient {
         } else {
             stopPolling()
         }
-        notifySnapshot()
     }
 
     fun setHosting(@NonNull address: String, @Nullable world: String?, @NonNull engine: String) {
@@ -291,7 +291,7 @@ object FriendsClient {
                 val r = FriendsApi.call("cs_sync", syncArgs(token))
                 snap = parse(r)
             } catch (e: IOException) {
-                error = e.message
+                error = e.message ?: "Network error"
             }
             val fs = snap
             val fe = error
@@ -310,6 +310,11 @@ object FriendsClient {
                 }
             }
         }
+    }
+
+    private fun optLongOpt(o: JSONObject, key: String): Long {
+        val v = o.opt(key)
+        return if (v is Number) v.toLong() else 0L
     }
 
     private fun parse(r: JSONObject): Snapshot {
@@ -345,7 +350,7 @@ object FriendsClient {
                     name = o.optString("name", ""),
                     code = o.optString("code", ""),
                     incoming = o.optBoolean("incoming", false),
-                    at = when(o.opt("at")) is Number -> (o.opt("at") as Number).toLong() else 0
+                    at = optLongOpt(o, "at")
                 ))
             }
         }
@@ -363,7 +368,7 @@ object FriendsClient {
                     world = if (o.isNull("world")) null else o.optString("world", null),
                     engine = o.optString("engine", "java"),
                     version = if (o.isNull("version")) null else o.optString("version", null),
-                    at = when(o.opt("at")) is Number -> (o.opt("at") as Number).toLong() else 0
+                    at = optLongOpt(o, "at")
                 ))
             }
         }
@@ -380,7 +385,7 @@ object FriendsClient {
                     from = o.optString("from", ""),
                     to = o.optString("to", ""),
                     body = o.optString("body", ""),
-                    at = when(o.opt("at")) is Number -> (o.opt("at") as Number).toLong() else 0,
+                    at = optLongOpt(o, "at"),
                     mine = mine,
                     image = if (o.isNull("image")) null else o.optString("image", null),
                     replyTo = if (o.isNull("reply_to")) null else o.optLong("reply_to").toString(),
@@ -395,7 +400,7 @@ object FriendsClient {
             }
         }
 
-        val now = when(r.opt("now")) is Number -> (r.opt("now") as Number).toLong() else System.currentTimeMillis()
+        val now = optLongOpt(r, "now")
         return Snapshot(friends = friends, requests = requests, invites = invites, messages = messages, now = now)
     }
 
@@ -519,8 +524,6 @@ object FriendsClient {
         notifySnapshot()
     }
 
-    private class MutableBoolean(var value: Boolean)
-
     private fun push(n: Note) {
         synchronized(mInbox) {
             mInbox.add(0, n)
@@ -620,26 +623,6 @@ object FriendsClient {
         try {
             val keys = synchronized(mSeen) { mSeen.toList() }
             val from = maxOf(0, keys.size - 400)
-            val seenArr = JSONArray()
-            for (i in from until keys.size) seenArr.put(keys[i])
-
-            val inboxArr = JSONArray()
-            synchronized(mInbox) {
-                for (n in mInbox) {
-                    val o = JSONObject()
-                    o.put("kind", n.kind)
-                    o.put("key", n.key)
-                    o.put("title", n.title)
-                    o.put("body", n.body)
-                    o.put("at", n.at)
-                    o.put("read", n.read)
-                    n.fromId?.let { o.put("fromId", it) }
-                    n.address?.let { o.put("address", it) }
-                    n.engine?.let { o.put("engine", it) }
-                    n.world?.let { o.put("world", it) }
-                    inboxArr.put(o)
-                }
-            }
             AllSettings.friendsSeenKeys.save(keys.subList(from, keys.size))
             val inboxList = ArrayList<String>()
             synchronized(mInbox) {
@@ -722,7 +705,7 @@ object FriendsClient {
         }
     }
 
-    fun account(register: Boolean, @NonNull username: String, @NonNull password, @Nullable display: String?, @NonNull cb: Result) {
+    fun account(register: Boolean, @NonNull username: String, @NonNull password: String, @Nullable display: String?, @NonNull cb: Result) {
         mIo.execute {
             var err: String? = null
             try {
@@ -739,4 +722,7 @@ object FriendsClient {
             mMain.post { cb?.done(fe) }
         }
     }
+
+    private class MutableBoolean(var value: Boolean)
+    private fun mutableBoolean() = MutableBoolean(false)
 }
