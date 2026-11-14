@@ -117,7 +117,6 @@ import com.movtery.zalithlauncher.ui.cs.screens.CsDiscoverScreen
 import com.movtery.zalithlauncher.ui.cs.screens.CsHomeScreen
 import com.movtery.zalithlauncher.ui.cs.screens.CsDownloadsScreen
 import com.movtery.zalithlauncher.ui.cs.screens.CsInstancesScreen
-import com.movtery.zalithlauncher.ui.cs.screens.CsFriendsScreen
 import com.movtery.zalithlauncher.ui.cs.screens.CsSettingsScreen
 import com.movtery.zalithlauncher.ui.cs.shell.CsDestination
 import com.movtery.zalithlauncher.ui.cs.shell.CsMenuItem
@@ -552,12 +551,6 @@ private fun NavigationUI(
                         addonInfoScreenKey = key.currentKey,
                         eventViewModel = eventViewModel,
                         submitError = submitError,
-                    )
-                }
-                entry<NormalNavKey.Friends> {
-                    CsFriendsScreen(
-                        onBack = { screenBackStackModel.mainScreen.backStack.removeFirstOrNull() },
-                        onToast = { eventViewModel.sendToast(it) }
                     )
                 }
                 entry<NormalNavKey.Multiplayer> {
