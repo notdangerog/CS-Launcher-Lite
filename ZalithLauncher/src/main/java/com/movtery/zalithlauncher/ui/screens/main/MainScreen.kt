@@ -110,7 +110,6 @@ import com.movtery.zalithlauncher.ui.screens.navigateTo
 import com.movtery.zalithlauncher.ui.screens.onBack
 import com.movtery.zalithlauncher.ui.screens.rememberTransitionSpec
 import com.movtery.zalithlauncher.ui.theme.backgroundColor
-import androidx.compose.runtime.mutableIntStateOf
 import com.movtery.zalithlauncher.ui.resolveAndroidString
 import com.movtery.zalithlauncher.ui.cs.data.CsAddonItem
 import com.movtery.zalithlauncher.ui.cs.data.CsDiscoverRequest
@@ -149,11 +148,9 @@ fun MainScreen(
     submitError: (ErrorViewModel.ThrowableMessage) -> Unit
 ) {
     //监控当前是否有任务正在进行
-    var runningTaskCount by remember { mutableIntStateOf(0) }
     LaunchedEffect(Unit) {
         TaskSystem.tasksFlow.collect { tasks ->
             eventViewModel.sendKeepScreen(tasks.isNotEmpty())
-            runningTaskCount = tasks.size
         }
     }
 
@@ -295,13 +292,7 @@ fun MainScreen(
                 onBack = {
                     screenBackStackModel.mainScreen.backStack.removeFirstOrNull()
                 },
-                runningTaskCount = runningTaskCount,
-                onOpenTasks = {
-                    screenBackStackModel.mainScreen.clearWith(NormalNavKey.Downloads)
-                },
-                menuItems = menuItems,
-                // 首页顶栏：品牌 Logo + 名称 + Minecraft 标识
-                showBrandLogo = selectedDestination == CsDestination.HOME
+                menuItems = menuItems
             ) {
                 NavStateHost(rootKey = screenBackStackModel.mainScreen) {
                     NavigationUI(

@@ -27,9 +27,12 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.movtery.zalithlauncher.R
 
 /**
  * CS Launcher Lite 设计系统调色板。
@@ -43,6 +46,12 @@ object CsColors {
 
     /** 次级背景（侧边栏、右侧信息栏） */
     val BackgroundSecondary = Color(0xFF171717)
+
+    /** 左侧导航栏背景 */
+    val Sidebar = Color(0xFF1C1C1C)
+
+    /** 右侧信息面板背景（首页） */
+    val Panel = Color(0xFF1C1C1C)
 
     /** 卡片 */
     val Card = Color(0xFF1E1E1E)
@@ -76,6 +85,9 @@ object CsColors {
 
     /** 边框 */
     val Border = Color(0xFF2A2A2A)
+
+    /** 顶栏的极细描边（比常规边框更淡） */
+    val HeaderOutline = Color(0xFF262626)
 
     /** 强边框（悬浮态） */
     val BorderStrong = Color(0xFF3D3D3D)
@@ -250,5 +262,15 @@ object CsSpacing {
     val sidebarWidth = 60.dp
 
     /** 顶栏高度 */
-    val topBarHeight = 46.dp
+    val topBarHeight = 40.dp
+}
+
+/**
+ * 像素字体（Minecraft 风格）。
+ *
+ * 字体文件：res/font/monocraft.ttf（Monocraft, SIL OFL 1.1, Idrees Hassan）。
+ * 仅用于品牌标题与导航文字，正文仍使用系统字体以保证可读性。
+ */
+object CsFonts {
+    val Minecraft = FontFamily(Font(R.font.monocraft))
 }

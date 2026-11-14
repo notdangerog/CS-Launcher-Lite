@@ -179,7 +179,7 @@ private fun HomeSplitLayout(
                     modifier = Modifier
                         .width(sidePanelWidth)
                         .fillMaxHeight()
-                        .background(CsColors.BackgroundSecondary)
+                        .background(CsColors.Panel)
                 ) {
                     side()
                 }
@@ -220,7 +220,7 @@ private fun HomeSplitLayout(
                             modifier = Modifier
                                 .width(42.dp)
                                 .fillMaxHeight()
-                                .background(CsColors.BackgroundSecondary),
+                                .background(CsColors.Panel),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Spacer(modifier = Modifier.height(12.dp))
@@ -237,7 +237,7 @@ private fun HomeSplitLayout(
                             modifier = Modifier
                                 .width(panelWidth)
                                 .fillMaxHeight()
-                                .background(CsColors.BackgroundSecondary)
+                                .background(CsColors.Panel)
                         ) {
                             side()
                         }
@@ -269,7 +269,7 @@ private fun SideDock(
 
     Column(
         modifier = modifier
-            .background(CsColors.BackgroundSecondary)
+            .background(CsColors.Panel)
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

@@ -13,11 +13,16 @@ package com.movtery.zalithlauncher.ui.cs.shell
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,16 +57,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.ui.cs.components.CsIconButton
 import com.movtery.zalithlauncher.ui.cs.components.csPressScale
 import com.movtery.zalithlauncher.ui.cs.theme.CsColors
+import com.movtery.zalithlauncher.ui.cs.theme.CsFonts
 import com.movtery.zalithlauncher.ui.cs.theme.CsSpacing
 
 /**
@@ -82,6 +93,27 @@ private val topDestinations = listOf(
     CsDestination.LIBRARY
 )
 
+/**
+ * Navigation label style: Minecraft-style pixel font, sized to fit inside the slim rail
+ * (Monocraft advances 2/3 em per glyph, so "Discover" is ~37 dp at 7 sp — never clipped).
+ */
+private val railLabelStyle = TextStyle(
+    fontFamily = CsFonts.Minecraft,
+    fontWeight = FontWeight.Normal,
+    fontSize = 7.sp,
+    lineHeight = 9.sp,
+    letterSpacing = 0.sp
+)
+
+/** Brand title style for the top header (pixel font, single line, no clipping). */
+private val brandTitleStyle = TextStyle(
+    fontFamily = CsFonts.Minecraft,
+    fontWeight = FontWeight.Normal,
+    fontSize = 12.sp,
+    lineHeight = 14.sp,
+    letterSpacing = 0.sp
+)
+
 /** Extra tools that are not primary destinations (engine features, kept out of the rail). */
 data class CsMenuItem(
     val label: String,
@@ -90,7 +122,7 @@ data class CsMenuItem(
 )
 
 /**
- * The single application shell: ultra-slim icon-only rail + slim top bar + content area.
+ * The single application shell: ultra-slim icon rail + slim top bar + content area.
  *
  * This is the only navigation surface in the app — no second rail, no tab bar, no duplicated buttons.
  */
@@ -102,10 +134,7 @@ fun CsShell(
     onBack: () -> Unit,
     title: String,
     canGoBack: Boolean,
-    runningTaskCount: Int,
-    onOpenTasks: () -> Unit,
     menuItems: List<CsMenuItem>,
-    showBrandLogo: Boolean = false,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -123,11 +152,8 @@ fun CsShell(
         Column(modifier = Modifier.fillMaxSize()) {
             CsTopBar(
                 title = title,
-                showBrandLogo = showBrandLogo,
                 canGoBack = canGoBack,
                 onBack = onBack,
-                runningTaskCount = runningTaskCount,
-                onOpenTasks = onOpenTasks,
                 menuItems = menuItems
             )
 
@@ -143,8 +169,9 @@ fun CsShell(
 }
 
 /**
- * Ultra-slim rail: thin-line icons only, no text labels.
- * The active destination is highlighted with a rounded green capsule behind the icon.
+ * Ultra-slim rail: thin-line icons with small pixel labels.
+ * The active destination is marked by a rounded green capsule that springs into place
+ * plus a slim accent bar on the rail's inner edge.
  */
 @Composable
 private fun CsNavRail(
@@ -156,22 +183,10 @@ private fun CsNavRail(
         modifier = Modifier
             .width(CsSpacing.sidebarWidth)
             .fillMaxHeight()
-            .background(CsColors.BackgroundSecondary),
+            .background(CsColors.Sidebar),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Brand mark: the CS Launcher Lite logo (identity, not navigation)
-        Image(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(RoundedCornerShape(10.dp)),
-            painter = painterResource(R.drawable.ic_cs_brand),
-            contentDescription = stringResource(R.string.cs_app_name),
-            contentScale = ContentScale.Fit
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Main navigation: Home, Discover, Library — grouped, compact spacing
         topDestinations.forEach { destination ->
@@ -192,6 +207,7 @@ private fun CsNavRail(
         )
         CsRailActionItem(
             iconRes = R.drawable.ic_exit_to_app,
+            label = stringResource(R.string.cs_nav_exit),
             contentDescription = stringResource(R.string.cs_nav_exit),
             tint = CsColors.TextSecondary,
             onClick = onExit
@@ -204,38 +220,41 @@ private fun CsNavRail(
 @Composable
 private fun CsRailActionItem(
     iconRes: Int,
+    label: String,
     contentDescription: String,
     tint: Color,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
-    Box(
+    Column(
         modifier = Modifier
             .width(CsSpacing.sidebarWidth)
-            .height(44.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .width(26.dp)
-                .height(30.dp)
-                .clip(CircleShape)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick
-                )
-                .csPressScale(interactionSource, pressedScale = 0.9f),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                modifier = Modifier.size(18.dp),
-                painter = painterResource(iconRes),
-                contentDescription = contentDescription,
-                tint = tint
+            .height(46.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
             )
-        }
+            .csPressScale(interactionSource, pressedScale = 0.92f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            modifier = Modifier.size(18.dp),
+            painter = painterResource(iconRes),
+            contentDescription = contentDescription,
+            tint = tint
+        )
+        Spacer(modifier = Modifier.height(3.dp))
+        Text(
+            text = label,
+            style = railLabelStyle,
+            color = CsColors.TextTertiary,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -247,67 +266,126 @@ private fun CsRailItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
-    // "Sleek rounded green capsule" for the active tab
-    val capsuleColor by animateColorAsState(
-        targetValue = if (selected) CsColors.AccentSoft else Color.Transparent,
-        label = "csRailCapsule"
+    // Polished selection: the capsule springs between sizes while the accent bar grows from zero,
+    // so switching Home → Discover → Library reads as one continuous motion.
+    val capsuleSpring = spring<Dp>(
+        dampingRatio = 0.55f,
+        stiffness = Spring.StiffnessMediumLow
     )
     val capsuleWidth by animateDpAsState(
-        targetValue = if (selected) 30.dp else 22.dp,
+        targetValue = if (selected) 34.dp else 24.dp,
+        animationSpec = capsuleSpring,
         label = "csRailCapsuleWidth"
     )
     val capsuleHeight by animateDpAsState(
-        targetValue = if (selected) 40.dp else 30.dp,
+        targetValue = if (selected) 32.dp else 26.dp,
+        animationSpec = capsuleSpring,
         label = "csRailCapsuleHeight"
+    )
+    val barHeight by animateDpAsState(
+        targetValue = if (selected) 18.dp else 0.dp,
+        animationSpec = capsuleSpring,
+        label = "csRailBarHeight"
+    )
+    val barAlpha by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(durationMillis = 180),
+        label = "csRailBarAlpha"
+    )
+    val iconScale by animateFloatAsState(
+        targetValue = if (selected) 1f else 0.92f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMedium),
+        label = "csRailIconScale"
+    )
+    val capsuleColor by animateColorAsState(
+        targetValue = if (selected) CsColors.AccentSoft else Color.Transparent,
+        animationSpec = tween(durationMillis = 220),
+        label = "csRailCapsule"
     )
     val tint by animateColorAsState(
         targetValue = if (selected) CsColors.Accent else CsColors.TextSecondary,
+        animationSpec = tween(durationMillis = 220),
         label = "csRailTint"
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (selected) CsColors.Accent else CsColors.TextTertiary,
+        animationSpec = tween(durationMillis = 220),
+        label = "csRailLabel"
     )
 
     Box(
         modifier = Modifier
             .width(CsSpacing.sidebarWidth)
-            .height(44.dp),
-        contentAlignment = Alignment.Center
+            .height(46.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .csPressScale(interactionSource, pressedScale = 0.92f)
     ) {
+        // Inner-edge accent bar: grows out of nothing when the item becomes active
         Box(
             modifier = Modifier
-                .width(capsuleWidth)
-                .height(capsuleHeight)
-                .clip(CircleShape)
-                .background(capsuleColor)
-                .then(
-                    if (selected) {
-                        Modifier.border(1.dp, CsColors.AccentDark, CircleShape)
-                    } else Modifier
-                )
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick
-                )
-                .csPressScale(interactionSource, pressedScale = 0.9f),
-            contentAlignment = Alignment.Center
+                .align(Alignment.CenterStart)
+                .width(3.dp)
+                .height(barHeight)
+                .clip(RoundedCornerShape(topEnd = 3.dp, bottomEnd = 3.dp))
+                .background(CsColors.Accent.copy(alpha = barAlpha))
+        )
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                modifier = Modifier.size(19.dp),
-                painter = painterResource(destination.iconRes),
-                contentDescription = stringResource(destination.labelRes),
-                tint = tint
+            Box(
+                modifier = Modifier
+                    .width(capsuleWidth)
+                    .height(capsuleHeight)
+                    .clip(CircleShape)
+                    .background(capsuleColor)
+                    .then(
+                        if (selected) {
+                            Modifier.border(1.dp, CsColors.AccentDark, CircleShape)
+                        } else Modifier
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .scale(iconScale),
+                    painter = painterResource(destination.iconRes),
+                    contentDescription = stringResource(destination.labelRes),
+                    tint = tint
+                )
+            }
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            Text(
+                text = stringResource(destination.labelRes),
+                style = railLabelStyle,
+                color = labelColor,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
 
+/**
+ * Slim top header: exactly one logo (circular brand mark) and one title
+ * ("CS Launcher" + "Lite" in the accent colour) in a Minecraft-style pixel font.
+ * No Minecraft tag, no task/status chip — only the overflow menu remains.
+ */
 @Composable
 private fun CsTopBar(
     title: String,
-    showBrandLogo: Boolean,
     canGoBack: Boolean,
     onBack: () -> Unit,
-    runningTaskCount: Int,
-    onOpenTasks: () -> Unit,
     menuItems: List<CsMenuItem>
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
@@ -316,12 +394,13 @@ private fun CsTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(CsSpacing.topBarHeight),
-        color = CsColors.Background
+        color = CsColors.Background,
+        border = BorderStroke(1.dp, CsColors.HeaderOutline)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 14.dp),
+                .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AnimatedVisibility(
@@ -334,62 +413,59 @@ private fun CsTopBar(
                         iconRes = R.drawable.ic_arrow_back,
                         contentDescription = stringResource(R.string.generic_back),
                         onClick = onBack,
-                        size = 30.dp,
-                        iconSize = 16.dp
+                        size = 28.dp,
+                        iconSize = 15.dp
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                 }
             }
 
+            // Brand mark — the single logo in the header/navigation area
+            Image(
+                modifier = Modifier.size(22.dp),
+                painter = painterResource(R.drawable.ic_cs_brand_round),
+                contentDescription = null,
+                contentScale = ContentScale.Fit
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Brand title — one title, two tones
             Text(
-                modifier = Modifier.weight(1f),
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
+                text = stringResource(R.string.cs_brand_name),
+                style = brandTitleStyle,
                 color = CsColors.TextPrimary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                softWrap = false
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = stringResource(R.string.cs_brand_lite),
+                style = brandTitleStyle,
+                color = CsColors.Accent,
+                maxLines = 1,
+                softWrap = false
             )
 
-            if (showBrandLogo) {
-                Spacer(modifier = Modifier.width(7.dp))
-                Text(
-                    text = stringResource(R.string.cs_header_minecraft),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = CsColors.BrandGreen,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(CsColors.BackgroundSecondary)
-                    .border(1.dp, CsColors.Border, RoundedCornerShape(8.dp))
-                    .clickable(enabled = runningTaskCount > 0, onClick = onOpenTasks)
-                    .padding(horizontal = 9.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (canGoBack) {
+                // Nested screens keep their own title (secondary, never competing with the brand)
+                Spacer(modifier = Modifier.width(10.dp))
                 Box(
                     modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(if (runningTaskCount > 0) CsColors.Accent else CsColors.TextTertiary)
+                        .width(1.dp)
+                        .height(12.dp)
+                        .background(CsColors.HeaderOutline)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = if (runningTaskCount > 0) {
-                        stringResource(R.string.cs_status_tasks, runningTaskCount)
-                    } else {
-                        stringResource(R.string.cs_status_idle)
-                    },
+                    modifier = Modifier.weight(1f),
+                    text = title,
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (runningTaskCount > 0) CsColors.TextPrimary else CsColors.TextSecondary,
+                    color = CsColors.TextSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
             }
 
             if (menuItems.isNotEmpty()) {
@@ -399,8 +475,8 @@ private fun CsTopBar(
                         iconRes = R.drawable.ic_more_vert,
                         contentDescription = stringResource(R.string.cs_more_menu),
                         onClick = { menuExpanded = true },
-                        size = 30.dp,
-                        iconSize = 16.dp
+                        size = 28.dp,
+                        iconSize = 15.dp
                     )
                     DropdownMenu(
                         expanded = menuExpanded,
