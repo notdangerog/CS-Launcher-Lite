@@ -208,9 +208,10 @@ private fun CsNavRail(
         Spacer(modifier = Modifier.height(10.dp))
 
         // Main navigation: Home, Discover, Library — directly below the logo
-        topDestinations.forEachIndexed { index, destination ->
+        for (i in topDestinations.indices) {
+            val destination = topDestinations[i]
             AnimatedVisibility(
-                enter = fadeIn(animationSpec = staggeredEnter(index, baseDelayMillis = 30, durationMillis = 400)),
+                enter = fadeIn(animationSpec = staggeredEnter(i, baseDelayMillis = 30, durationMillis = 400)),
                 exit = fadeOut()
             ) {
                 CsRailItem(

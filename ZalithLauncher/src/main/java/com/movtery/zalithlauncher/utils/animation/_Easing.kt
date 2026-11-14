@@ -22,14 +22,13 @@ import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import kotlin.math.cos
-import kotlin.math.pow
 import kotlin.math.sin
 
 /**
  * 平滑结束缓动（保留，用于旧页面退场）
  */
 class EaseOutFluent(private val power: Int) : Easing {
-    override fun transform(fraction: Float): Float = 1f - (1f - fraction).coerceIn(0f, 1f).pow(power)
+    override fun transform(fraction: Float): Float = 1f - Math.pow((1f - fraction).coerceIn(0f, 1f).toDouble(), power.toDouble()).toFloat()
 }
 
 /**
@@ -40,7 +39,7 @@ class EaseOutBack(power: Int) : Easing {
 
     override fun transform(fraction: Float): Float {
         val t = fraction.coerceIn(0f, 1f)
-        return 1f - (1f - t).pow(exponent) * cos(1.5f * Math.PI * t).toFloat()
+        return 1f - Math.pow((1f - t).toDouble(), exponent.toDouble()).toFloat() * cos(1.5f * Math.PI * t).toFloat()
     }
 }
 

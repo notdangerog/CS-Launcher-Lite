@@ -130,7 +130,7 @@ object FriendsClient {
         fun onFriendsError(message: String) {}
     }
 
-    interface Result {
+    fun interface Result {
         fun done(@Nullable error: String?)
     }
 
@@ -154,7 +154,7 @@ object FriendsClient {
     @Volatile private var mLoaded = false
     @Volatile private var mBackground = false
     private var mWatchers = 0
-    @Volatile private var mSince: Long = 0
+    private var mSince: Long = 0
     @Volatile private var mLastError: String? = null
     private val mDeclined = HashSet<String>()
     private val mTick = Runnable { tick() }

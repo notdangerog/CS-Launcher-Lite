@@ -5,8 +5,10 @@
 
 package com.movtery.zalithlauncher.ui.screens.content
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -69,7 +71,7 @@ fun CsFriendsScreen(
 ) {
     val client = FriendsClient
 
-    val snapshot by remember { mutableStateOf(client.snapshot()) }
+    val friendsSnapshot by remember { mutableStateOf(client.snapshot()) }
     val inbox by remember { mutableStateOf(client.inbox()) }
 
     var tab by remember { mutableStateOf(0) } // 0 friends, 1 requests, 2 invites, 3 messages
@@ -79,7 +81,7 @@ fun CsFriendsScreen(
     LaunchedEffect(Unit) {
         client.addListener(object : FriendsClient.Listener {
             override fun onFriendsChanged(s: Snapshot) {
-                snapshot.value = s
+                friendsSnapshot.value = s
             }
             override fun onNote(n: Note) {
                 inbox.value = client.inbox()
@@ -148,10 +150,10 @@ fun CsFriendsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             when (tab) {
-                0 -> FriendsList(snapshot.value.friends, client, onToast)
-                1 -> RequestsList(snapshot.value.requests, client, onToast)
-                2 -> InvitesList(snapshot.value.invites, client, onToast)
-                3 -> MessagesList(snapshot.value.messages, client, onToast)
+                0 -> FriendsList(friendsSnapshot.value.friends, client, onToast)
+                1 -> RequestsList(friendsSnapshot.value.requests, client, onToast)
+                2 -> InvitesList(friendsSnapshot.value.invites, client, onToast)
+                3 -> MessagesList(friendsSnapshot.value.messages, client, onToast)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
