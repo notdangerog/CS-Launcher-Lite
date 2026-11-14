@@ -75,6 +75,25 @@ sealed interface NormalNavKey : TitledNavKey {
         @Contextual override val title: AndroidStringText = androidText(R.string.terracotta_terracotta)
     }
 
+    /**
+     * CS friends screen — presence, requests, world invites and chat.
+     *
+     * A top-level destination rather than a settings sub-screen: it is a place the player returns to
+     * constantly while playing, and burying it under settings would make "who is online" four taps
+     * away.
+     */
+    @Serializable data object Friends : NormalNavKey {
+        @Contextual override val title: AndroidStringText = androidText(R.string.cs_friends_title)
+    }
+
+    /**
+     * World hosting screen — the player limit, who may join, and the live address of a world that is
+     * currently open to friends.
+     */
+    @Serializable data object WorldHost : NormalNavKey {
+        @Contextual override val title: AndroidStringText = androidText(R.string.cs_host_title)
+    }
+
     /** 查看日志屏幕 */
     @Serializable data class LogView(
         val logPath: String

@@ -97,6 +97,7 @@ import com.movtery.zalithlauncher.utils.network.openLinkInternal
 import com.movtery.zalithlauncher.utils.string.getMessageOrToString
 import com.movtery.zalithlauncher.viewmodel.BackgroundViewModel
 import com.movtery.zalithlauncher.viewmodel.ErrorViewModel
+import com.movtery.zalithlauncher.friends.FriendsClient
 import com.movtery.zalithlauncher.viewmodel.EventViewModel
 import com.movtery.zalithlauncher.viewmodel.LaunchGameViewModel
 import com.movtery.zalithlauncher.viewmodel.LauncherUpgradeOperation
@@ -799,6 +800,17 @@ class MainActivity : BaseAppCompatActivity() {
     override fun onResume() {
         super.onResume()
         ControlManager.checkDefaultAndRefresh(this@MainActivity)
+        // Foreground: the friends poll comes back up to the visible rate. Presence set while the app
+        // was away is re-reported here, so a friend does not stay "offline" through a screen-off gap.
+        FriendsClient.setBackgroundWatch(false)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Background, not stopped: presence keeps reporting at the slow heartbeat rate instead of
+        // dropping the player offline, and an invitation that arrives while the launcher is in a
+        // pocket still lands. A hosted world keeps its own watcher, so this is only about the UI.
+        FriendsClient.setBackgroundWatch(true)
     }
 
     @SuppressLint("RestrictedApi")
