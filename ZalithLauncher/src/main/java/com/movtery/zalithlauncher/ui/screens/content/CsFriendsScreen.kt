@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +52,12 @@ import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.androidText
+import com.movtery.zalithlauncher.ui.cs.friends.Friend
+import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient
+import com.movtery.zalithlauncher.ui.cs.friends.Invite
+import com.movtery.zalithlauncher.ui.cs.friends.Message
+import com.movtery.zalithlauncher.ui.cs.friends.Request
+import com.movtery.zalithlauncher.ui.cs.friends.Snapshot
 import com.movtery.zalithlauncher.ui.cs.components.CsCard
 import com.movtery.zalithlauncher.ui.cs.components.CsIconButton
 import com.movtery.zalithlauncher.ui.cs.components.CsPrimaryButton
@@ -164,7 +171,7 @@ fun CsFriendsScreen(
                 onAdd = { code ->
                     client.addFriend(code) { error ->
                         if (error == null) {
-                            onToast?.invoke(androidText(R.string.cs_friends_request_sent))
+                            onToast?.invoke(androidText(stringResource(R.string.cs_friends_request_sent)))
                             showAddDialog = false
                             addCode.value = ""
                         } else {
@@ -178,7 +185,7 @@ fun CsFriendsScreen(
 }
 
 @Composable
-private fun FriendsList(friends: List<Friend>, client: FriendsClient, onToast: ((String) -> Unit)?) {
+private fun FriendsList(friends: List<Friend>, client: FriendsClient, onToast: ((AndroidStringText) -> Unit)?) {
     if (friends.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -238,7 +245,7 @@ private fun FriendsList(friends: List<Friend>, client: FriendsClient, onToast: (
 }
 
 @Composable
-private fun RequestsList(requests: List<Request>, client: FriendsClient, onToast: ((String) -> Unit)?) {
+private fun RequestsList(requests: List<Request>, client: FriendsClient, onToast: ((AndroidStringText) -> Unit)?) {
     if (requests.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = "No pending requests", style = MaterialTheme.typography.bodyMedium, color = CsColors.TextSecondary)
@@ -268,8 +275,8 @@ private fun RequestsList(requests: List<Request>, client: FriendsClient, onToast
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CsSecondaryButton(text = stringResource(R.string.cs_friends_accept), onClick = { client.respond(req.id, true) { onToast?.invoke(androidText("Accepted")) } }, compact = true)
-                        CsSecondaryButton(text = stringResource(R.string.cs_friends_decline), onClick = { client.respond(req.id, false) { onToast?.invoke(androidText("Declined")) } }, compact = true)
+                        CsSecondaryButton(text = stringResource(R.string.cs_friends_accept), onClick = { client.respond(req.id, true) { error -> if (error == null) onToast?.invoke(androidText("Accepted")) else onToast?.invoke(androidText(error)) } }, compact = true)
+                        CsSecondaryButton(text = stringResource(R.string.cs_friends_decline), onClick = { client.respond(req.id, false) { error -> if (error == null) onToast?.invoke(androidText("Declined")) else onToast?.invoke(androidText(error)) } }, compact = true)
                     }
                 }
             }
@@ -278,7 +285,7 @@ private fun RequestsList(requests: List<Request>, client: FriendsClient, onToast
 }
 
 @Composable
-private fun InvitesList(invites: List<Invite>, client: FriendsClient, onToast: ((String) -> Unit)?) {
+private fun InvitesList(invites: List<Invite>, client: FriendsClient, onToast: ((AndroidStringText) -> Unit)?) {
     val openInvites = client.openInvites()
     if (openInvites.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -317,7 +324,7 @@ private fun InvitesList(invites: List<Invite>, client: FriendsClient, onToast: (
 }
 
 @Composable
-private fun MessagesList(messages: List<Message>, client: FriendsClient, onToast: ((String) -> Unit)?) {
+private fun MessagesList(messages: List<Message>, client: FriendsClient, onToast: ((AndroidStringText) -> Unit)?) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = stringResource(R.string.cs_friends_select_conversation), style = MaterialTheme.typography.bodyMedium, color = CsColors.TextSecondary)
     }

@@ -60,7 +60,7 @@ object FriendsApi {
         c.setRequestProperty("Content-Type", "application/json")
         c.setRequestProperty("Accept", "application/json")
         val out = body.toByteArray(StandardCharsets.UTF_8)
-        OutputStream(c.outputStream).use { it.write(out) }
+        c.outputStream.use { it.write(out) }
         return try {
             val code = c.responseCode
             val inStream = if (code >= 400) c.errorStream else c.inputStream
