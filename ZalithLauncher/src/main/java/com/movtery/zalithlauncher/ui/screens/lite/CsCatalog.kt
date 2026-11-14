@@ -11,11 +11,6 @@
 package com.movtery.zalithlauncher.ui.screens.lite
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -73,6 +68,9 @@ import com.movtery.zalithlauncher.game.download.assets.platform.searchAssets
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.androidText
 import com.movtery.zalithlauncher.ui.design.CsCard
+import com.movtery.zalithlauncher.ui.design.CsDuration
+import com.movtery.zalithlauncher.ui.design.csShimmer
+import com.movtery.zalithlauncher.ui.design.rememberCsShimmerPhase
 import com.movtery.zalithlauncher.ui.design.CsEmptyState
 import com.movtery.zalithlauncher.ui.design.CsIconButton
 import com.movtery.zalithlauncher.ui.design.CsPrimaryButton
@@ -629,16 +627,11 @@ fun CsCatalogError(onRetry: () -> Unit, modifier: Modifier = Modifier) {
  */
 @Composable
 fun CsCatalogSkeleton(height: Dp, modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "CsCatalogSkeleton")
-    val alpha by transition.animateFloat(
-        initialValue = 0.35f,
-        targetValue = 0.75f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 900),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "CsCatalogSkeletonAlpha"
-    )
+    // A travelling highlight rather than a whole-block alpha pulse. The old version reversed at
+    // 0.35/0.75, and that turn-around is an acceleration kink the eye catches as a flicker when
+    // several skeleton rows share it. A one-directional sweep has no seam and gives the eye a
+    // direction to follow, which reads as "working" instead of "blinking".
+    val phase = rememberCsShimmerPhase(CsDuration.Loop)
 
     Box(
         modifier = modifier
@@ -651,8 +644,13 @@ fun CsCatalogSkeleton(height: Dp, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxSize()
-                .alpha(alpha)
+                .alpha(0.55f)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .csShimmer(
+                    phase = phase,
+                    highlight = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    angleDegrees = 18f
+                )
         )
     }
 }

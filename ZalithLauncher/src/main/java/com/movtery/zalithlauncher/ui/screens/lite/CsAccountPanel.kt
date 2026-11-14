@@ -12,11 +12,8 @@ package com.movtery.zalithlauncher.ui.screens.lite
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import com.movtery.zalithlauncher.ui.design.CsSpring
+import com.movtery.zalithlauncher.ui.design.CsTransitions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -131,10 +128,14 @@ fun CsAccountPanel(
                     onManage = { expanded = !expanded }
                 )
 
+                // Shared disclosure motion: the same expand/collapse curve every other
+                // reveal in the launcher uses, and re-timed by the launcher's speed dial.
+                val (listEnter, listExit) = CsTransitions.expand(vertical = true)
                 AnimatedVisibility(
                     visible = expanded,
-                    enter = fadeIn(tween(140)) + expandVertically(tween(180)),
-                    exit = fadeOut(tween(110)) + shrinkVertically(tween(150))
+                    enter = listEnter,
+                    exit = listExit,
+                    label = "CsAccountListExpand"
                 ) {
                     Column {
                         Spacer(modifier = Modifier.height(CsSpace.m))
@@ -279,9 +280,12 @@ private fun CurrentAccountCard(
     expanded: Boolean,
     onManage: () -> Unit
 ) {
+    // A spring, not a tween: the chevron gets toggled twice in quick succession often enough that
+    // a fixed 180 ms clock would visibly restart. A spring reverses from its current velocity, so
+    // double-tapping the card flips the arrow smoothly instead of stuttering.
     val rotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
-        animationSpec = tween(durationMillis = 180),
+        animationSpec = CsSpring.stiff(visibilityThreshold = 0.1f),
         label = "CsAccountChevron"
     )
 
