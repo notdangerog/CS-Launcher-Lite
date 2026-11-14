@@ -209,11 +209,8 @@ private fun CsNavRail(
         // Main navigation: Home, Discover, Library — directly below the logo
         topDestinations.forEachIndexed { index, destination ->
             AnimatedVisibility(
-                enter = fadeIn(animationSpec = staggeredEnter(index, baseDelayMillis = 30, durationMillis = 400)) + slideInVertically(
-                    initialOffsetY = { 12.dp },
-                    animationSpec = staggeredEnter(index, baseDelayMillis = 30, durationMillis = 400)
-                ),
-                exit = fadeOut() + slideOutVertically(targetOffsetY = { 12.dp })
+                enter = fadeIn(animationSpec = staggeredEnter(index, baseDelayMillis = 30, durationMillis = 400)),
+                exit = fadeOut()
             ) {
                 CsRailItem(
                     destination = destination,

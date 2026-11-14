@@ -428,7 +428,7 @@ object FriendsClient {
         val before = mSnapshot
         mSnapshot = merged
 
-        val inboxChanged = mutableBoolean(false)
+        val inboxChanged = MutableBoolean(false)
 
         for (f in s.friends) {
             if (!f.hosting() || !JoinWorld.isKnownHost(f.id)) continue
@@ -712,7 +712,7 @@ object FriendsClient {
                 val a = JSONObject().apply {
                     put("p_username", username.trim())
                     put("p_password", password)
-                    if (register) a.put("p_display", if (display.isNullOrBlank()) username.trim() else display.trim())
+                    if (register) put("p_display", if (display.isNullOrBlank()) username.trim() else display.trim())
                 }
                 val r = FriendsApi.call(if (register) "cs_account_register" else "cs_account_login", a)
                 if (!r.has("token")) throw IOException("Unexpected reply from the account service")

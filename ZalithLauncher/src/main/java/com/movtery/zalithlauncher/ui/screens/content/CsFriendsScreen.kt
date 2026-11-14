@@ -52,12 +52,12 @@ import androidx.compose.ui.unit.dp
 import com.movtery.zalithlauncher.R
 import com.movtery.zalithlauncher.ui.AndroidStringText
 import com.movtery.zalithlauncher.ui.androidText
-import com.movtery.zalithlauncher.ui.cs.friends.Friend
 import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient
-import com.movtery.zalithlauncher.ui.cs.friends.Invite
-import com.movtery.zalithlauncher.ui.cs.friends.Message
-import com.movtery.zalithlauncher.ui.cs.friends.Request
-import com.movtery.zalithlauncher.ui.cs.friends.Snapshot
+import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Friend
+import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Invite
+import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Message
+import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Request
+import com.movtery.zalithlauncher.ui.cs.friends.FriendsClient.Snapshot
 import com.movtery.zalithlauncher.ui.cs.components.CsCard
 import com.movtery.zalithlauncher.ui.cs.components.CsIconButton
 import com.movtery.zalithlauncher.ui.cs.components.CsPrimaryButton
@@ -118,7 +118,7 @@ fun CsFriendsScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                listOf(
+                listOf<Pair<Int, String>>(
                     Pair(0, stringResource(R.string.cs_friends_title)),
                     Pair(1, stringResource(R.string.cs_friends_requests)),
                     Pair(2, stringResource(R.string.cs_friends_invites)),

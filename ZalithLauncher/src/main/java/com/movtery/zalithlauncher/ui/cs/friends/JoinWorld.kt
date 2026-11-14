@@ -27,7 +27,7 @@ object JoinWorld {
     /** Hosts (friend ids) whose world the player joined before: joinable again without an invite. */
     fun isKnownHost(@Nullable friendId: String?): Boolean {
         if (friendId == null) return false
-        val known: Set<String>? = AllSettings.friendsSeenKeys.state.toSet()
+        val known = AllSettings.friendsSeenKeys.state.toSet()
         return known.contains(friendId)
     }
 
