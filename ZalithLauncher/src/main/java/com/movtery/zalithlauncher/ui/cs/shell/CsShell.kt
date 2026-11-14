@@ -169,7 +169,7 @@ fun CsShell(
 }
 
 /**
- * Ultra-slim rail: thin-line icons with small pixel labels.
+ * Ultra-slim rail: brand logo at the top-left, then the navigation icons with small pixel labels.
  * The active destination is marked by a rounded green capsule that springs into place
  * plus a slim accent bar on the rail's inner edge.
  */
@@ -186,9 +186,21 @@ private fun CsNavRail(
             .background(CsColors.Sidebar),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Main navigation: Home, Discover, Library — grouped, compact spacing
+        // Brand mark: the single CS Launcher Lite logo, top-left of the rail, above Home
+        Image(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(10.dp)),
+            painter = painterResource(R.drawable.ic_cs_brand_round),
+            contentDescription = stringResource(R.string.cs_brand_name),
+            contentScale = ContentScale.Fit
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Main navigation: Home, Discover, Library — directly below the logo
         topDestinations.forEach { destination ->
             CsRailItem(
                 destination = destination,
@@ -377,9 +389,9 @@ private fun CsRailItem(
 }
 
 /**
- * Slim top header: exactly one logo (circular brand mark) and one title
- * ("CS Launcher" + "Lite" in the accent colour) in a Minecraft-style pixel font.
- * No Minecraft tag, no task/status chip — only the overflow menu remains.
+ * Slim top header: text only — "CS Launcher" + "Lite" in the accent colour, in a
+ * Minecraft-style pixel font. The single CS Launcher Lite logo sits in the rail's
+ * top-left corner. No Minecraft tag, no task/status chip.
  */
 @Composable
 private fun CsTopBar(
@@ -420,16 +432,7 @@ private fun CsTopBar(
                 }
             }
 
-            // Brand mark — the single logo in the header/navigation area
-            Image(
-                modifier = Modifier.size(22.dp),
-                painter = painterResource(R.drawable.ic_cs_brand_round),
-                contentDescription = null,
-                contentScale = ContentScale.Fit
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Brand title — one title, two tones
+            // Brand title — the only logo lives in the rail, so the header is text only
             Text(
                 text = stringResource(R.string.cs_brand_name),
                 style = brandTitleStyle,

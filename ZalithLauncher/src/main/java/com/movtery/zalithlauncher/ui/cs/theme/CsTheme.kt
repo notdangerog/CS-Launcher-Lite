@@ -48,10 +48,10 @@ object CsColors {
     val BackgroundSecondary = Color(0xFF171717)
 
     /** 左侧导航栏背景 */
-    val Sidebar = Color(0xFF1C1C1C)
+    val Sidebar = Color(0xFF171717)
 
-    /** 右侧信息面板背景（首页） */
-    val Panel = Color(0xFF1C1C1C)
+    /** 右侧信息面板背景（首页：Playing as / Friends / News） */
+    val Panel = Color(0xFF171717)
 
     /** 卡片 */
     val Card = Color(0xFF1E1E1E)
