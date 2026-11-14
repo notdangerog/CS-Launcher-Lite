@@ -3207,4 +3207,46 @@
     <string name="cs_header_minecraft">Minecraft</string>
     <string name="cs_library_search">Search instances…</string>
     <string name="cs_library_no_results">No instances match your search</string>
+
+    <!-- ================= CS Friends ================= -->
+    <!-- Title of the friends screen -->
+    <string name="cs_friends_title">Friends</string>
+    <!-- Empty state on the friends screen -->
+    <string name="cs_friends_empty">No friends yet. Add a friend by their CS code to play together.</string>
+    <!-- Hint of the friend code input field -->
+    <string name="cs_friends_code_hint">Enter friend code</string>
+    <!-- Button to send a friend request -->
+    <string name="cs_friends_add">Add friend</string>
+    <!-- Confirm dialog when sending a friend request -->
+    <string name="cs_friends_request_sent">Friend request sent</string>
+    <!-- Incoming friend requests tab title -->
+    <string name="cs_friends_requests">Requests</string>
+    <!-- Button to accept a friend request -->
+    <string name="cs_friends_accept">Accept</string>
+    <!-- Button to decline a friend request -->
+    <string name="cs_friends_decline">Decline</string>
+    <!-- Invites tab title -->
+    <string name="cs_friends_invites">Invites</string>
+    <!-- Button to join a friend's world from an invite -->
+    <string name="cs_friends_join">Join world</string>
+    <!-- Messages tab title -->
+    <string name="cs_friends_messages">Messages</string>
+    <!-- Placeholder when no conversation is selected -->
+    <string name="cs_friends_select_conversation">Select a friend to chat</string>
+    <!-- Button to send a message -->
+    <string name="cs_friends_send">Send</string>
+    <!-- Toast when joining a friend's world -->
+    <string name="friends_joining">Joining %s…</string>
+    <!-- Toast when no suitable profile exists for the host's engine -->
+    <string name="friends_no_profile_java">No Java profile matches this world.</string>
+    <string name="friends_no_profile_horizon">No Horizon profile matches this world.</string>
+    <!-- Notification channel name -->
+    <string name="friends_channel_name">CS Friends</string>
+    <!-- Notification channel description -->
+    <string name="friends_channel_desc">Friend requests, invites and messages</string>
+    <!-- Cross-version join strings -->
+    <string name="cross_version_ready">Cross-version ready via %s for %s</string>
+    <string name="cross_version_failed">Cross-version join failed for %s</string>
+    <string name="cross_version_forge_newer">Forge clients cannot join a newer Forge host.</string>
+    <string name="cross_version_vanilla">Vanilla profiles can only join the same version.</string>
 </resources>

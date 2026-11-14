@@ -642,4 +642,26 @@ object AllSettings : SettingsRegistry() {
      * 搜索光影的初始搜索平台
      */
     val searchShadersPlatform = enumSetting("searchShadersPlatform", Platform.CURSEFORGE)
+
+    // ── CS Friends 会话（Supabase，不保留密码，只保留稳定的友人 token） ──
+    /** 好友系统登录凭证（cs_account_login / cs_account_register 返回） */
+    val friendsToken = stringSetting("cs.friends.token", "")
+    /** 好友系统用户名 */
+    val friendsUsername = stringSetting("cs.friends.username", "")
+    /** 好友系统显示名 */
+    val friendsDisplayName = stringSetting("cs.friends.name", "")
+    /** 好友系统好友代码 */
+    val friendsCode = stringSetting("cs.friends.code", "")
+    /** 好友系统内部 id */
+    val friendsId = stringSetting("cs.friends.id", "")
+    /** 已去重过的通知 key（最新 400 条） */
+    val friendsSeenKeys = stringListSetting("cs.friends.seen", emptyList())
+    /** 本地通知收件箱（JSON 字符串列表，最新 80 条） */
+    val friendsInbox = stringListSetting("cs.friends.inbox", emptyList())
+    /** 世界主机：允许加入的人 0=任何人 1=仅好友 2=仅受邀者 */
+    val hostAccess = intSetting("cs.host.access", 1, 0, 2)
+    /** 世界主机：最大玩家数（0 = 不限制） */
+    val hostMaxPlayers = intSetting("cs.host.max_players", 8, 0, 512)
+    /** 世界主机：服务器图标模式 0=CS 标识 1=资料图标 2=自定义 */
+    val hostIconMode = intSetting("cs.host.icon", 0, 0, 2)
 }

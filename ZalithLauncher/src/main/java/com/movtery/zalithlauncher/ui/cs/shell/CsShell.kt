@@ -22,6 +22,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import com.movtery.zalithlauncher.utils.animation.staggeredEnter
+import com.movtery.zalithlauncher.utils.animation.BounceEasing
+import com.movtery.zalithlauncher.utils.animation.PulseEasing
+import com.movtery.zalithlauncher.utils.animation.QuickSpringEasing
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -201,12 +207,20 @@ private fun CsNavRail(
         Spacer(modifier = Modifier.height(10.dp))
 
         // Main navigation: Home, Discover, Library — directly below the logo
-        topDestinations.forEach { destination ->
-            CsRailItem(
-                destination = destination,
-                selected = destination == selected,
-                onClick = { onNavigate(destination) }
-            )
+        topDestinations.forEachIndexed { index, destination ->
+            AnimatedVisibility(
+                enter = fadeIn(animationSpec = staggeredEnter(index, baseDelayMillis = 30, durationMillis = 400)) + slideInVertically(
+                    initialOffsetY = { 12.dp },
+                    animationSpec = staggeredEnter(index, baseDelayMillis = 30, durationMillis = 400)
+                ),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { 12.dp })
+            ) {
+                CsRailItem(
+                    destination = destination,
+                    selected = destination == selected,
+                    onClick = { onNavigate(destination) }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -278,51 +292,56 @@ private fun CsRailItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
-    // Polished selection: the capsule springs between sizes while the accent bar grows from zero,
-    // so switching Home → Discover → Library reads as one continuous motion.
+    // New selection: the capsule pops open with a quick spring, the accent bar grows with a bounce,
+    // and the selected item gets a slow heartbeat pulse so it feels alive on the rail.
     val capsuleSpring = spring<Dp>(
-        dampingRatio = 0.55f,
-        stiffness = Spring.StiffnessMediumLow
+        dampingRatio = 0.45f,
+        stiffness = Spring.StiffnessMedium
     )
     val capsuleWidth by animateDpAsState(
-        targetValue = if (selected) 34.dp else 24.dp,
+        targetValue = if (selected) 36.dp else 22.dp,
         animationSpec = capsuleSpring,
         label = "csRailCapsuleWidth"
     )
     val capsuleHeight by animateDpAsState(
-        targetValue = if (selected) 32.dp else 26.dp,
+        targetValue = if (selected) 34.dp else 24.dp,
         animationSpec = capsuleSpring,
         label = "csRailCapsuleHeight"
     )
     val barHeight by animateDpAsState(
-        targetValue = if (selected) 18.dp else 0.dp,
+        targetValue = if (selected) 20.dp else 0.dp,
         animationSpec = capsuleSpring,
         label = "csRailBarHeight"
     )
     val barAlpha by animateFloatAsState(
         targetValue = if (selected) 1f else 0f,
-        animationSpec = tween(durationMillis = 180),
+        animationSpec = tween(durationMillis = 160),
         label = "csRailBarAlpha"
     )
     val iconScale by animateFloatAsState(
-        targetValue = if (selected) 1f else 0.92f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMedium),
+        targetValue = if (selected) 1.08f else 0.9f,
+        animationSpec = tween(durationMillis = 140, easing = BounceEasing),
         label = "csRailIconScale"
     )
     val capsuleColor by animateColorAsState(
         targetValue = if (selected) CsColors.AccentSoft else Color.Transparent,
-        animationSpec = tween(durationMillis = 220),
+        animationSpec = tween(durationMillis = 200, easing = QuickSpringEasing),
         label = "csRailCapsule"
     )
     val tint by animateColorAsState(
         targetValue = if (selected) CsColors.Accent else CsColors.TextSecondary,
-        animationSpec = tween(durationMillis = 220),
+        animationSpec = tween(durationMillis = 200, easing = QuickSpringEasing),
         label = "csRailTint"
     )
     val labelColor by animateColorAsState(
         targetValue = if (selected) CsColors.Accent else CsColors.TextTertiary,
-        animationSpec = tween(durationMillis = 220),
+        animationSpec = tween(durationMillis = 200, easing = QuickSpringEasing),
         label = "csRailLabel"
+    )
+    val pulse by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = tween(durationMillis = 2200, easing = PulseEasing),
+        label = "csRailPulse"
     )
 
     Box(
@@ -353,8 +372,8 @@ private fun CsRailItem(
         ) {
             Box(
                 modifier = Modifier
-                    .width(capsuleWidth)
-                    .height(capsuleHeight)
+                    .width(capsuleWidth + 4.dp * pulse)
+                    .height(capsuleHeight + 4.dp * pulse)
                     .clip(CircleShape)
                     .background(capsuleColor)
                     .then(

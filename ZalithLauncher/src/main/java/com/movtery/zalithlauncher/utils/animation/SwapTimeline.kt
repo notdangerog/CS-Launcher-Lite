@@ -9,11 +9,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
 
 package com.movtery.zalithlauncher.utils.animation
@@ -21,41 +21,35 @@ package com.movtery.zalithlauncher.utils.animation
 import com.movtery.zalithlauncher.setting.AllSettings
 
 /**
- * 页面切换的串行时间轴
+ * 页面切换的串行时间轴（v2.3：更快更脆的页面切换，进出场分离，错峰更短）。
  */
 object SwapTimeline {
     /** 旧页单项退场时长 */
-    const val EXIT_ITEM = 70
+    const val EXIT_ITEM = 50
     /** 旧页单项淡出时长 */
-    const val EXIT_ALPHA = 70
+    const val EXIT_ALPHA = 50
     /** 旧页退场相邻项错峰间隔 */
-    const val EXIT_STAGGER = 15
+    const val EXIT_STAGGER = 10
     /** 旧页退场错峰封顶 */
-    const val EXIT_STAGGER_CAP = 40
+    const val EXIT_STAGGER_CAP = 30
     /** 旧页独占退场的总窗口 */
     const val EXIT_WINDOW = EXIT_ITEM + EXIT_STAGGER_CAP
     /** 旧页退场结束到新页进场的间隔 */
-    const val GAP = 30
+    const val GAP = 20
 
-
-
-    /** 新页单项位移时长 */
-    const val ENTER_ITEM = 350
+    /** 新页单项位移时长：比原来更短，页面切换更脆 */
+    const val ENTER_ITEM = 260
     /** 新页单项淡入时长 */
-    const val ENTER_ALPHA = 200
+    const val ENTER_ALPHA = 150
     /** 新页进场相邻项错峰间隔 */
-    const val ENTER_STAGGER = 25
+    const val ENTER_STAGGER = 18
     /** 新页进场错峰封顶 */
-    const val ENTER_STAGGER_CAP = 250
-
-
+    const val ENTER_STAGGER_CAP = 180
 
     /** 通用内容动画的基准时长 */
-    const val CONTENT_BASE = 350
+    const val CONTENT_BASE = 280
     /** 退场位移距离相对进场位移距离的比例 */
     const val EXIT_DISTANCE_SCALE = 6f / 16f
-
-
 
     /**
      * @return 页面切换动画是否关闭
@@ -79,17 +73,12 @@ object SwapTimeline {
      */
     fun swapTime(ms: Int): Int = if (isSwapClosed()) 0 else time(ms)
 
-    /**
-     * @return 进场第 [index] 项的错峰延迟
-     */
+    /** @return 进场第 [index] 项的错峰延迟 */
     fun enterStagger(index: Int): Int = swapTime(minOf(index * ENTER_STAGGER, ENTER_STAGGER_CAP))
 
-    /**
-     * @return 退场第 [index] 项的错峰延迟
-     */
+    /** @return 退场第 [index] 项的错峰延迟 */
     fun exitStagger(index: Int): Int = swapTime(minOf(index * EXIT_STAGGER, EXIT_STAGGER_CAP))
 }
-
 
 /**
  * 一次页面切换的延迟窗口
