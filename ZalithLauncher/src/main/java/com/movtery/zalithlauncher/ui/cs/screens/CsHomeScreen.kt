@@ -604,25 +604,35 @@ private fun FeaturedGrid(
             )
         }
 
-        is CsFeaturedState.Loaded -> BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        is CsFeaturedState.Loaded -> Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
             val spacing = 10.dp
-            // Exactly three recommended modpack cards side by side in one row.
+            // 9–12 recommended modpacks, 3 cards per row, additional rows by scrolling.
             val columns = 3
+            val displayCount = 12
             val cellWidth = (maxWidth - spacing * (columns - 1).toFloat()) / columns
             val coverHeight = coverHeightFor(cellWidth)
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(spacing)
-            ) {
-                state.items.take(columns).forEach { item ->
-                    ModpackCard(
-                        modifier = Modifier.width(cellWidth),
-                        item = item,
-                        coverHeight = coverHeight,
-                        onOpen = { onInstall(item) }
-                    )
+            state.items.take(displayCount).chunked(columns).forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(spacing)
+                ) {
+                    rowItems.forEach { item ->
+                        Box(modifier = Modifier.width(cellWidth)) {
+                            ModpackCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                item = item,
+                                coverHeight = coverHeight,
+                                onOpen = { onInstall(item) }
+                            )
+                        }
+                    }
                 }
+                Spacer(modifier = Modifier.height(spacing))
             }
         }
     }
@@ -789,6 +799,7 @@ private fun ModpackCard(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 CsPrimaryButton(
+                    modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.cs_discover_install),
                     onClick = onOpen,
                     iconRes = R.drawable.ic_download,

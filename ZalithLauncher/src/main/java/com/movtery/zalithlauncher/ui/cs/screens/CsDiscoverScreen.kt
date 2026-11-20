@@ -126,7 +126,9 @@ fun CsDiscoverScreen(
         viewModel.submitQuery()
     }
 
-    val collapsed = false
+    val scrollState = rememberScrollState()
+    val collapsed = scrollState.value > 6
+
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -140,32 +142,15 @@ fun CsDiscoverScreen(
                     .weight(1f)
                     .fillMaxHeight()
                     .padding(start = 24.dp, end = if (isWide) 16.dp else 24.dp, top = 14.dp)
+                    .verticalScroll(scrollState)
             ) {
-                // Top row: category tabs on left, compact search bar at top-right
+                // Always-visible compact search bar at top-right
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 分类标签：随滚动收起，平滑动画
-                    AnimatedVisibility(
-                        visible = !collapsed,
-                        enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                            fadeIn(animationSpec = tween(220)),
-                        exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                            fadeOut(animationSpec = tween(140))
-                    ) {
-                        CsTabs(
-                            labels = CsBrowseCategory.entries.map { stringResource(it.labelRes) },
-                            selectedIndex = CsBrowseCategory.entries.indexOf(viewModel.category),
-                            onSelected = { index ->
-                                viewModel.selectCategory(CsBrowseCategory.entries[index])
-                            }
-                        )
-                    }
-
                     Spacer(modifier = Modifier.weight(1f))
 
-                    // Compact search bar at top-right
                     CsSearchField(
                         modifier = Modifier.width(220.dp),
                         value = viewModel.query,
@@ -191,7 +176,26 @@ fun CsDiscoverScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Sort by / Per page / Pagination — all on one row beneath the heading
+                // Collapsible category tabs — scroll out of view when scrolling down
+                AnimatedVisibility(
+                    visible = !collapsed,
+                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeOut(animationSpec = tween(140))
+                ) {
+                    CsTabs(
+                        labels = CsBrowseCategory.entries.map { stringResource(it.labelRes) },
+                        selectedIndex = CsBrowseCategory.entries.indexOf(viewModel.category),
+                        onSelected = { index ->
+                            viewModel.selectCategory(CsBrowseCategory.entries[index])
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Sort by / Per page / Pagination — beneath the search bar
                 DiscoverControlRow(
                     sortLabel = stringResource(R.string.cs_discover_sort_by),
                     sortOptions = CsDiscoverViewModel.SORT_OPTIONS.map {
@@ -211,86 +215,80 @@ fun CsDiscoverScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Box(modifier = Modifier.weight(1f)) {
-                    when (val state = viewModel.state) {
-                        is CsDiscoverState.Loading -> ResultSkeleton()
-                        is CsDiscoverState.Error -> Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CsEmptyState(
-                                title = stringResource(R.string.cs_discover_error),
-                                description = stringResource(R.string.cs_discover_source_note),
-                                action = {
-                                    CsSecondaryButton(
-                                        text = stringResource(R.string.cs_home_retry),
-                                        onClick = { viewModel.retry() },
-                                        iconRes = R.drawable.ic_refresh,
-                                        compact = true
-                                    )
-                                }
-                            )
-                        }
+                when (val state = viewModel.state) {
+                    is CsDiscoverState.Loading -> ResultSkeleton()
+                    is CsDiscoverState.Error -> Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CsEmptyState(
+                            title = stringResource(R.string.cs_discover_error),
+                            description = stringResource(R.string.cs_discover_source_note),
+                            action = {
+                                CsSecondaryButton(
+                                    text = stringResource(R.string.cs_home_retry),
+                                    onClick = { viewModel.retry() },
+                                    iconRes = R.drawable.ic_refresh,
+                                    compact = true
+                                )
+                            }
+                        )
+                    }
 
-                        is CsDiscoverState.Unsupported -> Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CsEmptyState(
-                                title = stringResource(R.string.cs_discover_tab_datapacks),
-                                description = stringResource(R.string.cs_discover_datapack_unsupported)
-                            )
-                        }
+                    is CsDiscoverState.Unsupported -> Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CsEmptyState(
+                            title = stringResource(R.string.cs_discover_tab_datapacks),
+                            description = stringResource(R.string.cs_discover_datapack_unsupported)
+                        )
+                    }
 
-                        is CsDiscoverState.Loaded -> {
-                            if (state.page.items.isEmpty()) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CsEmptyState(
-                                        title = stringResource(R.string.cs_discover_no_results),
-                                        description = stringResource(R.string.cs_discover_no_results_desc),
-                                        action = if (viewModel.hasActiveFilters() || viewModel.query.isNotEmpty()) {
-                                            {
-                                                CsSecondaryButton(
-                                                    text = stringResource(R.string.cs_discover_filter_clear),
-                                                    onClick = {
-                                                        viewModel.updateQuery("")
-                                                        viewModel.clearFilters()
-                                                        viewModel.submitQuery()
-                                                    },
-                                                    iconRes = R.drawable.ic_close,
-                                                    compact = true
-                                                )
-                                            }
-                                        } else null
-                                    )
-                                }
-                            } else {
-                                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                                    val cellWidth = (maxWidth - 10.dp) / 2
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .verticalScroll(rememberScrollState())
-                                    ) {
-                                        state.page.items.chunked(2).forEach { rowItems ->
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                            ) {
-                                                rowItems.forEach { item ->
-                                                    Box(modifier = Modifier.width(cellWidth)) {
-                                                        DiscoverResultCard(
-                                                            item = item,
-                                                            onOpen = { onOpenProject(item) }
-                                                        )
-                                                    }
+                    is CsDiscoverState.Loaded -> {
+                        if (state.page.items.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CsEmptyState(
+                                    title = stringResource(R.string.cs_discover_no_results),
+                                    description = stringResource(R.string.cs_discover_no_results_desc),
+                                    action = if (viewModel.hasActiveFilters() || viewModel.query.isNotEmpty()) {
+                                        {
+                                            CsSecondaryButton(
+                                                text = stringResource(R.string.cs_discover_filter_clear),
+                                                onClick = {
+                                                    viewModel.updateQuery("")
+                                                    viewModel.clearFilters()
+                                                    viewModel.submitQuery()
+                                                },
+                                                iconRes = R.drawable.ic_close,
+                                                compact = true
+                                            )
+                                        }
+                                    } else null
+                                )
+                            }
+                        } else {
+                            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                                val cellWidth = (maxWidth - 10.dp) / 2
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    state.page.items.chunked(2).forEach { rowItems ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            rowItems.forEach { item ->
+                                                Box(modifier = Modifier.width(cellWidth)) {
+                                                    DiscoverResultCard(
+                                                        item = item,
+                                                        onOpen = { onOpenProject(item) }
+                                                    )
                                                 }
                                             }
-                                            Spacer(modifier = Modifier.height(10.dp))
                                         }
+                                        Spacer(modifier = Modifier.height(10.dp))
                                     }
                                 }
                             }
