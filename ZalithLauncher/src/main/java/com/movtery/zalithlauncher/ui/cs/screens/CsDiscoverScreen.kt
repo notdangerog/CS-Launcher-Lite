@@ -144,15 +144,32 @@ fun CsDiscoverScreen(
                     .padding(start = 24.dp, end = if (isWide) 16.dp else 24.dp, top = 14.dp)
                     .verticalScroll(scrollState)
             ) {
-                // Always-visible compact search bar at top-right
+                // Collapsible category tabs — scroll out of view when scrolling down
+                AnimatedVisibility(
+                    visible = !collapsed,
+                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeIn(animationSpec = tween(220)),
+                    exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                        fadeOut(animationSpec = tween(140))
+                ) {
+                    CsTabs(
+                        labels = CsBrowseCategory.entries.map { stringResource(it.labelRes) },
+                        selectedIndex = CsBrowseCategory.entries.indexOf(viewModel.category),
+                        onSelected = { index ->
+                            viewModel.selectCategory(CsBrowseCategory.entries[index])
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Search bar below category tabs, with working search field and filter button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Spacer(modifier = Modifier.weight(1f))
-
                     CsSearchField(
-                        modifier = Modifier.width(220.dp),
+                        modifier = Modifier.weight(1f),
                         value = viewModel.query,
                         onValueChange = { viewModel.updateQuery(it) },
                         placeholder = stringResource(viewModel.category.placeholderRes),
@@ -172,25 +189,6 @@ fun CsDiscoverScreen(
                             borderColor = if (activeFilters) CsColors.AccentDark else CsColors.Border
                         )
                     }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Collapsible category tabs — scroll out of view when scrolling down
-                AnimatedVisibility(
-                    visible = !collapsed,
-                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                        fadeIn(animationSpec = tween(220)),
-                    exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                        fadeOut(animationSpec = tween(140))
-                ) {
-                    CsTabs(
-                        labels = CsBrowseCategory.entries.map { stringResource(it.labelRes) },
-                        selectedIndex = CsBrowseCategory.entries.indexOf(viewModel.category),
-                        onSelected = { index ->
-                            viewModel.selectCategory(CsBrowseCategory.entries[index])
-                        }
-                    )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
