@@ -25,7 +25,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -49,8 +48,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -129,9 +126,7 @@ fun CsDiscoverScreen(
         viewModel.submitQuery()
     }
 
-    // Results list state drives the collapsing header (scroll-position based, so no jumps)
-    val listState = rememberLazyListState()
-    val collapsed = listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 6
+    val collapsed = false
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
@@ -146,15 +141,19 @@ fun CsDiscoverScreen(
                     .fillMaxHeight()
                     .padding(start = 24.dp, end = if (isWide) 16.dp else 24.dp, top = 14.dp)
             ) {
-                // 分类标签：随滚动收起，平滑动画
-                AnimatedVisibility(
-                    visible = !collapsed,
-                    enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                        fadeIn(animationSpec = tween(220)),
-                    exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                        fadeOut(animationSpec = tween(140))
+                // Top row: category tabs on left, compact search bar at top-right
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    // 分类标签：随滚动收起，平滑动画
+                    AnimatedVisibility(
+                        visible = !collapsed,
+                        enter = expandVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                            fadeIn(animationSpec = tween(220)),
+                        exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                            fadeOut(animationSpec = tween(140))
+                    ) {
                         CsTabs(
                             labels = CsBrowseCategory.entries.map { stringResource(it.labelRes) },
                             selectedIndex = CsBrowseCategory.entries.indexOf(viewModel.category),
@@ -162,13 +161,13 @@ fun CsDiscoverScreen(
                                 viewModel.selectCategory(CsBrowseCategory.entries[index])
                             }
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Compact search bar at top-right
                     CsSearchField(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.width(220.dp),
                         value = viewModel.query,
                         onValueChange = { viewModel.updateQuery(it) },
                         placeholder = stringResource(viewModel.category.placeholderRes),
@@ -190,41 +189,25 @@ fun CsDiscoverScreen(
                     }
                 }
 
-                // 滚动后仅保留这条细搜索栏。
-                // 先淡出、再收起高度：控件不会在动画中被“切掉一半”，避免看起来像裁切/重叠。
-                AnimatedVisibility(
-                    visible = !collapsed,
-                    enter = fadeIn(animationSpec = tween(140)) +
-                        expandVertically(
-                            animationSpec = tween(200, delayMillis = 140, easing = FastOutSlowInEasing)
-                        ),
-                    exit = fadeOut(animationSpec = tween(110)) +
-                        shrinkVertically(
-                            animationSpec = tween(180, delayMillis = 110, easing = FastOutSlowInEasing)
-                        )
-                ) {
-                    Column {
-                        // 排序 / 每页数量 / 分页：窄屏自动换行，控件不会被挤压或溢出
-                        DiscoverControlRow(
-                            sortLabel = stringResource(R.string.cs_discover_sort_by),
-                            sortOptions = CsDiscoverViewModel.SORT_OPTIONS.map {
-                                stringResource(it.getDisplayName()) to it
-                            },
-                            sort = viewModel.sort,
-                            onSortSelected = { viewModel.selectSort(it) },
-                            pageSizeLabel = stringResource(R.string.cs_discover_per_page),
-                            pageSizeOptions = CsDiscoverViewModel.PAGE_SIZE_OPTIONS.map { it.toString() to it },
-                            pageSize = viewModel.pageSize,
-                            onPageSizeSelected = { viewModel.selectPageSize(it) },
-                            pageNumber = viewModel.pageNumber,
-                            totalPages = viewModel.totalPages,
-                            onPrevious = { viewModel.previousPage() },
-                            onNext = { viewModel.nextPage() }
-                        )
+                Spacer(modifier = Modifier.height(12.dp))
 
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-                }
+                // Sort by / Per page / Pagination — all on one row beneath the heading
+                DiscoverControlRow(
+                    sortLabel = stringResource(R.string.cs_discover_sort_by),
+                    sortOptions = CsDiscoverViewModel.SORT_OPTIONS.map {
+                        stringResource(it.getDisplayName()) to it
+                    },
+                    sort = viewModel.sort,
+                    onSortSelected = { viewModel.selectSort(it) },
+                    pageSizeLabel = stringResource(R.string.cs_discover_per_page),
+                    pageSizeOptions = CsDiscoverViewModel.PAGE_SIZE_OPTIONS.map { it.toString() to it },
+                    pageSize = viewModel.pageSize,
+                    onPageSizeSelected = { viewModel.selectPageSize(it) },
+                    pageNumber = viewModel.pageNumber,
+                    totalPages = viewModel.totalPages,
+                    onPrevious = { viewModel.previousPage() },
+                    onNext = { viewModel.nextPage() }
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -285,20 +268,29 @@ fun CsDiscoverScreen(
                                     )
                                 }
                             } else {
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
-                                    state = listState,
-                                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 20.dp)
-                                ) {
-                                    items(
-                                        items = state.page.items,
-                                        key = { item -> "${item.platform}_${item.classes}_${item.projectId}" }
-                                    ) { item ->
-                                        DiscoverResultCard(
-                                            item = item,
-                                            onOpen = { onOpenProject(item) }
-                                        )
+                                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                                    val cellWidth = (maxWidth - 10.dp) / 2
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .verticalScroll(rememberScrollState())
+                                    ) {
+                                        state.page.items.chunked(2).forEach { rowItems ->
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                            ) {
+                                                rowItems.forEach { item ->
+                                                    Box(modifier = Modifier.width(cellWidth)) {
+                                                        DiscoverResultCard(
+                                                            item = item,
+                                                            onOpen = { onOpenProject(item) }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.height(10.dp))
+                                        }
                                     }
                                 }
                             }

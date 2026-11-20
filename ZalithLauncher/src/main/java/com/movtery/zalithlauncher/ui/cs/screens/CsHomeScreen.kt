@@ -606,30 +606,22 @@ private fun FeaturedGrid(
 
         is CsFeaturedState.Loaded -> BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
             val spacing = 10.dp
-            // Two columns as soon as each card can be at least 232dp wide; otherwise one column.
-            val columns = if (maxWidth >= 476.dp) 2 else 1
-            val cellWidth = if (columns == 2) (maxWidth - spacing) / 2 else maxWidth
+            // Exactly three recommended modpack cards side by side in one row.
+            val columns = 3
+            val cellWidth = (maxWidth - spacing * (columns - 1).toFloat()) / columns
             val coverHeight = coverHeightFor(cellWidth)
 
-            Column(verticalArrangement = Arrangement.spacedBy(spacing)) {
-                state.items.chunked(columns).forEach { rowItems ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(spacing)
-                    ) {
-                        rowItems.forEach { item ->
-                            ModpackCard(
-                                modifier = Modifier.width(cellWidth),
-                                item = item,
-                                coverHeight = coverHeight,
-                                onOpen = { onInstall(item) }
-                            )
-                        }
-                        // Keep the last row aligned to the grid when it holds a single card
-                        if (rowItems.size < columns) {
-                            Spacer(modifier = Modifier.width(cellWidth))
-                        }
-                    }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(spacing)
+            ) {
+                state.items.take(columns).forEach { item ->
+                    ModpackCard(
+                        modifier = Modifier.width(cellWidth),
+                        item = item,
+                        coverHeight = coverHeight,
+                        onOpen = { onInstall(item) }
+                    )
                 }
             }
         }
