@@ -604,11 +604,7 @@ private fun FeaturedGrid(
             )
         }
 
-        is CsFeaturedState.Loaded -> Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-        ) {
+        is CsFeaturedState.Loaded -> BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
             val spacing = 10.dp
             // 9–12 recommended modpacks, 3 cards per row, additional rows by scrolling.
             val columns = 3
@@ -616,23 +612,29 @@ private fun FeaturedGrid(
             val cellWidth = (maxWidth - spacing * (columns - 1).toFloat()) / columns
             val coverHeight = coverHeightFor(cellWidth)
 
-            state.items.take(displayCount).chunked(columns).forEach { rowItems ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(spacing)
-                ) {
-                    rowItems.forEach { item ->
-                        Box(modifier = Modifier.width(cellWidth)) {
-                            ModpackCard(
-                                modifier = Modifier.fillMaxWidth(),
-                                item = item,
-                                coverHeight = coverHeight,
-                                onOpen = { onInstall(item) }
-                            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                state.items.take(displayCount).chunked(columns).forEach { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(spacing)
+                    ) {
+                        rowItems.forEach { item ->
+                            Box(modifier = Modifier.width(cellWidth)) {
+                                ModpackCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    item = item,
+                                    coverHeight = coverHeight,
+                                    onOpen = { onInstall(item) }
+                                )
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(spacing))
                 }
-                Spacer(modifier = Modifier.height(spacing))
             }
         }
     }
