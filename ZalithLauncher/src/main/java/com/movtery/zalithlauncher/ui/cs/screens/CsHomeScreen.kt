@@ -607,15 +607,15 @@ private fun FeaturedGrid(
         is CsFeaturedState.Loaded -> BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
             val spacing = 10.dp
             // 9–12 recommended modpacks, 3 cards per row, additional rows by scrolling.
+            // Scrolling is handled by the parent HomeMainContent column (verticalScroll);
+            // no nested verticalScroll here to avoid infinite height constraint crashes.
             val columns = 3
             val displayCount = 12
             val cellWidth = (maxWidth - spacing * (columns - 1).toFloat()) / columns
             val coverHeight = coverHeightFor(cellWidth)
 
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                modifier = Modifier.fillMaxWidth()
             ) {
                 state.items.take(displayCount).chunked(columns).forEach { rowItems ->
                     Row(
